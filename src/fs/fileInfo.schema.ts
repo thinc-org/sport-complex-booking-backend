@@ -11,6 +11,9 @@ export class FileInfo {
     @Prop()
     ext: string;
 
+    @Prop()
+    full_path: string;
+
     @Prop({ type: MongooseSchema.Types.ObjectId})
     owner:  MongooseSchema.Types.ObjectId 
 }

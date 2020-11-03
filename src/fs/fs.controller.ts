@@ -15,7 +15,7 @@ export class FSController {
   @UseInterceptors(FileFieldsInterceptor([
     { name: 'user_photo', maxCount: 1 },
     { name: 'medical_certificate', maxCount: 1 },
-    { name: 'national_id', maxCount: 1 },
+    { name: 'national_id_photo', maxCount: 1 },
     { name: 'house_registration_number', maxCount: 1 },
     { name: 'relationship_verification_document', maxCount: 1 },
   ]))
@@ -57,7 +57,7 @@ export class FSController {
   @UseInterceptors(FileFieldsInterceptor([
     { name: 'user_photo', maxCount: 1 },
     { name: 'medical_certificate', maxCount: 1 },
-    { name: 'national_id', maxCount: 1 },
+    { name: 'national_id_photo', maxCount: 1 },
     { name: 'house_registration_number', maxCount: 1 },
     { name: 'relationship_verification_document', maxCount: 1 },
   ]))

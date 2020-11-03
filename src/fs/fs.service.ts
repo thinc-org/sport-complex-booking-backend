@@ -47,7 +47,8 @@ export class FSService {
   async saveFile(rootPath: string, owner: string, file: Express.Multer.File){
     if(file == null) return
     const newFile = new this.fileInfoModel({owner, file_name:file.originalname, ext: extname(file.originalname)})
-    const  ws = createWriteStream(path.join(rootPath,newFile._id.toString()+newFile.ext))
+    newFile.full_path = path.join(rootPath,newFile._id.toString()+newFile.ext)
+    const  ws = createWriteStream(newFile.full_path)
     ws.write(file.buffer)  
     return await newFile.save()
   }
