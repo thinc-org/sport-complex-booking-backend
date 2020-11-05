@@ -12,8 +12,10 @@ export const UserSchema = new mongoose.Schema({
     expired_penalize_date: Date,
     phone: String,
     personal_email: String,
-    name: String,
-    surname: String,
+    name_en: String,
+    surname_en: String,
+    name_th: String,
+    surname_th: String,
     username: String,
 })
 
@@ -21,10 +23,10 @@ export const UserSchema = new mongoose.Schema({
 export const CuStudentSchema = new mongoose.Schema({
     account_type: accountSchemaType,
     is_thai_language: Boolean,
-    name: String,
-    surname: String,
     name_en: String,
     surname_en: String,
+    name_th: String,
+    surname_th: String,
     username: String, //username=student id
     personal_email: String,
     phone: String,
@@ -36,8 +38,10 @@ export const CuStudentSchema = new mongoose.Schema({
 export const SatitCuPersonelSchema = new mongoose.Schema({
     account_type: accountSchemaType,
     is_thai_language: Boolean,
-    name: String,
-    surname: String,
+    name_en: String,
+    surname_en: String,
+    name_th: String,
+    surname_th: String,
     personal_email: String,
     phone: String,
     username: String,
@@ -50,8 +54,10 @@ export const OtherSchema = new mongoose.Schema({
     account_type: accountSchemaType,
     is_thai_language: Boolean,
     prefix: String, //(เพื่อแสดง นาย/นาง/นางสาว)
-    name: String,
-    surname: String,
+    name_en: String,
+    surname_en: String,
+    name_th: String,
+    surname_th: String,
     birthday: Date, //(use this for cal age)
     national_id: String, //(also pasport no in foreign) 
     gender: String,
