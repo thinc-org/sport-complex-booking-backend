@@ -2,24 +2,26 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { FileInfo, FileInfoDocument } from './fileInfo.schema';
-import {createWriteStream, unlink} from 'fs'
+import {createWriteStream, unlink, existsSync} from 'fs'
 import { AccountInfosService } from 'src/accountInfos/accountInfos.service';
 import { extname } from 'path';
 const path = require('path');
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class FSService {
   constructor(@InjectModel(FileInfo.name) private fileInfoModel : Model<FileInfoDocument>, private readonly accountInfoService: AccountInfosService, private readonly jwtService: JwtService){}
   
-  async saveFileInfo(userId: string, filename: string ){
-    const newFile = new this.fileInfoModel({owner: userId, file_name: filename})
-    return await newFile.save();
-  }
   async getFileInfo(fileId: string){
+    console.log(__dirname)
     const fileInfo = await this.fileInfoModel.findById(fileId);
     if(fileInfo == null) {
       throw new HttpException('cannot find this file: '+fileId,HttpStatus.NOT_FOUND)
+    }
+    if(!existsSync(fileInfo.full_path)){
+      await fileInfo.remove()
+      throw new HttpException('This file is deleted: '+fileId,HttpStatus.INTERNAL_SERVER_ERROR)
     }
     return fileInfo
   }
@@ -56,7 +58,7 @@ export class FSService {
   async deleteFile(rootPath: string, fileId: string){
     if(fileId==null) return 
     const fileInfo = await this.getFileInfo(fileId)
-    const fullPath = path.join(rootPath,fileInfo._id+fileInfo.ext)
+    const fullPath = fileInfo.full_path
     unlink(fullPath,(err)=>{
       console.log('cant delete file',err)
     })
@@ -68,7 +70,11 @@ export class FSService {
   }
 
   extractFileId(token: string): string{
-    return this.jwtService.verify(token).fileId
+    try {
+      return this.jwtService.verify(token).fileId
+    }catch(err){
+      throw new HttpException('Invalid Token',HttpStatus.BAD_REQUEST)
+    }
   }
 
 }

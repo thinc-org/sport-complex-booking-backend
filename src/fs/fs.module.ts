@@ -15,7 +15,7 @@ import { FSService } from './fs.service';
       signOptions: { expiresIn: '10s' },
     }),
     inject: [ConfigService],
-  })],
+  }),ConfigModule],
   controllers: [FSController],
   providers: [FSService],
 })
