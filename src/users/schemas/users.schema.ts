@@ -1,32 +1,28 @@
+import { assert } from 'console';
 import * as mongoose from 'mongoose';
 
-export enum Account {
-    CuStudent = 'CuStudent',
-    SatitAndCuPersonel = 'SatitAndCuPersonel',
-    Other = 'Other',
-}
 
-export enum Verification {
-    NotSubmitted = 'NotSubmitted',
-    Submitted = 'Submitted',
-    Verified = 'Verified',
-    Rejected = 'Rejected',
-}
+const accountSchemaType = {type: String, enum:['CuStudent','SatitAndCuPersonel','Other']};
+const verificationSchemaType = {type: String, enum: ['NotSubmitted','Submitted','Verified','Rejected']};
 
-export interface Contact_person {
-    contact_person_prefix: String;
-    contact_person_name: String;
-    contact_person_surname: String;
-    contact_person_home_phone: String;
-    contact_person_phone: String;
-}
-  
+export const UserSchema = new mongoose.Schema({
+    account_type: accountSchemaType,
+    is_thai_language: Boolean,
+    is_penalize: Boolean,
+    expired_penalize_date: Date,
+    phone: String,
+    personal_email: String,
+    name: String,
+    surname: String,
+    username: String,
+})
+
 
 export const CuStudentSchema = new mongoose.Schema({
-    account_type: Account,
+    account_type: accountSchemaType,
     is_thai_language: Boolean,
-    name_th: String,
-    surname_th: String,
+    name: String,
+    surname: String,
     name_en: String,
     surname_en: String,
     username: String, //username=student id
@@ -37,8 +33,8 @@ export const CuStudentSchema = new mongoose.Schema({
     is_first_login: Boolean,
 });
 
-export const SatitCuSchema = new mongoose.Schema({
-    account_type: Account,
+export const SatitCuPersonelSchema = new mongoose.Schema({
+    account_type: accountSchemaType,
     is_thai_language: Boolean,
     name: String,
     surname: String,
@@ -51,7 +47,7 @@ export const SatitCuSchema = new mongoose.Schema({
 });
 
 export const OtherSchema = new mongoose.Schema({
-    account_type: Account,
+    account_type: accountSchemaType,
     is_thai_language: Boolean,
     prefix: String, //(เพื่อแสดง นาย/นาง/นางสาว)
     name: String,
@@ -77,7 +73,7 @@ export const OtherSchema = new mongoose.Schema({
     password: String, //pass=phone(editable)
     is_penalize: Boolean,
     expired_penalize_date: Date,
-    verification_status: Verification,
+    verification_status: verificationSchemaType,
     rejected_info: [String],
     account_expiration_date :Date,
     user_photo: mongoose.Schema.Types.ObjectId, //(ของcollectionที่เก็บรูป)
