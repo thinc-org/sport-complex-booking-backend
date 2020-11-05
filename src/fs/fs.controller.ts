@@ -1,14 +1,15 @@
-import { Controller, Get, Res, Post, Param, UploadedFile, UploadedFiles, UseInterceptors, UseGuards, Req, Put, Query, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Res, Post, Param, UploadedFile, UploadedFiles, UseInterceptors, UseGuards, Req, Put, Query, HttpException, HttpStatus, Body, Delete } from '@nestjs/common';
 import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { FSService } from './fs.service';
 
 import { AccountInfosService } from 'src/accountInfos/accountInfos.service';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('fs')
 export class FSController {
 
-  constructor(private readonly fsService: FSService, private readonly accountInfoService: AccountInfosService) { }
+  constructor(private readonly fsService: FSService, private readonly accountInfoService: AccountInfosService,private readonly configService: ConfigService) { }
 
   @UseGuards(JwtAuthGuard)
   @Post('upload')
@@ -24,21 +25,15 @@ export class FSController {
     if(user==null){
       throw new HttpException('cannot find user: '+req.use.userId,HttpStatus.NOT_FOUND)
     }
-    return this.fsService.saveFiles('../uploads/',req.user.userId, files)
+    return this.fsService.saveFiles(this.configService.get('UPLOAD_DEST'),req.user.userId, files)
   }
 
   @Get('/view')
   async viewFile(@Req() req, @Res() res, @Query('token') token: string) {
     if(!token) throw new HttpException('No token', HttpStatus.FORBIDDEN)
-
-    try{
-      const fileId = this.fsService.extractFileId(token)
-      const fileInfo = await this.fsService.getFileInfo(fileId)
-      res.sendFile('uploads/' + fileInfo._id + fileInfo.ext, { root: '../' });
-    }
-    catch(err){
-      throw new HttpException(err.name, HttpStatus.UNAUTHORIZED);
-    }
+    const fileId = this.fsService.extractFileId(token)
+    const fileInfo = await this.fsService.getFileInfo(fileId)
+    res.sendFile(fileInfo.full_path);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -50,6 +45,15 @@ export class FSController {
     } else {
       res.send({token: this.fsService.generateViewFileToken(fileId)})
     }
+  }
+
+  
+  @UseGuards(JwtAuthGuard)
+  @Delete('admin/delete/:fileId')
+  async deleteFileAdmin(@Param('fileId') fileId : string) {
+    const fileInfo = await this.fsService.getFileInfo(fileId)
+    await this.fsService.deleteFile(fileInfo.full_path,fileInfo._id)
+    return fileInfo
   }
 
   @UseGuards(JwtAuthGuard)
@@ -70,7 +74,8 @@ export class FSController {
     if(user==null){
       throw new HttpException('cannot find user: '+req.use.userId,HttpStatus.NOT_FOUND)
     }
-    res.send(await this.fsService.saveFiles('../uploads/',userId, files))
+    res.send(await this.fsService.saveFiles(this.configService.get('UPLOAD_DEST'),userId, files))
   }
+
 
 }
