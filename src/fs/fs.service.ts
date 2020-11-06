@@ -3,15 +3,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { FileInfo, FileInfoDocument } from './fileInfo.schema';
 import {createWriteStream, unlink, existsSync} from 'fs'
-import { AccountInfosService } from 'src/accountInfos/accountInfos.service';
+import { AccountInfosService } from 'src/users/accountInfos/accountInfos.service';
 import { extname } from 'path';
 const path = require('path');
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class FSService {
-  constructor(@InjectModel(FileInfo.name) private fileInfoModel : Model<FileInfoDocument>, private readonly accountInfoService: AccountInfosService, private readonly jwtService: JwtService){}
+  constructor(@InjectModel(FileInfo.name) private fileInfoModel : Model<FileInfoDocument>, private readonly usersService:UsersService, private readonly jwtService: JwtService){}
   
   async getFileInfo(fileId: string){
     console.log(__dirname)
@@ -29,7 +30,7 @@ export class FSService {
   async saveFiles(rootPath: string, owner: string, files: any){
     let result :any
     result = {}
-    const user = await this.accountInfoService.getAccountInfo(owner)
+    const user = await this.usersService.getUserById(owner)
     if(user==null){
       throw new HttpException('cannot find user: '+owner,HttpStatus.NOT_FOUND)
     }
