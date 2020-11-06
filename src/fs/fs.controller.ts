@@ -38,7 +38,7 @@ export class FSController {
   @Get('/viewFileToken/:fileId')
   async viewFileToken(@Req() req, @Res() res, @Param('fileId') fileId: string) {
     const fileInfo = await this.fsService.getFileInfo(fileId)
-    if (!req.user.isAdmin && fileInfo.owner != req.user.userId) {
+    if (!req.user.isStaff && fileInfo.owner != req.user.userId) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     } else {
       res.send({ token: this.fsService.generateViewFileToken(fileId) })
@@ -49,7 +49,8 @@ export class FSController {
   @UseGuards(JwtAuthGuard)
   @Delete('admin/delete/:fileId')
   async deleteFileAdmin(@Req() req, @Param('fileId') fileId: string) {
-    if (!req.user.isAdmin) throw new HttpException('Not an admin', HttpStatus.UNAUTHORIZED)
+    console.log(req.user)
+    if (!req.user.isStaff) throw new HttpException('Not an admin', HttpStatus.UNAUTHORIZED)
     const fileInfo = await this.fsService.getFileInfo(fileId)
     await this.fsService.deleteFile(fileInfo.full_path, fileInfo._id)
     return fileInfo
@@ -65,7 +66,7 @@ export class FSController {
     { name: 'relationship_verification_document', maxCount: 1 },
   ]))
   async uploadFileAdmin(@UploadedFiles() files, @Req() req, @Res() res, @Param('userId') userId: string) {
-    if (!req.user.isAdmin) throw new HttpException('Not an admin', HttpStatus.UNAUTHORIZED)
+    if (!req.user.isStaff) throw new HttpException('Not an admin', HttpStatus.UNAUTHORIZED)
     res.send(await this.fsService.saveFiles(this.configService.get('UPLOAD_DEST'), userId, files))
   }
 
