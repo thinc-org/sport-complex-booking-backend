@@ -7,14 +7,16 @@ import { StaffsModule } from './staffs/staffs.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { FSModule } from './fs/fs.module';
-import { AccountInfosModule } from './accountInfos/accountInfos.module';
+import { AccountInfosModule } from './users/accountInfos/accountInfos.module';
 import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 
 @Module({
   imports: [
     FSModule,
     AccountInfosModule,
+    UsersModule,
     ConfigModule.forRoot({ envFilePath: ['.env', '.env.development'] }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],

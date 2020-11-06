@@ -1,4 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
+import { AccountInfosModule } from 'src/users/accountInfos/accountInfos.module';
 import { AuthService } from './auth.service';
 import { StaffsModule } from 'src/staffs/staffs.module';
 import { JwtModule } from '@nestjs/jwt'

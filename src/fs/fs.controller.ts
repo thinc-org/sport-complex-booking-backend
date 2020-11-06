@@ -3,13 +3,13 @@ import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestj
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { FSService } from './fs.service';
 
-import { AccountInfosService } from 'src/accountInfos/accountInfos.service';
+import { AccountInfosService } from 'src/users/accountInfos/accountInfos.service';
 import { ConfigService } from '@nestjs/config';
 
 @Controller('fs')
 export class FSController {
 
-  constructor(private readonly fsService: FSService, private readonly accountInfoService: AccountInfosService,private readonly configService: ConfigService) { }
+  constructor(private readonly fsService: FSService ,private readonly configService: ConfigService) { }
 
   @UseGuards(JwtAuthGuard)
   @Post('upload')
@@ -21,10 +21,6 @@ export class FSController {
     { name: 'relationship_verification_document', maxCount: 1 },
   ]))
   async uploadFile(@UploadedFiles() files, @Req() req) {
-    const user = await this.accountInfoService.getAccountInfo(req.user.userId)
-    if(user==null){
-      throw new HttpException('cannot find user: '+req.use.userId,HttpStatus.NOT_FOUND)
-    }
     return this.fsService.saveFiles(this.configService.get('UPLOAD_DEST'),req.user.userId, files)
   }
 
@@ -37,7 +33,7 @@ export class FSController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('/:fileId/viewFileToken')
+  @Get('/viewFileToken/:fileId')
   async viewFileToken(@Req() req,@Res() res, @Param('fileId') fileId: string ){
     const fileInfo = await this.fsService.getFileInfo(fileId)
     if (!req.user.isAdmin && fileInfo.owner != req.user.userId) {
@@ -50,7 +46,10 @@ export class FSController {
   
   @UseGuards(JwtAuthGuard)
   @Delete('admin/delete/:fileId')
-  async deleteFileAdmin(@Param('fileId') fileId : string) {
+  async deleteFileAdmin(@Req() req,@Param('fileId') fileId : string) {
+    if (!req.user.isAdmin) {
+      throw new HttpException('Not an admin',HttpStatus.UNAUTHORIZED)
+    }
     const fileInfo = await this.fsService.getFileInfo(fileId)
     await this.fsService.deleteFile(fileInfo.full_path,fileInfo._id)
     return fileInfo
@@ -67,12 +66,7 @@ export class FSController {
   ]))
   async uploadFileAdmin(@UploadedFiles() files, @Req() req, @Res() res, @Param('userId') userId: string) {
     if (!req.user.isAdmin) {
-      res.status(401).send('Unauthorized')
-      return
-    }
-    const user = await this.accountInfoService.getAccountInfo(userId)
-    if(user==null){
-      throw new HttpException('cannot find user: '+req.use.userId,HttpStatus.NOT_FOUND)
+      throw new HttpException('Not an admin',HttpStatus.UNAUTHORIZED)
     }
     res.send(await this.fsService.saveFiles(this.configService.get('UPLOAD_DEST'),userId, files))
   }
