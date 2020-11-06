@@ -112,7 +112,7 @@ export class AccountInfosService {
 
         }
     }
-
+    
     /*
         the following functions are for testing purposes only
         
