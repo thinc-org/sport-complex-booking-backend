@@ -9,9 +9,14 @@ const path = require('path');
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from 'src/users/users.service';
+import { Account } from 'src/users/interfaces/user.interface';
 
 @Injectable()
 export class FSService {
+  verifyUserEligibility(userId: any) {
+    const user = await this.usersService.getUserById(userId)
+    return user.account_type == Account.Other
+  }
   constructor(@InjectModel(FileInfo.name) private fileInfoModel : Model<FileInfoDocument>, private readonly usersService:UsersService, private readonly jwtService: JwtService){}
   
   async getFileInfo(fileId: string){
@@ -40,8 +45,8 @@ export class FSService {
 
       const fileInfo = await this.saveFile(rootPath, owner, file)
       result[field] = fileInfo._id
-      this.deleteFile(rootPath,user[field+'_file'])
-      user[field+'_file'] = fileInfo._id
+      this.deleteFile(rootPath,user[field])
+      user[field] = fileInfo._id
     }
     await user.save()
     return result
