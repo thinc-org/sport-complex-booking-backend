@@ -47,4 +47,3 @@ const OtherProviderFactory = {
     ]
 })
 export class UsersModule { }
-
