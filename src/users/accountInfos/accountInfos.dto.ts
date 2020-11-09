@@ -98,6 +98,7 @@ export class editOtherAccountInfoDTO {
     @IsOptional()
     surname_en: string
     @Expose()
+    @Type(()=>Date)
     @IsDate()
     @IsOptional()
     birthday: Date
