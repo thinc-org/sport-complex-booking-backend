@@ -7,17 +7,17 @@ import * as bcrypt from 'bcrypt';
 @Injectable()
 export class StaffsService {
   constructor(
-    @InjectModel('Staff') private readonly staffModel: Model<Staff>) {}
+    @InjectModel('Staff') private readonly staffModel: Model<Staff>) { }
 
   async findAll(): Promise<Staff[]> {
     return await this.staffModel.find();
   }
 
   async findOne(id: string, isStaff: boolean): Promise<Staff> {
-    if (!isStaff){
+    if (!isStaff) {
       throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
     }
-    if (!isValidObjectId(id)){
+    if (!isValidObjectId(id)) {
       throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
     }
     const staff = await this.staffModel.findOne({ _id: id });
@@ -31,13 +31,13 @@ export class StaffsService {
     const staff = await this.staffModel.findOne({ username: username });
     return staff
   }
-  
+
   async hashPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, Number(process.env.HASH_SALT));
   }
 
-  async create(staff: Staff,isStaff: boolean): Promise<Staff> {
-    if (!isStaff){
+  async create(staff: Staff, isStaff: boolean): Promise<Staff> {
+    if (!isStaff) {
       throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
     }
     //if username already exist
@@ -66,11 +66,11 @@ export class StaffsService {
     return isUsernameExist;
   }
 
-  async delete(id: string,isStaff: boolean) {
-    if (!isStaff){
+  async delete(id: string, isStaff: boolean) {
+    if (!isStaff) {
       throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
     }
-    if (!isValidObjectId(id)){
+    if (!isValidObjectId(id)) {
       throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
     }
     const deleteResponse = await this.staffModel.findByIdAndRemove(id);
@@ -80,13 +80,13 @@ export class StaffsService {
     return deleteResponse
   }
 
-  async update(id: string, staff: Staff,isStaff:boolean): Promise<Staff> {
-    if (!isStaff){
+  async update(id: string, staff: Staff, isStaff: boolean): Promise<Staff> {
+    if (!isStaff) {
       throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
     }
-    if (!isValidObjectId(id)){
+    if (!isValidObjectId(id)) {
       throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
-    }    
+    }
     const updatedResponse = await this.staffModel.findByIdAndUpdate(id, staff, { new: true });
     if (!updatedResponse) {
       throw new HttpException('Staff not found', HttpStatus.NOT_FOUND);
