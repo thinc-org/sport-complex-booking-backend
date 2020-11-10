@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Account, CuStudentUser, OtherUser, SatitCuPersonelUser, User } from './interfaces/user.interface';
 import { Model } from 'mongoose';
+import * as bcrypt from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
@@ -11,34 +12,45 @@ export class UsersService {
         @InjectModel('SatitCuPersonel') private satitStudentModel: Model<SatitCuPersonelUser>,
         @InjectModel('Other') private otherUserModel: Model<OtherUser>
     ) { }
+
+    async findByUsername(username: string): Promise<User> {
+        const user = await this.userModel.findOne({ username: username });
+        return user
+    }
+
+    async findSatitByid(id: string): Promise<SatitCuPersonelUser> {
+        const user = await this.satitStudentModel.findOne({ _id: id });
+        return user
+    }
+
+    async findOtherByid(id: string): Promise<OtherUser> {
+        const user = await this.otherUserModel.findOne({ _id: id });
+        return user
+    }
+
+
+    async login(username:string, password:string): Promise<string> {
+        //if username is not exist
+        let isPasswordMatching = false;
+        let user = null;
+        const isUsernameExist = await this.findByUsername(username);
+        if (!isUsernameExist) {
+          throw new BadRequestException('Username or Password is wrong');
+        }
+
+        if (isUsernameExist.account_type == 'SatitAndCuPersonel') {
+            user = await this.findSatitByid(isUsernameExist._id);
+            isPasswordMatching = await bcrypt.compare(password, user.password);
+        }
+        else{
+            user = await this.findOtherByid(isUsernameExist._id);
+            isPasswordMatching = await bcrypt.compare(password, user.password);
+        }
+
+        if (!isPasswordMatching){
+          throw new BadRequestException('Username or Password is wrong');
+        }
+        return user._id;
+      }
     
-    async createCuUser(user): Promise<CuStudentUser> {
-        user.account_type = Account.CuStudent;
-        const newUser = new this.cuStudentModel(user);
-        return await newUser.save();
-    }
-
-    async createSatitUser(user): Promise<SatitCuPersonelUser> {
-        user.account_type = Account.SatitAndCuPersonel;
-        const newUser = new this.satitStudentModel(user);
-        return await newUser.save();
-    }
-
-    async createOtherUser(user): Promise<OtherUser> {
-        user.account_type = Account.SatitAndCuPersonel;
-        const newUser = new this.otherUserModel(user);
-        return await newUser.save();
-    }
-
-    async getUsers(filter): Promise<User[]> {
-        return await this.userModel.find(filter);
-    }
-
-    async getUserById(id: string): Promise<User> {
-        return await this.userModel.findById(id);
-    }
-
-    async getAllUser(): Promise<User[]> {
-        return await this.userModel.find();
-    }
 }

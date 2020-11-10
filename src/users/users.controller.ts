@@ -1,29 +1,21 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { CuStudentUser, SatitCuPersonelUser } from './interfaces/user.interface';
+import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { JwtAuthGuard } from 'src/auth/jwt.guard'
+import { AuthService } from 'src/auth/auth.service';
+import { LoginUserDto } from './dto/login-user.dto';
 
 @Controller('users')
 export class UsersController {
-    constructor(private readonly userService: UsersService){}
+    constructor(private readonly userService: UsersService, private authService: AuthService){}
 
-    @Post('/CuStudent')
-    async addCuStudent(@Body() body ){
-        return await this.userService.createCuUser(body)
-    }
 
-    @Post('/SatitStudent')
-    async addSatitStudent(@Body() body){
-        return await this.userService.createSatitUser(body)
-    }
-
-    @Get('/:id')
-    async getUser(@Param('id') id : string){
-        const user = await this.userService.getUserById(id);
-        return user
-    }
-
-    @Get()
-    async getAllUser(){
-        return this.userService.getAllUser();
+    @Get('/login')
+    async login(@Body() loginUserDto: LoginUserDto, @Res() res): Promise<string> {
+        const id  = await this.userService.login(loginUserDto.username,loginUserDto.password);
+        return res.status(201).json({
+            statusCode: 201,
+            message: 'Login successfully',
+            jwt: this.authService.generateJWT(id).token,
+        });
     }
 }
