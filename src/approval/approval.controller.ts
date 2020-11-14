@@ -5,10 +5,10 @@ import { ApprovalService } from './approval.service';
 export class ApprovalController {
     constructor(private readonly approvalService: ApprovalService) {}
   
-  @Get()
+  /*@Get()
     getAll(){
       return this.approvalService.getAll();
-    }
+    }*/
     
   @Get("/:start/:end")
   getByRange(@Param('start') start:number,@Param('end') end:number){
@@ -29,10 +29,12 @@ export class ApprovalController {
   @Patch("/approve")
   approve(@Body('username') username:string,@Body('newExpiredDate') newExpiredDate:Date){
     this.approvalService.approve(username,newExpiredDate);
+    return this.approvalService.getPersonalData(username);
   }
 
   @Patch("/reject")
   reject(@Body('username') username:string,@Body('reject_info') reject_info:[string]){
     this.approvalService.reject(username,reject_info);
+    return this.approvalService.getPersonalData(username);
   }
 }

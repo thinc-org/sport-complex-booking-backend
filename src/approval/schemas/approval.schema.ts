@@ -41,4 +41,4 @@ export const OtherSchema = new mongoose.Schema({
     national_id_photo: mongoose.Schema.Types.ObjectId, //also passport photo
     house_registration_number: mongoose.Schema.Types.ObjectId,//with reference person
     relationship_verification_document: mongoose.Schema.Types.ObjectId,
-});
+},{ collection: 'Other' });
