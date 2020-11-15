@@ -1,6 +1,7 @@
 
 import { forwardRef, Module } from '@nestjs/common';
 import { getModelToken, MongooseModule } from '@nestjs/mongoose';
+import { CuStudentSchema, OtherSchema, SatitCuPersonelSchema, UserSchema } from './schemas/users.schema';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { AuthModule } from 'src/auth/auth.module';
@@ -43,7 +44,8 @@ const OtherProviderFactory = {
         MongooseModule.forFeature([{ name: 'User', schema: UserSchema, collection: 'users' } ]),
         cuStudentProviderFactory,
         satitCuPersonelProviderFactory,
-        OtherProviderFactory
+        OtherProviderFactory,
+        UsersService
     ]
 })
 export class UsersModule { }

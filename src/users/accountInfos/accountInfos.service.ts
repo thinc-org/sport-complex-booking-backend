@@ -2,9 +2,9 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { plainToClass } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
-import { Model } from 'mongoose'
-import { Account, Contact_person, CuStudentUser, OtherUser, SatitCuPersonelUser, User, Verification } from 'src/users/interfaces/user.interface';
-import { editCuAccountInfoDTO, editSatitCuPersonelAccountInfoDTO, editOtherAccountInfoDTO, editAccountInfoDto, postCuAccountInfoDTO, PostOtherAccountInfoDTO } from './accountInfos.dto';
+import { Model } from 'mongoose';
+import { Account, CuStudentUser, OtherUser, SatitCuPersonelUser, User, Verification } from 'src/users/interfaces/user.interface';
+import { editCuAccountInfoDTO, editOtherAccountInfoDTO, editSatitCuPersonelAccountInfoDTO, postCuAccountInfoDTO, PostOtherAccountInfoDTO } from './accountInfos.dto';
 
 @Injectable()
 export class AccountInfosService {

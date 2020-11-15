@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer';
-import { IsBoolean, IsDate, isDefined, IsEmail, IsEnum, IsNotEmpty, IsOptional, isString, IsString, ValidateNested } from 'class-validator';
+import { IsBoolean, IsDate, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Account } from '../interfaces/user.interface';
 
 export class editAccountInfoDto {
