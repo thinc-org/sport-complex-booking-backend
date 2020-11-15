@@ -80,8 +80,8 @@ export class FSService {
   }
 
   async verifyUserEligibility(userId: any) {
-    const user = await this.usersService.getUserById(userId)
-    return user.account_type == Account.Other
+    const user = await this.otherUserModel.findById(userId)
+    return user!=null
   }
   
 }
