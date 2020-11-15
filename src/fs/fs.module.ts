@@ -10,7 +10,7 @@ import { FSController } from './fs.controller';
 import { FSService } from './fs.service';
 
 @Module({
-  imports: [MongooseModule.forFeature([{name: FileInfo.name, schema: FileInfoSchema},{ name: 'Other', schema: OtherSchema, collection: 'users'}]),UsersModule,JwtModule.registerAsync({
+  imports: [MongooseModule.forFeature([{name: FileInfo.name, schema: FileInfoSchema}]),UsersModule,JwtModule.registerAsync({
     imports:[ConfigModule],
     useFactory: async (configService: ConfigService) => ({
       secret: configService.get<string>('JWT_SECRET'),

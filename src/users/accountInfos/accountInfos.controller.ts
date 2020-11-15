@@ -1,12 +1,7 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
-import { AccountInfosService } from './accountInfos.service';
-import { Model } from 'mongoose'
-import { JwtAuthGuard } from 'src/auth/jwt.guard'
+import { Body, Controller, Get, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
-import { editSatitCuPersonelAccountInfoDTO, editCuAccountInfoDTO, editOtherAccountInfoDTO, editAccountInfoDto } from './accountInfos.dto';
-import { validate, validateOrReject, Validator } from 'class-validator';
-import { Account, User } from '../interfaces/user.interface';
-import { plainToClass } from 'class-transformer';
+import { JwtAuthGuard } from 'src/auth/jwt.guard';
+import { AccountInfosService } from './accountInfos.service';
 
 
 @Controller('account_info')
