@@ -52,7 +52,7 @@ export class editSatitCuPersonelAccountInfoDTO{
     is_thai_language: boolean
 }
 
-export class ContactPersonDTO {
+export class PostContactPersonDTO {
     @Expose()
     @IsString()
     contact_person_prefix: string
@@ -61,6 +61,29 @@ export class ContactPersonDTO {
     contact_person_name: string
     @Expose()
     @IsString()
+    contact_person_surname: string
+    @Expose()
+    @IsString()
+    @IsOptional()
+    contact_person_home_phone: string
+    @Expose()
+    @IsString()
+    @IsOptional()
+    contact_person_phone: string
+}
+
+export class EditContactPersonDTO {
+    @Expose()
+    @IsString()
+    @IsOptional()
+    contact_person_prefix: string
+    @Expose()
+    @IsString()
+    @IsOptional()
+    contact_person_name: string
+    @Expose()
+    @IsString()
+    @IsOptional()
     contact_person_surname: string
     @Expose()
     @IsString()
@@ -129,12 +152,13 @@ export class editOtherAccountInfoDTO {
     @Expose()
     @IsString()
     @IsOptional()
+    @IsEmail()
     personal_email: string
     @Expose()
     @IsOptional()
-    @Type(()=>ContactPersonDTO)
+    @Type(()=>EditContactPersonDTO)
     @ValidateNested()
-    contact_person: ContactPersonDTO;
+    contact_person: EditContactPersonDTO;
     @Expose()
     @IsString()
     @IsOptional()
@@ -162,7 +186,6 @@ export class PostOtherAccountInfoDTO {
     surname_en: string
     @Expose()
     @IsDate()
-    @IsOptional()
     birthday: Date
     @Expose()
     @IsString()
@@ -189,11 +212,12 @@ export class PostOtherAccountInfoDTO {
     @Expose()
     @IsString()
     @IsOptional()
+    @IsEmail()
     personal_email: string
     @Expose()
-    @Type(()=>ContactPersonDTO)
+    @Type(()=>PostContactPersonDTO)
     @ValidateNested()
-    contact_person: ContactPersonDTO;
+    contact_person: PostContactPersonDTO;
     @Expose()
     @IsString()
     @IsOptional()
