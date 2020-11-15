@@ -5,11 +5,11 @@ import { JwtService } from '@nestjs/jwt';
 export class AuthService {
     constructor(private jwtService: JwtService){}
 
-    generateDummyJWT(userId: string){
+    generateJWT(userId: string){
         return {token: this.jwtService.sign({userId ,isStaff: false})}
     }
 
-    generateDummyAdminJWT(userId: string){
+    generateAdminJWT(userId: string){
         return {token: this.jwtService.sign({userId ,isStaff: true})}
     }
 }

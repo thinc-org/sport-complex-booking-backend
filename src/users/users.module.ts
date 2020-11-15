@@ -5,7 +5,6 @@ import { CuStudentSchema, OtherSchema, SatitCuPersonelSchema, UserSchema } from 
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { AuthModule } from 'src/auth/auth.module';
-import { CuStudentSchema, OtherSchema, SatitCuPersonelSchema, UserSchema } from './schemas/users.schema';
 
 const cuStudentProviderFactory = {
     provide: getModelToken('CuStudent'),

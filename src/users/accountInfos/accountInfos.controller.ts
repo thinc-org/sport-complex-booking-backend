@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, Put, Req, UseGuards } from '@nestjs/common
 import { AuthService } from 'src/auth/auth.service';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { AccountInfosService } from './accountInfos.service';
+const mongoose = require('mongoose')
 
 
 @Controller('account_info')
@@ -38,27 +39,27 @@ export class AccountInfosController {
     @Get('testing/addTestCuUser')
     async addTestUser() {
         const testUser = await this.accountInfoService.addTestCuUser()
-        const token = this.authService.generateDummyJWT(testUser._id).token;
+        const token = this.authService.generateJWT(testUser._id).token;
         return { testUser, token }
     }
     
     @Get('testing/addTestSatitUser')
     async addTestSatitUser(){
         const testUser = await this.accountInfoService.addTestSatitUser()
-        const token = this.authService.generateDummyJWT(testUser._id).token;
+        const token = this.authService.generateJWT(testUser._id).token;
         return { testUser, token }
     }
 
     @Get('testing/addTestOtherUser')
     async addTestOtherUser() {
         const testUser = await this.accountInfoService.addTestOtherUser()
-        const token = this.authService.generateDummyJWT(testUser._id).token;
+        const token = this.authService.generateJWT(testUser._id).token;
         return { testUser, token }
     }
     
     @Get('testing/adminToken')
     async addTestAdmin() {
-        const token = this.authService.generateDummyAdminJWT();
+        const token = this.authService.generateAdminJWT(mongoose.Types.ObjectId().toHexString());
         return { token }
     }
 

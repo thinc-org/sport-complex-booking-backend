@@ -8,7 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CuStudentSchema, OtherSchema, SatitCuPersonelSchema, UserSchema } from '../schemas/users.schema';
 
 @Module({
-  imports: [UsersModule,forwardRef(()=> AuthModule)],
+  imports: [forwardRef(()=>UsersModule),forwardRef(()=> AuthModule)],
   controllers: [AccountInfosController],
   providers: [AccountInfosService],
   exports: [AccountInfosService]
