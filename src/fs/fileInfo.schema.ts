@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
-import { Document, PromiseProvider, Schema as MongooseSchema} from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export type FileInfoDocument = FileInfo & Document;
 
