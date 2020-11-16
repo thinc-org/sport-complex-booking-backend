@@ -1,11 +1,8 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
+import { AuthModule } from 'src/auth/auth.module';
+import { UsersModule } from 'src/users/users.module';
 import { AccountInfosController } from './accountInfos.controller';
 import { AccountInfosService } from './accountInfos.service';
-import { AuthModule } from 'src/auth/auth.module';
-import {forwardRef} from '@nestjs/common';
-import { UsersModule } from 'src/users/users.module';
-import { MongooseModule } from '@nestjs/mongoose';
-import { CuStudentSchema, OtherSchema, SatitCuPersonelSchema, UserSchema } from '../schemas/users.schema';
 
 @Module({
   imports: [forwardRef(()=>UsersModule),forwardRef(()=> AuthModule)],
