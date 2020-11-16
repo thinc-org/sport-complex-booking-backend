@@ -4,7 +4,6 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { FSService } from './fs.service';
 
-
 @Controller('fs')
 export class FSController {
 
@@ -67,5 +66,4 @@ export class FSController {
     if (!req.user.isStaff) throw new HttpException('Not an admin', HttpStatus.UNAUTHORIZED)
     res.send(await this.fsService.saveFiles(this.configService.get('UPLOAD_DEST'), userId, files))
   }
-
 }

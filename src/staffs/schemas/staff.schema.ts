@@ -4,6 +4,6 @@ export const StaffSchema = new mongoose.Schema({
     name: String,
     surname: String,
     username: String,
-    password: String,
+    passworf: String,
     is_admin: Boolean,
 });
