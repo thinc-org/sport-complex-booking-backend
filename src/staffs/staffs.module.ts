@@ -8,8 +8,9 @@ import { UsersModule } from 'src/users/users.module';
 import { listAllUserModule } from './list-all-user/list-all-user.module'
 
 @Module({
-    imports: [MongooseModule.forFeature([
-        { name: 'Staff', schema: StaffSchema, collection: 'staffs'}]),forwardRef(()=>UsersModule),
+    imports: [MongooseModule.forFeature(
+        [{ name: 'Staff', schema: StaffSchema, collection: 'staffs'}]),
+        forwardRef(()=>UsersModule),
         forwardRef(()=>AuthModule),
         listAllUserModule
         ],
