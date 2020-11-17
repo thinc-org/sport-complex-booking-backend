@@ -8,6 +8,7 @@ import { OtherUser } from 'src/users/interfaces/user.interface';
 import { FileInfo, FileInfoDocument } from './fileInfo.schema';
 const path = require('path');
 
+
 @Injectable()
 export class FSService {
   constructor(@InjectModel(FileInfo.name) private fileInfoModel: Model<FileInfoDocument>, @InjectModel('Other') private otherUserModel: Model<OtherUser>, private readonly jwtService: JwtService) { }
