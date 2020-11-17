@@ -537,7 +537,7 @@
     webpack "5.4.0"
     webpack-node-externals "2.5.2"
 
-"@nestjs/common@^7.0.0":
+"@nestjs/common@^7.5.2":
   version "7.5.2"
   resolved "https://registry.yarnpkg.com/@nestjs/common/-/common-7.5.2.tgz#8229081c8aab8a656c5509f1060411bfb8cf03eb"
   integrity sha512-b1rKSOCO20qFgS9qr4Blu24XyVs+PAa4GIFDZxw+4HiPPKrU9PMLC3YdJ2K+wB1xEO9D7bmS0mlEz3fimD/z0A==
@@ -558,7 +558,7 @@
     lodash.set "4.3.2"
     uuid "8.1.0"
 
-"@nestjs/core@^7.0.0":
+"@nestjs/core@^7.5.2":
   version "7.5.2"
   resolved "https://registry.yarnpkg.com/@nestjs/core/-/core-7.5.2.tgz#8c358a753825041efc5012a24f545e54ac9df59f"
   integrity sha512-StAYVexFqEch7NLV5wcjMwM/q2JKJ8Qi46bnsXVOxEQV8qlBc9aflJ3DWpM4pERvtUFJyfgo9iLk5IMQAPnnCg==
@@ -1224,6 +1224,11 @@
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
+
+Express@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/Express/-/Express-3.0.1.tgz#e64ef7cb37684a69fc22d4111ddde4498896496a"
+  integrity sha1-5k73yzdoSmn8ItQRHd3kSYiWSWo=
 
 abab@^2.0.3:
   version "2.0.5"
@@ -3113,9 +3118,9 @@ globals@^12.1.0:
     type-fest "^0.8.1"
 
 google-libphonenumber@^3.2.8:
-  version "3.2.14"
-  resolved "https://registry.yarnpkg.com/google-libphonenumber/-/google-libphonenumber-3.2.14.tgz#f206fa466511427c83aa6b893dd8d949eb8e30ae"
-  integrity sha512-4r7mQRbk7EUYV1gyfP1SInYuQsjuDtRXCGLSotxeYDJaj/aF1xFO5PV/GSQeIxXWhIw050DujROICvWpZ1XYRw==
+  version "3.2.15"
+  resolved "https://registry.yarnpkg.com/google-libphonenumber/-/google-libphonenumber-3.2.15.tgz#3a01dc554dbf83c754f249c16df3605e5d154bb9"
+  integrity sha512-tbCIuzMoH34RdrbFRw5kijAZn/p6JMQvsgtr1glg2ugbwqrMPlOL8pHNK8cyGo9B6SXpcMm4hdyDqwomR+HPRg==
 
 graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0, graceful-fs@^4.2.4:
   version "4.2.4"

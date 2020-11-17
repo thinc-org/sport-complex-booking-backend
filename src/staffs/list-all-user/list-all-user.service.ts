@@ -6,7 +6,7 @@ import { SatitCuPersonelUser, OtherUser, User } from 'src/users/interfaces/user.
 
 
 @Injectable()
-export class AddUserService {
+export class listAllUserService {
     constructor(
         @InjectModel('SatitCuPersonel') private satitStudentModel: Model<SatitCuPersonelUser>,
         @InjectModel('Other') private otherUserModel: Model<OtherUser>,
@@ -35,7 +35,7 @@ export class AddUserService {
         return false;
     }
 
-    async getUsers(filter, isStaff: boolean): Promise<User[]> {
+    async getUsers(filter, isStaff: boolean): Promise<[number,User[]]> {
         if (!isStaff) {
             throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
         }        
@@ -48,23 +48,32 @@ export class AddUserService {
                 query = query.find({ name_th: { $regex: ".*" + filter.name + ".*", $options: 'i' } });
             }
         }
-
-        if (filter.hasOwnProperty('is_penalize')) {
-            query = query.find({ is_penalize: filter.is_penalize });
+        var begin = -99,end = -99;
+        if (filter.hasOwnProperty('begin')) {
+            if (filter.hasOwnProperty('end')) {
+                end = filter.end;
+            }
+            begin = filter.begin;
         }
+
+        delete filter['name'];
+        delete filter['begin'];
+        delete filter['end'];
+
+        query = query.find(filter);
 
         var output = await query;
 
-        if (filter.hasOwnProperty('begin')) {
-            if (filter.hasOwnProperty('end')) {
-                output = output.slice(filter.begin, filter.end);
+        if (begin != -99) {
+            if (end != -99) {
+                output = output.slice(begin, end);
             }
             else {
-                output = output.slice(filter.begin);
+                output = output.slice(begin);
             }
         }
 
-        return output;
+        return [output.length,output];
     }
 
     async findUserByUsername(username: string): Promise<User> {
