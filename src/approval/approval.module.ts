@@ -1,10 +1,12 @@
-import { Module } from '@nestjs/common';
+import { Module ,forwardRef} from '@nestjs/common';
 import {ApprovalService} from "./approval.service"
-import {MongooseModule} from "@nestjs/mongoose"
-import {OtherSchema} from "./schemas/approval.schema"
 import { ApprovalController } from './approval.controller';
+import {UsersModule} from 'src/users/users.module'
+import {AuthModule} from 'src/auth/auth.module'
+
 @Module({
-    imports:[MongooseModule.forFeature([{name:"Other",schema:OtherSchema}])],
+    imports:[forwardRef(()=>UsersModule),
+        forwardRef(()=>AuthModule)],
     providers:[ApprovalService],
     controllers: [ApprovalController]
 })

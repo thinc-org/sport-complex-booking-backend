@@ -91,13 +91,7 @@ export interface OtherUser extends User {
     marital_status: string
     address: string
     home_phone: string
-    contact_person: {
-        contact_person_prefix: string
-        contact_person_name: string
-        contact_person_surname: string
-        contact_person_home_phone: string
-        contact_person_phone: string
-    }
+    contact_person: Contact_person
     medical_condition: string
     membership_type: string
     password: string //pass=phone(editable)
@@ -110,4 +104,3 @@ export interface OtherUser extends User {
     house_registration_number: mongoose.Types.ObjectId//with reference person
     relationship_verification_document: mongoose.Types.ObjectId
 }
-
