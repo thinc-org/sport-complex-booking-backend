@@ -55,7 +55,7 @@ export class ApprovalService {
 
   async reject(username:string,info:[string]) :Promise<User>{
   
-    const user =await this.userModel.updateOne({"username":username}, {$set:{verification_status:Verification.Rejected,rejected_info:info}} ).exec();
+    const user =await this.userModel.findOneAndUpdate({"username":username}, {$set:{verification_status:Verification.Rejected,rejected_info:info}} ).exec();
 
     if(!user)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
