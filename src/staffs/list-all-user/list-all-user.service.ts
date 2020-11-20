@@ -35,7 +35,7 @@ export class listAllUserService {
         return false;
     }
 
-    async getUsers(filter, isStaff: boolean): Promise<[number,User[]]> {
+    async getUsers(filter, isStaff: boolean , begin:number, end:number): Promise<[number,User[]]> {
         if (!isStaff) {
             throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
         }        
@@ -48,13 +48,6 @@ export class listAllUserService {
                 query = query.find({ name_th: { $regex: ".*" + filter.name + ".*", $options: 'i' } });
             }
         }
-        var begin = -99,end = -99;
-        if (filter.hasOwnProperty('begin')) {
-            if (filter.hasOwnProperty('end')) {
-                end = filter.end;
-            }
-            begin = filter.begin;
-        }
 
         delete filter['name'];
         delete filter['begin'];
@@ -63,15 +56,7 @@ export class listAllUserService {
         query = query.find(filter);
 
         var output = await query;
-
-        if (begin != -99) {
-            if (end != -99) {
-                output = output.slice(begin, end);
-            }
-            else {
-                output = output.slice(begin);
-            }
-        }
+        output = output.slice(begin,end);
 
         return [output.length,output];
     }
