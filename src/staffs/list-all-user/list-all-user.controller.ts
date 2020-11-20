@@ -19,9 +19,9 @@ export class listAllUserController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get('/getUser')
-    async filterUser(@Body() body, @Req() req) : Promise<[number,User[]]> {
-        return this.addUserService.getUsers(body,req.user.isStaff);
+    @Get('/getUser/:start/:end')
+    async filterUser(@Body() body, @Req() req,@Param() param) : Promise<[number,User[]]> {
+        return this.addUserService.getUsers(body,req.user.isStaff,param.begin,param.end);
     }
 
     @UseGuards(JwtAuthGuard)
