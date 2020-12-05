@@ -104,3 +104,4 @@ export interface OtherUser extends User {
     house_registration_number: mongoose.Types.ObjectId//with reference person
     relationship_verification_document: mongoose.Types.ObjectId
 }
+

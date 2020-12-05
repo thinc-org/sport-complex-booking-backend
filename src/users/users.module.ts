@@ -1,11 +1,11 @@
-
-import { forwardRef, Module } from '@nestjs/common';
+import { forwardRef, HttpModule, Module } from '@nestjs/common';
 import { getModelToken, MongooseModule } from '@nestjs/mongoose';
 import { CuStudentSchema, OtherSchema, SatitCuPersonelSchema, UserSchema } from './schemas/users.schema';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { AuthModule } from 'src/auth/auth.module';
 
+import {SsoContentSchema} from './schemas/sso.schema';
 
 const cuStudentProviderFactory = {
     provide: getModelToken('CuStudent'),
@@ -32,6 +32,8 @@ const OtherProviderFactory = {
     imports: [
         forwardRef(()=>AuthModule),
         MongooseModule.forFeature([{ name: 'User', schema: UserSchema, collection: 'users' }]),
+        MongooseModule.forFeature([{ name: 'SsoContent', schema: SsoContentSchema }]),
+        HttpModule
     ],
     controllers: [UsersController],
     providers: [
@@ -42,6 +44,7 @@ const OtherProviderFactory = {
     ],
     exports: [
         MongooseModule.forFeature([{ name: 'User', schema: UserSchema, collection: 'users' } ]),
+        MongooseModule.forFeature([{ name: 'SsoContent', schema: SsoContentSchema }]),
         cuStudentProviderFactory,
         satitCuPersonelProviderFactory,
         OtherProviderFactory,
