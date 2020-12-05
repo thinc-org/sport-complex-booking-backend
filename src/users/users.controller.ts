@@ -1,12 +1,16 @@
-import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res, HttpService, HttpException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt.guard'
 import { AuthService } from 'src/auth/auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
+import { map, catchError } from 'rxjs/operators';
+
+import config from '../config/keys';
 
 @Controller('users')
 export class UsersController {
-    constructor(private readonly userService: UsersService, private authService: AuthService){}
+    constructor(private readonly userService: UsersService, private authService: AuthService,
+        private readonly httpService: HttpService){}
 
 
     @Get('/login')
@@ -18,4 +22,34 @@ export class UsersController {
             jwt: this.authService.generateJWT(id).token,
         });
     }
+
+    @Post('validation')
+    async authenticateUser(@Body() appticket: { "appticket": string }): Promise<any> {
+        const params = JSON.stringify(appticket);
+        const res = this.httpService.post(config.ssoEndpoint_VALIDATE,
+            params,
+            {
+                headers: {
+                    'DeeAppId': config.DeeAppId,
+                    'DeeAppSecret': config.DeeAppSecret,
+                    'DeeTicket': appticket["appticket"]
+                },
+            })
+            .pipe(
+                catchError(e => {
+                    throw new HttpException(e.response.data, e.response.status);
+                }),
+            )
+            .pipe(map(async (res) => {
+                const id = this.userService.create_fromSso(res.data);
+                const account = this.userService.findOtherByid(await id); //id needs to be a string
+                const payload = this.authService.generateUserJWT(account["_id"], 
+                account["is_first_login"], account["is_thai_language"]);
+
+                return payload;
+            }));
+            
+            return res;
+    }
+
 }
