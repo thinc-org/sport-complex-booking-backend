@@ -2,7 +2,7 @@ import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nes
 import { isValidObjectId, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
-import { SatitCuPersonelUser, OtherUser, User } from 'src/users/interfaces/user.interface';
+import { SatitCuPersonelUser, OtherUser, User ,Account} from 'src/users/interfaces/user.interface';
 
 
 @Injectable()
@@ -35,28 +35,36 @@ export class listAllUserService {
         return false;
     }
 
-    async getUsers(filter, isStaff: boolean , begin:number, end:number): Promise<[number,User[]]> {
+    async getUsers(isStaff: boolean ,name : string , penalize : boolean , begin:number, end:number , account:Account): Promise<[number,User[]]> {
         if (!isStaff) {
             throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
         }        
         var query = this.userModel.find();
-        if (filter.hasOwnProperty('name')) {
-            if (await this.isEngLang(filter.name)) {
-                query = query.find({ name_en: { $regex: ".*" + filter.name + ".*", $options: 'i' } });
+
+        if(name !== undefined){
+            if (await this.isEngLang(name)) {
+                query = query.find({ name_en: { $regex: ".*" + name + ".*", $options: 'i' } });
             }
-            if (await this.isThaiLang(filter.name)) {
-                query = query.find({ name_th: { $regex: ".*" + filter.name + ".*", $options: 'i' } });
+            if (await this.isThaiLang(name)) {
+                query = query.find({ name_th: { $regex: ".*" + name + ".*", $options: 'i' } });
             }
         }
 
-        delete filter['name'];
-        delete filter['begin'];
-        delete filter['end'];
+        if(penalize !== undefined){
+            query = query.find({is_penalize : penalize});
+        }
 
-        query = query.find(filter);
+        if(account !== undefined){
+            query = query.find({account_type : account});
+        }
 
         var output = await query;
-        output = output.slice(begin,end);
+        if(end != undefined){
+            output = output.slice(begin,end);
+        }
+        else{
+            output = output.slice(begin);
+        }
 
         return [output.length,output];
     }
