@@ -7,6 +7,7 @@ import { DisableCourtSchema } from './schemas/disable-courts.schema';
 @Module({
   imports: [MongooseModule.forFeature([{ name: 'DisableCourt', schema: DisableCourtSchema}])],
   controllers: [DisableCourtsController],
-  providers: [DisableCourtsService]
+  providers: [DisableCourtsService],
+  exports: [DisableCourtsService]
 })
 export class DisableCourtsModule {}
