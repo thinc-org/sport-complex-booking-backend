@@ -20,8 +20,8 @@ export class listAllUserController {
 
     @UseGuards(JwtAuthGuard)
     @Get('/getUser')
-    async filterUser(@Req() req,@Query() param) : Promise<[number,User[]]> {
-        return this.addUserService.getUsers(req.user.isStaff,param.name,param.penalize,param.begin,param.end,param.account);
+    async filterUser(@Req() req,@Query() param) : Promise<[number,User[][]]> {
+        return this.addUserService.getUsers(req.user.isStaff,param.name,param.penalize,param.begin,param.end,param.account,param.max_user);
     }
 
     @UseGuards(JwtAuthGuard)
