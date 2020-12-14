@@ -10,6 +10,7 @@ import { ApprovalModule } from './approval/approval.module'
 import { FSModule } from './fs/fs.module';
 import { AccountInfosModule } from './users/accountInfos/accountInfos.module';
 import { ReservationModule } from './reservation/reservation.module';
+import { DisableCourtsModule } from './courts/disable-courts/disable-courts.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ReservationModule } from './reservation/reservation.module';
     FSModule,
     AccountInfosModule,
     ReservationModule,
+    DisableCourtsModule
   ],
   controllers: [AppController],
   providers: [AppService],
