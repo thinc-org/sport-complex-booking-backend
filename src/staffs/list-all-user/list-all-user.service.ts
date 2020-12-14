@@ -36,12 +36,12 @@ export class listAllUserService {
         return false;
     }
 
-    async getUsers(isStaff: boolean ,name : string , penalize : boolean , begin:number, end:number , account:Account , max_user:number): Promise<[number,User[][]]> {
+    async getUsers(isStaff: boolean ,name : string , penalize : boolean , begin:number, end:number , account:Account ): Promise<[number,User[]]> {
         if (!isStaff) {
             throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
         }        
         var query = this.userModel.find();
-
+        var size : number = (await query).length;
         if(name !== undefined){
             if (await this.isEngLang(name)) {
                 query = query.find({ name_en: { $regex: ".*" + name + ".*", $options: 'i' } });
@@ -59,38 +59,15 @@ export class listAllUserService {
             query = query.find({account_type : account});
         }
 
-        var temp = await query;
-        var output : User[][];
-
-        if(begin === undefined){
-            begin = 0;
+        var output : User[] = await query;
+        if(begin !== undefined){
+            if(end === undefined){
+                output = output.slice(begin);
+            }
+            else {
+                output = output.slice(begin,end);
+            }
         }
-        if(end === undefined){
-            end = temp.length;
-        }
-        if(max_user === undefined){
-            max_user = (end-begin);
-        }
-
-        if(begin > temp.length){
-            begin = 0;
-        }
-        if(end > temp.length){
-            end = temp.length;
-        }
-
-        var size : number = end-begin;
-
-        var row : number = Math.ceil(size/max_user),i:number = 0;
-        output = new Array(row);
-
-        for(i=0 ; i<row-1 ; i++){
-            output[i] = temp.slice(Number(begin),Number(begin)+Number(max_user));
-            begin = Number(begin)+Number(max_user);
-        }
-
-        output[i] = temp.slice(begin,end);
-        
         return [size,output];
     }
 
