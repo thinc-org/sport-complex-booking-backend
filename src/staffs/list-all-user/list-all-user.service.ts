@@ -3,6 +3,7 @@ import { isValidObjectId, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { SatitCuPersonelUser, OtherUser, User ,Account} from 'src/users/interfaces/user.interface';
+import { max } from 'class-validator';
 
 
 @Injectable()
@@ -35,7 +36,7 @@ export class listAllUserService {
         return false;
     }
 
-    async getUsers(isStaff: boolean ,name : string , penalize : boolean , begin:number, end:number , account:Account): Promise<[number,User[]]> {
+    async getUsers(isStaff: boolean ,name : string , penalize : boolean , begin:number, end:number , account:Account , max_user:number): Promise<[number,User[][]]> {
         if (!isStaff) {
             throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
         }        
@@ -58,15 +59,27 @@ export class listAllUserService {
             query = query.find({account_type : account});
         }
 
-        var output = await query;
-        if(end != undefined){
-            output = output.slice(begin,end);
+        var temp = await query;
+        var output : User[][];
+
+        if(begin === undefined){
+            begin = 0;
         }
-        else{
-            output = output.slice(begin);
+        if(end === undefined){
+            end = temp.length-1;
+        }
+        if(max_user === undefined){
+            max_user = (end-begin)+1;
         }
 
-        return [output.length,output];
+        var size : number = Math.ceil((end-begin+1)/max_user);
+        output = new Array(size);
+
+        for(let i = 0 ;i < size;i++){
+            output[i] = new Array(max_user);
+            output[i]=temp.slice(max_user*i,max_user*(i+1));
+        }
+        return [temp.length,output];
     }
 
     async findUserByUsername(username: string): Promise<User> {
