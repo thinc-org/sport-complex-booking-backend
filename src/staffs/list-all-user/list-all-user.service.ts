@@ -66,20 +66,32 @@ export class listAllUserService {
             begin = 0;
         }
         if(end === undefined){
-            end = temp.length-1;
+            end = temp.length;
         }
         if(max_user === undefined){
-            max_user = (end-begin)+1;
+            max_user = (end-begin);
         }
 
-        var size : number = Math.ceil((end-begin+1)/max_user);
-        output = new Array(size);
-
-        for(let i = 0 ;i < size;i++){
-            output[i] = new Array(max_user);
-            output[i]=temp.slice(max_user*i,max_user*(i+1));
+        if(begin > temp.length){
+            begin = 0;
         }
-        return [temp.length,output];
+        if(end > temp.length){
+            end = temp.length;
+        }
+
+        var size : number = end-begin;
+
+        var row : number = Math.ceil(size/max_user),i:number = 0;
+        output = new Array(row);
+
+        for(i=0 ; i<row-1 ; i++){
+            output[i] = temp.slice(Number(begin),Number(begin)+Number(max_user));
+            begin = Number(begin)+Number(max_user);
+        }
+
+        output[i] = temp.slice(begin,end);
+        
+        return [size,output];
     }
 
     async findUserByUsername(username: string): Promise<User> {
