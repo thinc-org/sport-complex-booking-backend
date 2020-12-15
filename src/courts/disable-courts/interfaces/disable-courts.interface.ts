@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, Mongoose, Types } from "mongoose";
 
 export interface DisableTime {
     start_time: number
@@ -7,8 +7,7 @@ export interface DisableTime {
 }
 
 export interface DisableCourt extends Document {
-    sport_name_th: string
-    sport_name_en: string
+    sport_id: Types.ObjectId
     court_num: number
     starting_date: Date
     expired_date: Date

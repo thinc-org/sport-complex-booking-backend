@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { performance } from 'perf_hooks';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
-import { CreateDisableCourtDTO } from './disable-courts.dto';
+import { AddDisableTimeDTO, CreateDisableCourtDTO, EditDisableCourtDTO } from './disable-courts.dto';
 import { DisableCourtsService } from './disable-courts.service';
 import { DisableCourt } from './interfaces/disable-courts.interface';
 
@@ -10,9 +11,9 @@ export class DisableCourtsController {
 
     @UseGuards(JwtAuthGuard)
     @Post('')
-    async createDisableCourt(@Req() req, @Body() body: CreateDisableCourtDTO, @Query('merge') merge: boolean): Promise<DisableCourt> {
+    async createDisableCourt(@Req() req, @Body() body: CreateDisableCourtDTO): Promise<DisableCourt> {
         if (!req.user.isStaff) throw new HttpException("Not a Staff", HttpStatus.UNAUTHORIZED);
-        return await this.disableCourtsService.createDisableCourt(body, merge);
+        return await this.disableCourtsService.createDisableCourt(body);
     }
 
     @Get('')
@@ -44,4 +45,17 @@ export class DisableCourtsController {
         await this.disableCourtsService.deleteDisableCourt(id);
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Put(':id')
+    async editDisableCourt(@Req() req, @Param('id') id: string, @Body() body: EditDisableCourtDTO): Promise<DisableCourt> {
+        if(!req.user.isStaff) throw new HttpException("Not a Staff",HttpStatus.UNAUTHORIZED);
+        return await this.disableCourtsService.editDisableCourt(id,body);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Put(':id/add_disable_time')
+    async addDisableTime(@Req() req, @Param('id') id: string, @Body() body: AddDisableTimeDTO){
+        if(!req.user.isStaff) throw new HttpException("Not a Staff",HttpStatus.UNAUTHORIZED);
+        await this.disableCourtsService.addDisableTime(id,body.disable_times);
+    }
 }
