@@ -46,7 +46,7 @@ export const OtherSchema = new mongoose.Schema({
     rejected_info: [String],
     account_expiration_date :Date,
     user_photo: mongoose.Schema.Types.ObjectId, //(ของcollectionที่เก็บรูป)
-    medical_ceritficate: mongoose.Schema.Types.ObjectId,
+    medical_certificate: mongoose.Schema.Types.ObjectId,
     national_id_photo: mongoose.Schema.Types.ObjectId, //also passport photo
     house_registration_number: mongoose.Schema.Types.ObjectId,//with reference person
     relationship_verification_document: mongoose.Schema.Types.ObjectId,

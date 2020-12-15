@@ -2,7 +2,8 @@ import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nes
 import { isValidObjectId, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
-import { SatitCuPersonelUser, OtherUser, User } from 'src/users/interfaces/user.interface';
+import { SatitCuPersonelUser, OtherUser, User ,Account, CuStudentUser} from 'src/users/interfaces/user.interface';
+import { max } from 'class-validator';
 
 
 @Injectable()
@@ -10,7 +11,10 @@ export class listAllUserService {
     constructor(
         @InjectModel('SatitCuPersonel') private satitStudentModel: Model<SatitCuPersonelUser>,
         @InjectModel('Other') private otherUserModel: Model<OtherUser>,
-        @InjectModel('User') private userModel: Model<User>) { }
+        @InjectModel('CuStudent') private cuStudentModel: Model<CuStudentUser>,
+        @InjectModel('User') private userModel: Model<User>
+        ) 
+        { }
 
 
     async hashPassword(password: string): Promise<string> {
@@ -35,30 +39,39 @@ export class listAllUserService {
         return false;
     }
 
-    async getUsers(filter, isStaff: boolean , begin:number, end:number): Promise<[number,User[]]> {
+    async getUsers(isStaff: boolean ,name : string , penalize : boolean , begin:number, end:number , account:Account ): Promise<[number,User[]]> {
         if (!isStaff) {
             throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
         }        
         var query = this.userModel.find();
-        if (filter.hasOwnProperty('name')) {
-            if (await this.isEngLang(filter.name)) {
-                query = query.find({ name_en: { $regex: ".*" + filter.name + ".*", $options: 'i' } });
+        var size : number = (await query).length;
+        if(name !== undefined){
+            if (await this.isEngLang(name)) {
+                query = query.find({ name_en: { $regex: ".*" + name + ".*", $options: 'i' } });
             }
-            if (await this.isThaiLang(filter.name)) {
-                query = query.find({ name_th: { $regex: ".*" + filter.name + ".*", $options: 'i' } });
+            if (await this.isThaiLang(name)) {
+                query = query.find({ name_th: { $regex: ".*" + name + ".*", $options: 'i' } });
             }
         }
 
-        delete filter['name'];
-        delete filter['begin'];
-        delete filter['end'];
+        if(penalize !== undefined){
+            query = query.find({is_penalize : penalize});
+        }
 
-        query = query.find(filter);
+        if(account !== undefined){
+            query = query.find({account_type : account});
+        }
 
-        var output = await query;
-        output = output.slice(begin,end);
-
-        return [output.length,output];
+        var output : User[] = await query;
+        if(begin !== undefined){
+            if(end === undefined){
+                output = output.slice(begin);
+            }
+            else {
+                output = output.slice(begin,end);
+            }
+        }
+        return [size,output];
     }
 
     async findUserByUsername(username: string): Promise<User> {
@@ -156,10 +169,24 @@ export class listAllUserService {
         if (!isValidObjectId(id)) {
             throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
         }
-        const updatedResponse = await this.userModel.findByIdAndUpdate(id,update, {useFindAndModify: false});
+        var updatedResponse;
+
+        const type = (await this.userModel.findById(id)).account_type;
+
+        if(type === Account.CuStudent){
+            updatedResponse = this.cuStudentModel.findByIdAndUpdate(id,update, {useFindAndModify: false});
+        }
+        else if(type === Account.SatitAndCuPersonel){
+            updatedResponse = this.satitStudentModel.findByIdAndUpdate(id,update, {useFindAndModify: false});
+        }
+        else if(type === Account.Other){
+            updatedResponse = this.otherUserModel.findByIdAndUpdate(id,update, {useFindAndModify: false});
+        }
+
         if (!updatedResponse) {
           throw new HttpException('Staff not found', HttpStatus.NOT_FOUND);
         }
+
         return updatedResponse
-      }
+    }
 }

@@ -99,7 +99,7 @@ export interface OtherUser extends User {
     rejected_info: [string]
     account_expiration_date :Date
     user_photo: mongoose.Types.ObjectId //(ของcollectionที่เก็บรูป)
-    medical_ceritficate: mongoose.Types.ObjectId
+    medical_certificate: mongoose.Types.ObjectId
     national_id_photo: mongoose.Types.ObjectId //also passport photo
     house_registration_number: mongoose.Types.ObjectId//with reference person
     relationship_verification_document: mongoose.Types.ObjectId
