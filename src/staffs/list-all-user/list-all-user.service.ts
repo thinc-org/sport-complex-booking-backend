@@ -2,7 +2,7 @@ import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nes
 import { isValidObjectId, Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
-import { SatitCuPersonelUser, OtherUser, User ,Account} from 'src/users/interfaces/user.interface';
+import { SatitCuPersonelUser, OtherUser, User ,Account, CuStudentUser} from 'src/users/interfaces/user.interface';
 import { max } from 'class-validator';
 
 
@@ -11,7 +11,10 @@ export class listAllUserService {
     constructor(
         @InjectModel('SatitCuPersonel') private satitStudentModel: Model<SatitCuPersonelUser>,
         @InjectModel('Other') private otherUserModel: Model<OtherUser>,
-        @InjectModel('User') private userModel: Model<User>) { }
+        @InjectModel('CuStudent') private cuStudentModel: Model<CuStudentUser>,
+        @InjectModel('User') private userModel: Model<User>
+        ) 
+        { }
 
 
     async hashPassword(password: string): Promise<string> {
@@ -166,10 +169,24 @@ export class listAllUserService {
         if (!isValidObjectId(id)) {
             throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
         }
-        const updatedResponse = await this.userModel.findByIdAndUpdate(id,update, {useFindAndModify: false});
+        var updatedResponse;
+
+        const type = (await this.userModel.findById(id)).account_type;
+
+        if(type === Account.CuStudent){
+            updatedResponse = this.cuStudentModel.findByIdAndUpdate(id,update, {useFindAndModify: false});
+        }
+        else if(type === Account.SatitAndCuPersonel){
+            updatedResponse = this.satitStudentModel.findByIdAndUpdate(id,update, {useFindAndModify: false});
+        }
+        else if(type === Account.Other){
+            updatedResponse = this.otherUserModel.findByIdAndUpdate(id,update, {useFindAndModify: false});
+        }
+
         if (!updatedResponse) {
           throw new HttpException('Staff not found', HttpStatus.NOT_FOUND);
         }
+
         return updatedResponse
-      }
+    }
 }
