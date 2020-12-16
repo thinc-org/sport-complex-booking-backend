@@ -185,6 +185,7 @@ export class PostOtherAccountInfoDTO {
     @IsString()
     surname_en: string
     @Expose()
+    @Type(()=>Date)
     @IsDate()
     birthday: Date
     @Expose()

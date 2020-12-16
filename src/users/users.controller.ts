@@ -4,13 +4,12 @@ import { JwtAuthGuard } from 'src/auth/jwt.guard'
 import { AuthService } from 'src/auth/auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { map, catchError } from 'rxjs/operators';
-
-import config from '../config/keys';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('users')
 export class UsersController {
     constructor(private readonly userService: UsersService, private authService: AuthService,
-        private readonly httpService: HttpService){}
+        private readonly httpService: HttpService, private readonly configService: ConfigService){}
 
 
     @Get('/login')
@@ -26,12 +25,12 @@ export class UsersController {
     @Post('validation')
     async authenticateUser(@Body() appticket: { "appticket": string }): Promise<any> {
         const params = JSON.stringify(appticket);
-        const res = this.httpService.post(config.ssoEndpoint_VALIDATE,
+        const res = this.httpService.post(this.configService.get("ssoEndpoint_VALIDATE"),
             params,
             {
                 headers: {
-                    'DeeAppId': config.DeeAppId,
-                    'DeeAppSecret': config.DeeAppSecret,
+                    'DeeAppId': this.configService.get("DeeAppId"),
+                    'DeeAppSecret': this.configService.get("DeeAppSecret"),
                     'DeeTicket': appticket["appticket"]
                 },
             })

@@ -14,7 +14,7 @@ export class ApprovalService {
     end=Number(end);
 
     const user=await this.userModel.find({verification_status:Verification.Submitted},
-          {"name_en":1,"surname_en":1,"username":1}).skip(start).limit(end-start).exec();
+          {"name_en":1,"surname_en":1,"username":1,"name_th":1,"surname_th":1}).skip(start).limit(end-start).exec();
     return user;
 
   }
@@ -37,11 +37,11 @@ export class ApprovalService {
 
     if("A"<=query.charAt(0)&&query.charAt(0)<="z")
       return await this.userModel.find({ $or:[ {"name_en":{$regex:query},verification_status:Verification.Submitted} , 
-            {"surname_en":{$regex:query},verification_status:Verification.Submitted} ] },{"name_en":1,"surname_en":1,"username":1}).skip(start).limit(end-start).exec();
+            {"surname_en":{$regex:query},verification_status:Verification.Submitted} ] },{"name_en":1,"surname_en":1,"username":1,"name_th":1,"surname_th":1}).skip(start).limit(end-start).exec();
     
 
     return await this.userModel.find({ $or:[ {"name_th":{$regex:query},verification_status:Verification.Submitted} , 
-          {"surname_th":{$regex:query},verification_status:Verification.Submitted} ] },{"name_en":1,"surname_en":1,"username":1}).skip(start).limit(end-start).exec();
+          {"surname_th":{$regex:query},verification_status:Verification.Submitted} ] },{"name_en":1,"surname_en":1,"username":1,"name_th":1,"surname_th":1}).skip(start).limit(end-start).exec();
     
   }
 

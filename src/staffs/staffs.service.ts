@@ -9,24 +9,6 @@ export class StaffsService {
   constructor(
     @InjectModel('Staff') private readonly staffModel: Model<Staff>) { }
 
-  async findAll(): Promise<Staff[]> {
-    return await this.staffModel.find();
-  }
-
-  async findOne(id: string, isStaff: boolean): Promise<Staff> {
-    if (!isStaff) {
-      throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
-    }
-    if (!isValidObjectId(id)) {
-      throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
-    }
-    const staff = await this.staffModel.findOne({ _id: id });
-    if (!staff) {
-      throw new BadRequestException('This Id does not exist');
-    }
-    return staff
-  }
-
   async findByUsername(username: string): Promise<Staff> {
     const staff = await this.staffModel.findOne({ username: username });
     return staff
@@ -36,62 +18,35 @@ export class StaffsService {
     return await bcrypt.hash(password, Number(process.env.HASH_SALT));
   }
 
-  async create(staff: Staff, isStaff: boolean): Promise<Staff> {
-    if (!isStaff) {
-      throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
+  async addFirstAdmin(){
+    const staff = {
+      name: "first admin",
+      surname: "pass is admin",
+      username: "admin",
+      password: await this.hashPassword("admin"),
+      is_admin: true
     }
-    //if username already exist
     const isUsernameExist = await this.findByUsername(staff.username);
     if (isUsernameExist) {
-      throw new HttpException('Username already exist', HttpStatus.BAD_REQUEST);
+      throw new HttpException('First admin is already added', HttpStatus.BAD_REQUEST);
     }
-    //hash pasword
-    staff.password = await this.hashPassword(staff.password);
     const newStaff = new this.staffModel(staff);
-    //create staff
-    return await newStaff.save();
+    return await newStaff.save()
   }
-
 
   async login(staff: Staff): Promise<Staff> {
     //if username is not exist
     const isUsernameExist = await this.findByUsername(staff.username);
+    console.log(isUsernameExist)
     if (!isUsernameExist) {
       throw new BadRequestException('Username or Password is wrong');
     }
+    console.log(isUsernameExist.password)
     const isPasswordMatching = await bcrypt.compare(staff.password, isUsernameExist.password);
     if (!isPasswordMatching) {
       throw new BadRequestException('Username or Password is wrong');
     }
     return isUsernameExist;
-  }
-
-  async delete(id: string, isStaff: boolean) {
-    if (!isStaff) {
-      throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
-    }
-    if (!isValidObjectId(id)) {
-      throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
-    }
-    const deleteResponse = await this.staffModel.findByIdAndRemove(id);
-    if (!deleteResponse) {
-      throw new HttpException("Staff not found", HttpStatus.NOT_FOUND)
-    }
-    return deleteResponse
-  }
-
-  async update(id: string, staff: Staff, isStaff: boolean): Promise<Staff> {
-    if (!isStaff) {
-      throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
-    }
-    if (!isValidObjectId(id)) {
-      throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
-    }
-    const updatedResponse = await this.staffModel.findByIdAndUpdate(id, staff, { new: true });
-    if (!updatedResponse) {
-      throw new HttpException('Staff not found', HttpStatus.NOT_FOUND);
-    }
-    return updatedResponse
   }
 
 }

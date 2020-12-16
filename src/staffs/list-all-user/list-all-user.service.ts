@@ -44,7 +44,6 @@ export class listAllUserService {
             throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
         }        
         var query = this.userModel.find();
-        var size : number = (await query).length;
         if(name !== undefined){
             if (await this.isEngLang(name)) {
                 query = query.find({ name_en: { $regex: ".*" + name + ".*", $options: 'i' } });
@@ -71,6 +70,7 @@ export class listAllUserService {
                 output = output.slice(begin,end);
             }
         }
+        var size : number = output.length;
         return [size,output];
     }
 
@@ -155,7 +155,7 @@ export class listAllUserService {
         if (!isValidObjectId(id)) {
             throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
         }
-        const updatedResponse = await this.userModel.findByIdAndUpdate(id,{is_penalize:false}, {useFindAndModify: false});
+        const updatedResponse = await this.userModel.findByIdAndUpdate(id,{is_penalize:false}, {useFindAndModify: false,new: true});
         if (!updatedResponse) {
           throw new HttpException('Staff not found', HttpStatus.NOT_FOUND);
         }
@@ -174,17 +174,17 @@ export class listAllUserService {
         const type = (await this.userModel.findById(id)).account_type;
 
         if(type === Account.CuStudent){
-            updatedResponse = this.cuStudentModel.findByIdAndUpdate(id,update, {useFindAndModify: false});
+            updatedResponse = this.cuStudentModel.findByIdAndUpdate(id,update, {useFindAndModify: false,new: true});
         }
         else if(type === Account.SatitAndCuPersonel){
-            updatedResponse = this.satitStudentModel.findByIdAndUpdate(id,update, {useFindAndModify: false});
+            updatedResponse = this.satitStudentModel.findByIdAndUpdate(id,update, {useFindAndModify: false,new: true});
         }
         else if(type === Account.Other){
-            updatedResponse = this.otherUserModel.findByIdAndUpdate(id,update, {useFindAndModify: false});
+            updatedResponse = this.otherUserModel.findByIdAndUpdate(id,update, {useFindAndModify: false,new: true});
         }
 
         if (!updatedResponse) {
-          throw new HttpException('Staff not found', HttpStatus.NOT_FOUND);
+          throw new HttpException('User not found', HttpStatus.NOT_FOUND);
         }
 
         return updatedResponse

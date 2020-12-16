@@ -9,25 +9,12 @@ import { AuthService } from 'src/auth/auth.service';
 export class StaffsController {
     constructor(private readonly staffsService: StaffsService, private authService: AuthService) { }
 
-    
-    @Get()
-    findAll(): Promise<Staff[]> {
-        return this.staffsService.findAll();
+    //ลบก่อนส่ง
+    @Post('addFirstAdmin')
+    async addFirstAdmin() {
+        const staff = this.staffsService.addFirstAdmin();
+        return staff
     }
-
-    @Get('testing/adminToken')
-    async addTestAdmin() {
-        const token = this.authService.generateAdminJWT("test");
-        return token
-    }
-
-    @UseGuards(JwtAuthGuard)
-    @Get('/find/:id')
-    async findById(@Param('id') id, @Req() req): Promise<Staff> {
-        return await this.staffsService.findOne(id, req.user.isStaff);
-    }
-    //ยังมีerrorเรื่องobject_idอยู่นิดหน่อยแต่เดี๋ยวตอนทำsprint2ว่ากัน
-
 
     @Get('/login')
     async login(@Body() loginStaffDto: CreateStaffDto, @Res() res): Promise<string> {
@@ -38,35 +25,5 @@ export class StaffsController {
             jwt: this.authService.generateAdminJWT(staff._id).token,
         });
     }
-
-    @UseGuards(JwtAuthGuard)
-    @Post()
-    async create(@Body() createStaffDto: CreateStaffDto, @Res() res, @Req() req) {
-        await this.staffsService.create(createStaffDto, req.user.isStaff);
-
-        return res.status(201).json({
-            statusCode: 201,
-            message: 'User added Successfully',
-        });
-    }
-
-    @UseGuards(JwtAuthGuard)
-    @Delete(':id')
-    async delete(@Param('id') id, @Res() res, @Req() req) {
-        await this.staffsService.delete(id, req.user.isStaff);
-        return res.status(201).json({
-            statusCode: 201,
-            message: 'User deleted Successfully',
-        });
-    }
-    //ยังมีerrorเรื่องobject_idอยู่นิดหน่อยแต่เดี๋ยวตอนทำsprint2ว่ากัน
-
-    @UseGuards(JwtAuthGuard)
-    @Put('/promote/:id')
-    async promote(@Body() updateStaffDto: CreateStaffDto, @Param('id') id, @Req() req): Promise<Staff> {
-        return await this.staffsService.update(id, updateStaffDto, req.user.isStaff);
-    }
-    //ยังมีerrorเรื่องobject_idอยู่นิดหน่อยแต่เดี๋ยวตอนทำsprint2ว่ากัน
-
 
 }
