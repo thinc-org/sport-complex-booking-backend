@@ -1,5 +1,4 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
-import { performance } from 'perf_hooks';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { AddDisableTimeDTO, CreateDisableCourtDTO, EditDisableCourtDTO } from './disable-courts.dto';
 import { DisableCourtsService } from './disable-courts.service';
@@ -17,8 +16,8 @@ export class DisableCourtsController {
     }
 
     @Get('')
-    async getAllDisableCourt(@Req() req): Promise<DisableCourt[]> {
-        return await this.disableCourtsService.getAllDisableCourt();
+    async getDisableCourt(@Req() req, @Query('starting_date') starting_date: string, @Query('expired_date') expired_date: string, @Query('sport_id') sport_id: string, @Query('court_num') court_num: string, @Query('lean') lean: boolean): Promise<DisableCourt[]> {
+        return await this.disableCourtsService.queryDisableCourt(starting_date, expired_date, sport_id, court_num, lean);
     }
 
     @Get('closed_time')
@@ -27,7 +26,7 @@ export class DisableCourtsController {
     }
 
     @Get(':id')
-    async getDisableCourt(@Req() req, @Param('id') id: string): Promise<DisableCourt> {
+    async getDisableCourtById(@Req() req, @Param('id') id: string): Promise<DisableCourt> {
         return await this.disableCourtsService.getDisableCourt(id);
     }
 

@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { merge } from 'rxjs';
 import { CreateDisableCourtDTO, CreateDisableTimeDTO, EditDisableCourtDTO } from './disable-courts.dto';
 import { DisableCourt, DisableTime } from './interfaces/disable-courts.interface';
 
@@ -37,8 +36,20 @@ export class DisableCourtsService {
         return await disableCourt.save();
     }
 
-    async getAllDisableCourt(): Promise<DisableCourt[]> {
-        return await this.disableCourtModel.find({});
+    async queryDisableCourt(q_starting_date: string, q_expired_date: string, q_sport_id: string, q_court_num: string, lean: boolean): Promise<Array<DisableCourt>> {
+        let query = this.disableCourtModel.find();
+
+        if(q_starting_date != null) query = query.find({starting_date: {$gte: new Date(q_starting_date)}});
+        if(q_expired_date != null) query = query.find({expired_date:{$lte: new Date(q_expired_date)}});
+        if(q_sport_id != null) query = query.find({sport_id: q_sport_id});
+        if(q_court_num != null) query = query.find({court_num: Number.parseInt(q_court_num)});
+
+        if(lean === true) query.select('-disable_time');
+        
+        // populate sport_id field
+        //await query.populate('sport_id');
+
+        return await query.exec();
     }
 
     async getDisableCourt(id: string): Promise<DisableCourt> {
@@ -77,7 +88,7 @@ export class DisableCourtsService {
     async addDisableTime(id: string, disable_times: Array<DisableTime>): Promise<void>{
         if(!this.verifyDisableTimes(disable_times)) 
             throw new HttpException('there is an invalid DisableTime',HttpStatus.BAD_REQUEST);
-        let disableCourt = await this.disableCourtModel.findById(id);
+        let disableCourt = await this.getDisableCourt(id);
         disable_times.forEach(disable_time => {
             disableCourt.disable_time.push(disable_time);
         });
