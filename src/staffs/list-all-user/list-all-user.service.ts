@@ -44,6 +44,8 @@ export class listAllUserService {
             throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
         }        
         var query = this.userModel.find();
+
+        var size:number = (await query).length;
         if(name !== undefined){
             if (await this.isEngLang(name)) {
                 query = query.find({ name_en: { $regex: ".*" + name + ".*", $options: 'i' } });
@@ -70,7 +72,7 @@ export class listAllUserService {
                 output = output.slice(begin,end);
             }
         }
-        var size : number = output.length;
+        
         return [size,output];
     }
 
