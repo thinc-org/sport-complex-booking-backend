@@ -30,7 +30,6 @@ export class AccountInfosController {
         if(req.user.isStaff) throw new HttpException("This is for users only",HttpStatus.FORBIDDEN)
         return await this.accountInfoService.postAccountInfo(req.user.userId,body)
     }
-<<<<<<< HEAD
 
     @UsePipes(new ValidationPipe())
     @UseGuards(JwtAuthGuard)
@@ -38,7 +37,5 @@ export class AccountInfosController {
     async changePassword(@Body() body: ChangePasswordDTO, @Req() req){
         await this.accountInfoService.changePassword(req.user.userId, body.oldPassword, body.newPassword);
     }
-=======
->>>>>>> Remove testing routes from accountInfos
 
 }

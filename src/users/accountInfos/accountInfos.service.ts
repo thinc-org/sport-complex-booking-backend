@@ -115,7 +115,6 @@ export class AccountInfosService {
 
         }
     }
-<<<<<<< HEAD
 
     async changePassword(userId: string, oldPassword: string, newPassword: string){
         const user = await this.userModel.findById(userId);
@@ -143,7 +142,5 @@ export class AccountInfosService {
         castedUser.password = await bcrypt.hash(newPassword, Number(process.env.HASH_SALT));
         await castedUser.save();
     }
-=======
->>>>>>> Remove testing routes from accountInfos
 
 }
