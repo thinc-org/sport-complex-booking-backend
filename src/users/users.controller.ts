@@ -1,6 +1,6 @@
 import { CuStudentUser } from 'src/users/interfaces/user.interface';
 import { Body, Controller, Get, Param, Post, Put, Query, Res, 
-         HttpService, HttpException } from '@nestjs/common';
+         HttpService, HttpException, UseGuards, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt.guard'
 import { AuthService } from 'src/auth/auth.service';
@@ -50,22 +50,21 @@ export class UsersController {
                 }else{  //there is doc in db (login)
                     acc = db_acc
                 }
-                const payload = this.authService.generateUserJWT(acc["_id"], 
-                acc["is_first_login"], acc["is_thai_language"]);
-
+                const payload = {
+                token: this.authService.generateJWT(acc["_id"]).token, 
+                is_first_login: acc["is_first_login"], 
+                is_thai_language: acc["is_thai_language"]};
                 return payload;
             }));
-            
         return res; //return payload
     }
 
+    @UseGuards(JwtAuthGuard)
     @Put('validation')
     async changeDBInfo  //recieve username (for query), is_thai_language, personal_email, phone
-    (@Body() input:{username: string, is_thai_language: boolean, personal_email: string, phone:string}): Promise<CuStudentUser>{
-
-        const acc = this.userService.changeData(input);
+    (@Body() input:{is_thai_language: boolean, personal_email: string, phone:string}, @Req() req): Promise<CuStudentUser>{
+        const acc = this.userService.changeData(input,req.user.userId);
         console.log(await acc)
         return acc;
     }
-
 }

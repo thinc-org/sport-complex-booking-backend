@@ -42,11 +42,6 @@ export class UsersService {
         return user;
     }
 
-    async findUserBySSOUsername(username:string): Promise<CuStudentUser>{
-        const user = await this.cuStudentModel.findOne({username: username});
-        return user;
-    }
-
     async login(username:string, password:string): Promise<string> {
         //if username is not exist
         let isPasswordMatching = false;
@@ -73,10 +68,6 @@ export class UsersService {
 
       //not using any will return as observable, don't know how to 
     async create_fromSso(ssoReturn: SsoContent): Promise<CuStudentUser> {
-        const isUsernameExist = await this.findByUsername(ssoReturn["username"]);
-        if (isUsernameExist) {
-            
-        }
         const newAccount = new this.cuStudentModel(
             {
                 "is_thai_language": true,
@@ -96,12 +87,12 @@ export class UsersService {
     }
     
     //for change email, languange, phone number (send all 3 variable for each change)
-    async changeData(input:{username: string, is_thai_language: boolean, personal_email: string, phone:string}) {    
-        const acc = await this.findUserBySSOUsername(input.username);
+    async changeData(input:{is_thai_language: boolean, personal_email: string, phone:string},id:string) {    
+        const acc = await this.findUserById(id);
         acc.is_thai_language = input.is_thai_language;
         acc.personal_email = input.personal_email;
         acc.phone = input.phone;
-        
+        acc.is_first_login = false;
         acc.save()
         return acc;
     }

@@ -90,10 +90,19 @@ export class listAllUserService {
         return user
     }
 
+    private checkUsername(username: string){
+        return !(/^\d+$/.test(username));
+    }
+
     async createSatitUser(user: SatitCuPersonelUser, isStaff: boolean) {
         if (!isStaff) {
             throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
         }
+
+        if(!this.checkUsername(user.username)){
+            throw new HttpException('Please include at least one letter in username', HttpStatus.BAD_REQUEST);
+        }
+
         //if username already exist
         const isUsernameExist = await this.findUserByUsername(user.username);
         if (isUsernameExist) {
@@ -118,6 +127,11 @@ export class listAllUserService {
         if (!isStaff) {
             throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
         }
+
+        if(!this.checkUsername(user.username)){
+            throw new HttpException('Please include at least one letter in username', HttpStatus.BAD_REQUEST);
+        }
+
         //if username already exist
         const isUsernameExist = await this.findUserByUsername(user.username);
         if (isUsernameExist) {
