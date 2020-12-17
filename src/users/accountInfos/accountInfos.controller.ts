@@ -24,14 +24,11 @@ export class AccountInfosController {
     async postAccountInfo(@Req() req, @Body() body){
         return await this.accountInfoService.editAccountInfo(req.user.userId,body,true)
     }
-<<<<<<< HEAD
 
     @UsePipes(new ValidationPipe())
     @Post('/change_password')
     async changePassword(@Body() body: ChangePasswordDTO, @Req() req){
         await this.accountInfoService.changePassword(req.user.userId, body.oldPassword, body.newPassword);
     }
-=======
->>>>>>> Remove testing routes from accountInfos
 
 }
