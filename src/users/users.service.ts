@@ -12,14 +12,12 @@ export class UsersService {
         @InjectModel('User') private userModel: Model<User>, 
         @InjectModel('CuStudent') private cuStudentModel: Model<CuStudentUser>, 
         @InjectModel('SatitCuPersonel') private satitStudentModel: Model<SatitCuPersonelUser>,
-        @InjectModel('Other') private otherUserModel: Model<OtherUser>,
-
-        @InjectModel('SsoContent') private ssoContent: Model<SsoContent>,
+        @InjectModel('Other') private otherUserModel: Model<OtherUser>
     ) { }
 
     async findByUsername(username: string): Promise<User> {
         const user = await this.userModel.findOne({ username: username });
-        return user
+        return user;
     }
 
     async findUserById(id: string): Promise<CuStudentUser> {
@@ -36,14 +34,18 @@ export class UsersService {
 
     async findSatitByid(id: string): Promise<SatitCuPersonelUser> {
         const user = await this.satitStudentModel.findOne({ _id: id });
-        return user
+        return user;
     }
 
     async findOtherByid(id: string): Promise<OtherUser> {
         const user = await this.otherUserModel.findOne({ _id: id });
-        return user
+        return user;
     }
 
+    async findUserBySSOUsername(username:string): Promise<CuStudentUser>{
+        const user = await this.cuStudentModel.findOne({username: username});
+        return user;
+    }
 
     async login(username:string, password:string): Promise<string> {
         //if username is not exist
@@ -70,10 +72,10 @@ export class UsersService {
       }
 
       //not using any will return as observable, don't know how to 
-    async create_fromSso(ssoReturn: SsoContent): Promise<Account> {
+    async create_fromSso(ssoReturn: SsoContent): Promise<CuStudentUser> {
         const isUsernameExist = await this.findByUsername(ssoReturn["username"]);
         if (isUsernameExist) {
-            throw new HttpException("This username is already exist.", HttpStatus.BAD_REQUEST);
+            
         }
         const newAccount = new this.cuStudentModel(
             {
@@ -83,13 +85,24 @@ export class UsersService {
                 "name_en": ssoReturn["firstname"],
                 "surname_en": ssoReturn["lastname"],
                 "username": ssoReturn["username"],
-                "personal_email": ssoReturn["email"],
+                "personal_email": '',
                 "is_penalize": false,
-                "is_first_login": true
+                "is_first_login": true,
+                "phone": ''
             }
         );
         const acc = await newAccount.save();
-        return acc["_id"];
+        return acc;
     }
     
+    //for change email, languange, phone number (send all 3 variable for each change)
+    async changeData(input:{username: string, is_thai_language: boolean, personal_email: string, phone:string}) {    
+        const acc = await this.findUserBySSOUsername(input.username);
+        acc.is_thai_language = input.is_thai_language;
+        acc.personal_email = input.personal_email;
+        acc.phone = input.phone;
+        
+        acc.save()
+        return acc;
+    }
 }

@@ -1,4 +1,6 @@
-import { Body, Controller, Get, Param, Post, Query, Res, HttpService, HttpException } from '@nestjs/common';
+import { CuStudentUser } from 'src/users/interfaces/user.interface';
+import { Body, Controller, Get, Param, Post, Put, Query, Res, 
+         HttpService, HttpException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from 'src/auth/jwt.guard'
 import { AuthService } from 'src/auth/auth.service';
@@ -22,7 +24,7 @@ export class UsersController {
         });
     }
 
-    @Post('validation')
+    @Post('validation') //takes {"appticket": <ticket>} from front-end as body
     async authenticateUser(@Body() appticket: { "appticket": string }): Promise<any> {
         const params = JSON.stringify(appticket);
         const res = this.httpService.post(this.configService.get("ssoEndpoint_VALIDATE"),
@@ -34,21 +36,36 @@ export class UsersController {
                     'DeeTicket': appticket["appticket"]
                 },
             })
-            .pipe(
+            .pipe( 
                 catchError(e => {
                     throw new HttpException(e.response.data, e.response.status);
                 }),
             )
             .pipe(map(async (res) => {
-                const id = this.userService.create_fromSso(res.data);
-                const account = this.userService.findOtherByid(await id); //id needs to be a string
-                const payload = this.authService.generateUserJWT(account["_id"], 
-                account["is_first_login"], account["is_thai_language"]);
+                let acc;
+                const db_acc = await this.userService.findByUsername(res.data['username'])
+                
+                if(db_acc == null){  //no doc in db (register)
+                    acc = await this.userService.create_fromSso(res.data);   //return db's object id
+                }else{  //there is doc in db (login)
+                    acc = db_acc
+                }
+                const payload = this.authService.generateUserJWT(acc["_id"], 
+                acc["is_first_login"], acc["is_thai_language"]);
 
                 return payload;
             }));
             
-            return res;
+        return res; //return payload
+    }
+
+    @Put('validation')
+    async changeDBInfo  //recieve username (for query), is_thai_language, personal_email, phone
+    (@Body() input:{username: string, is_thai_language: boolean, personal_email: string, phone:string}): Promise<CuStudentUser>{
+
+        const acc = this.userService.changeData(input);
+        console.log(await acc)
+        return acc;
     }
 
 }
