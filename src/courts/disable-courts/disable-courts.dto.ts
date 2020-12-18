@@ -5,6 +5,8 @@ import { DisableCourt } from "./interfaces/disable-courts.interface"
 
 export class CreateDisableCourtDTO {
     @IsString()
+    description: string
+    @IsString()
     sport_id: Types.ObjectId
     @IsInt()
     @Min(0)
@@ -35,6 +37,9 @@ export class CreateDisableTimeDTO {
 }
 
 export class EditDisableCourtDTO {
+    @IsOptional()
+    @IsString()
+    description: string
     @IsOptional()
     @IsString()
     sport_id: Types.ObjectId
