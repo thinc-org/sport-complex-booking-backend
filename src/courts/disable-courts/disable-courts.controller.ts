@@ -24,8 +24,8 @@ export class DisableCourtsController {
 
     @UsePipes(new ValidationPipe({transform: true}))
     @Get('closed_time')
-    async getClosedTime(@Req() req, @Query('sport_name') sport_name: string, @Query('court_num') court_num: number, @Query('date') dateString: string): Promise<Array<[number, number]>> {
-        return await this.disableCourtsService.findClosedTimes(sport_name, court_num, new Date(dateString));
+    async getClosedTime(@Req() req, @Query('sport_id') sport_id: string, @Query('court_num') court_num: number, @Query('date') dateString: string): Promise<Array<[number, number]>> {
+        return await this.disableCourtsService.findClosedTimes(sport_id, court_num, new Date(dateString));
     }
 
     @UsePipes(new ValidationPipe({transform: true}))

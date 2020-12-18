@@ -7,6 +7,7 @@ export interface DisableTime {
 }
 
 export interface DisableCourt extends Document {
+    description: string
     sport_id: Types.ObjectId
     court_num: number
     starting_date: Date
