@@ -1,6 +1,7 @@
 import { Type } from "class-transformer"
 import { ArrayMinSize, IsDate, IsInt, IsNumber, IsOptional, IsString, Max, Min, ValidateNested } from "class-validator"
 import { Types } from "mongoose"
+import { DisableCourt } from "./interfaces/disable-courts.interface"
 
 export class CreateDisableCourtDTO {
     @IsString()
@@ -61,4 +62,10 @@ export class AddDisableTimeDTO {
     @ValidateNested({ each: true })
     @Type(() => CreateDisableTimeDTO)
     disable_times: Array<CreateDisableTimeDTO>
+}
+
+export class QueryResult {
+    total_found: number
+    total_returned: number
+    sliced_results: Array<DisableCourt>
 }

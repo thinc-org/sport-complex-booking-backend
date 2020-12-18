@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Query, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
-import { AddDisableTimeDTO, CreateDisableCourtDTO, EditDisableCourtDTO } from './disable-courts.dto';
+import { AddDisableTimeDTO, CreateDisableCourtDTO, EditDisableCourtDTO, QueryResult } from './disable-courts.dto';
 import { DisableCourtsService } from './disable-courts.service';
 import { DisableCourt } from './interfaces/disable-courts.interface';
 
@@ -18,8 +18,8 @@ export class DisableCourtsController {
 
     @UsePipes(new ValidationPipe({transform: true}))
     @Get('')
-    async getDisableCourt(@Req() req, @Query('starting_date') starting_date: string, @Query('expired_date') expired_date: string, @Query('sport_id') sport_id: string, @Query('court_num') court_num: string, @Query('lean') lean: boolean): Promise<DisableCourt[]> {
-        return await this.disableCourtsService.queryDisableCourt(starting_date, expired_date, sport_id, court_num, lean);
+    async getDisableCourt(@Req() req, @Query('starting_date') starting_date: string, @Query('expired_date') expired_date: string, @Query('sport_id') sport_id: string, @Query('court_num') court_num: string, @Query('start') start: number, @Query('end') end: number, @Query('lean') lean: boolean): Promise<QueryResult> {
+        return await this.disableCourtsService.queryDisableCourt(starting_date, expired_date, sport_id, court_num, start, end, lean);
     }
 
     @UsePipes(new ValidationPipe({transform: true}))
