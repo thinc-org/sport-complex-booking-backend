@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateDisableCourtDTO, CreateDisableTimeDTO, EditDisableCourtDTO } from './disable-courts.dto';
+import { CreateDisableCourtDTO, CreateDisableTimeDTO, EditDisableCourtDTO, QueryResult } from './disable-courts.dto';
 import { DisableCourt, DisableTime } from './interfaces/disable-courts.interface';
 
 @Injectable()
@@ -36,7 +36,7 @@ export class DisableCourtsService {
         return await disableCourt.save();
     }
 
-    async queryDisableCourt(q_starting_date: string, q_expired_date: string, q_sport_id: string, q_court_num: string, lean: boolean): Promise<Array<DisableCourt>> {
+    async queryDisableCourt(q_starting_date: string, q_expired_date: string, q_sport_id: string, q_court_num: string, start:number, end:number,  lean: boolean): Promise<QueryResult> {
         let query = this.disableCourtModel.find();
 
         if(q_starting_date != null) query = query.find({starting_date: {$gte: new Date(q_starting_date)}});
@@ -49,7 +49,18 @@ export class DisableCourtsService {
         // populate sport_id field
         //await query.populate('sport_id');
 
-        return await query.exec();
+        const results = await query.exec();
+        
+        if(isNaN(start)) start = 0;
+        if(start >= results.length) start = results.length;
+        if(isNaN(end) || end >= results.length) end = results.length - 1;
+        const sliced_results = results.slice(start,end+1);
+
+        return {
+            total_found: results.length,
+            total_returned: sliced_results.length, // included to avoid confusion with total_found
+            sliced_results: sliced_results
+        };
     }
 
     async getDisableCourt(id: string): Promise<DisableCourt> {
