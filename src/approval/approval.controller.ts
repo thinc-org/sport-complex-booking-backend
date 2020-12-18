@@ -28,7 +28,7 @@ export class ApprovalController {
 
   @UseGuards(JwtAuthGuard)  
   @Patch("/reject")
-  reject(@Body('id') id:string,@Body('reject_info') reject_info:[string],@Req() req){
+  reject(@Body('id') id:string,@Body('reject_info') reject_info:string[],@Req() req){
     if (!req.user.isStaff) throw new HttpException('Staff only', HttpStatus.UNAUTHORIZED)
     return this.approvalService.reject(id,reject_info);
   }

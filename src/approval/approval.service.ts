@@ -56,7 +56,7 @@ export class ApprovalService {
     return user;
   }
 
-  async reject(id:string,info:[string]) :Promise<User>{
+  async reject(id:string,info:string[]) :Promise<User>{
   
     const user =await this.userModel.findByIdAndUpdate(id, {$set:{verification_status:Verification.Rejected,rejected_info:info}},{new:true,strict: false}).exec();
 
