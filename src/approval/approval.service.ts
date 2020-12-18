@@ -1,61 +1,64 @@
 import { Injectable ,HttpException,HttpStatus} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model} from 'mongoose';
-import {  User,Verification} from 'src/users/interfaces/user.interface';
+import {  Verification,User} from 'src/users/interfaces/user.interface';
 
 @Injectable()
 export class ApprovalService {
 
   constructor(@InjectModel("User") private readonly userModel:Model<User>){}
 
-  async getByRange(start:number ,end:number) : Promise<User[]> {
-    
-    start=Number(start);
-    end=Number(end);
-
-    const user=await this.userModel.find({verification_status:Verification.Submitted},
-          {"name_en":1,"surname_en":1,"username":1,"name_th":1,"surname_th":1}).skip(start).limit(end-start).exec();
+  async getPersonalData(id:string) : Promise<User> {
+  
+    const user=await this.userModel.findById(id).exec();
+    if(!user)
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     return user;
-
   }
 
-  async getPersonalData(username:string) : Promise<User> {
+  async getSearchResult(name:string,start:number,end:number) : Promise<[Number,User[]]> {
+
+    var user;
+
+    if(name!==undefined){
+      if("A"<=name.charAt(0)&&name.charAt(0)<="z")
+        user=await this.userModel.find({ $or:[ {"name_en":{$regex:name},verification_status:Verification.Submitted} , 
+              {"surname_en":{$regex:name},verification_status:Verification.Submitted} ] },{"_id":1,"name_en":1,"surname_en":1,"username":1,"name_th":1,"surname_th":1}).exec();
+      else
+        user=await this.userModel.find({ $or:[ {"name_th":{$regex:name},verification_status:Verification.Submitted} , 
+            {"surname_th":{$regex:name},verification_status:Verification.Submitted} ] },{"_id":1,"name_en":1,"surname_en":1,"username":1,"name_th":1,"surname_th":1}).exec();
+    }
+    else
+      user=await this.userModel.find({verification_status:Verification.Submitted});
+
+    const length=user.length;
+    
+    if(start !== undefined){
+
+      start=Number(start);
+      if(end === undefined)
+            user = user.slice(start);
+      else {
+          end=Number(end);
+          user = user.slice(start,end);
+      }
+    }
+    
+    return [length,user];
   
-    const user=await this.userModel.findOne({"username":username}).exec();
+  }
+
+  async approve(id:string,newExpiredDate:Date) :Promise<User>{
+    const user =await this.userModel.findByIdAndUpdate(id, {$set:{"verification_status":Verification.Verified,"account_expiration_date":newExpiredDate}},{new:true,strict: false}).exec();
 
     if(!user)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     return user;
   }
 
-  async getSearchResult(query:string,start:number,end:number) : Promise<User[]> {
-
-    start=Number(start);
-    end=Number(end);
-    query=String(query);
-        
-
-    if("A"<=query.charAt(0)&&query.charAt(0)<="z")
-      return await this.userModel.find({ $or:[ {"name_en":{$regex:query},verification_status:Verification.Submitted} , 
-            {"surname_en":{$regex:query},verification_status:Verification.Submitted} ] },{"name_en":1,"surname_en":1,"username":1,"name_th":1,"surname_th":1}).skip(start).limit(end-start).exec();
-    
-
-    return await this.userModel.find({ $or:[ {"name_th":{$regex:query},verification_status:Verification.Submitted} , 
-          {"surname_th":{$regex:query},verification_status:Verification.Submitted} ] },{"name_en":1,"surname_en":1,"username":1,"name_th":1,"surname_th":1}).skip(start).limit(end-start).exec();
-    
-  }
-
-  async approve(username:string,newExpiredDate:Date) :Promise<User>{
-
-    const user =await this.userModel.findOneAndUpdate({"username":username}, {$set:{verification_status:Verification.Verified,account_expiration_date:newExpiredDate}} ).exec();
-    if(!user)
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    return user;
-  }
-
-  async reject(username:string,info:[string]) :Promise<User>{
+  async reject(id:string,info:[string]) :Promise<User>{
   
-    const user =await this.userModel.findOneAndUpdate({"username":username}, {$set:{verification_status:Verification.Rejected,rejected_info:info}} ).exec();
+    const user =await this.userModel.findByIdAndUpdate(id, {$set:{verification_status:Verification.Rejected,rejected_info:info}},{new:true,strict: false}).exec();
 
     if(!user)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
