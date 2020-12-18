@@ -1,13 +1,15 @@
-import { Module } from '@nestjs/common';
-import { Mongoose } from 'mongoose';
+import { Module,forwardRef } from '@nestjs/common';
 import { MongooseModule } from "@nestjs/mongoose";
+
+import { UsersModule } from 'src/users/users.module';
 import { MywaitingroomController } from "./mywaitingroom.controller";
 import { MywaitingroomService } from "./mywaitingroom.service";
 import { MyWaitingRoomSchema } from "./schemas/mywaitingroom.schema";
 
 @Module({
     imports : [
-        MongooseModule.forFeature([{ name : 'MyWaitingRoom', schema : MyWaitingRoomSchema , collection : "mywaitingroom" }])
+        MongooseModule.forFeature([{ name : 'MyWaitingRoom', schema : MyWaitingRoomSchema , collection : "mywaitingroom" }]),
+        forwardRef(()=>UsersModule)
     ],
     controllers : [MywaitingroomController],
     providers : [MywaitingroomService],

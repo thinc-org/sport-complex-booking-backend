@@ -9,12 +9,12 @@ export class MywaitingroomController {
 
     //@UseGuards()
     @Post()
-    async createMyWaitingRoom(@Body() createMyWaitingRoomDto : CreateMyWaitingRoomDto) : Promise<MyWaitingRoom> {
-        return this.mywaitingroomService.createMyWaitingRoom(createMyWaitingRoomDto);
+    async createMyWaitingRoom(@Body() myWaitingRoom : MyWaitingRoom) : Promise<MyWaitingRoom> {
+        return this.mywaitingroomService.createMyWaitingRoom(myWaitingRoom);
     }
 
-    @Post('/:id')
-    async addMyWaitingRoom(@Param() param){
-        return this.mywaitingroomService.addMyWaitingRoom();
+    @Post('/add/:user_id/:sport_id')
+    async addMyWaitingRoom(@Param() param,@Body() createMyWaitingRoomDto : CreateMyWaitingRoomDto){
+        return this.mywaitingroomService.addMyWaitingRoom(param.user_id,param.sport_id,createMyWaitingRoomDto);
     }
 }
