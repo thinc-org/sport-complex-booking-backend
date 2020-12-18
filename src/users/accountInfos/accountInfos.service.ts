@@ -16,7 +16,7 @@ export class AccountInfosService {
     ) { }
 
     async getAccountInfo(userId: string) {
-        const user = await this.userModel.findById(userId)
+        const user = await this.userModel.findById(userId).select("-password").exec();
         if (user == null) throw new HttpException('cannot find user: ' + userId, HttpStatus.NOT_FOUND)
         return user
     }
@@ -65,7 +65,7 @@ export class AccountInfosService {
         }
         let updt = {verification_status: Verification.Submitted}
         Object.assign(updt, info)
-        const updatedUser =  await this.otherUserModel.findByIdAndUpdate(userId,updt,{new: true, lean: true, omitUndefined: true})
+        const updatedUser =  await this.otherUserModel.findByIdAndUpdate(userId,updt,{new: true, lean: true, omitUndefined: true}).select("-password").exec();
         if (updatedUser == null) throw new HttpException('cannot find user: ' + userId, HttpStatus.NOT_FOUND)
         return updatedUser
     }
@@ -73,13 +73,13 @@ export class AccountInfosService {
     private async editCuAccountInfo(userId: string, info: editCuAccountInfoDTO) {
         let updt = {is_first_login: false}
         Object.assign(updt, info)
-        const updatedUser =  await this.cuStudentModel.findByIdAndUpdate(userId, updt,{ new: true, lean: true, omitUndefined: true })
+        const updatedUser =  await this.cuStudentModel.findByIdAndUpdate(userId, updt,{ new: true, lean: true, omitUndefined: true }).select("-password").exec();
         if (updatedUser == null) throw new HttpException('cannot find user: ' + userId, HttpStatus.NOT_FOUND)
         return updatedUser
     }
 
     private async editSatitAccountInfo(userId: string, body: editSatitCuPersonelAccountInfoDTO) {
-        const updatedUser = await this.satitStudentModel.findByIdAndUpdate({ _id: userId }, body, { new: true, lean: true, omitUndefined: true })
+        const updatedUser = await this.satitStudentModel.findByIdAndUpdate({ _id: userId }, body, { new: true, lean: true, omitUndefined: true }).select("-password").exec();
         if (updatedUser == null) throw new HttpException('cannot find user: ' + userId, HttpStatus.NOT_FOUND)
         return updatedUser
     }
