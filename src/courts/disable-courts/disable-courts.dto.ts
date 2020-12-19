@@ -1,5 +1,5 @@
 import { Type } from "class-transformer"
-import { ArrayMinSize, IsDate, IsInt, IsNumber, IsOptional, IsString, Max, Min, ValidateNested } from "class-validator"
+import { ArrayMinSize, IsBoolean, IsDate, IsInt, IsNumber, IsOptional, IsString, Max, Min, ValidateNested } from "class-validator"
 import { Types } from "mongoose"
 import { DisableCourt } from "./interfaces/disable-courts.interface"
 
@@ -73,4 +73,34 @@ export class QueryResult {
     total_found: number
     total_returned: number
     sliced_results: Array<DisableCourt>
+}
+
+export class QueryDisableCourtDTO {
+    @IsOptional()
+    @Type(()=>Date)
+    @IsDate()
+    starting_date: Date
+    @IsOptional()
+    @Type(()=>Date)
+    @IsDate()
+    expired_date: Date
+    @IsOptional()
+    @IsString()
+    sport_id: string
+    @IsOptional()
+    @IsInt()
+    @Min(0)
+    court_num: number
+    @IsOptional()
+    @IsInt()
+    start: number
+    @IsOptional()
+    @IsInt()
+    end: number
+    @IsOptional()
+    @IsBoolean()
+    lean: boolean = true
+    @IsOptional()
+    @IsString()
+    description: string
 }
