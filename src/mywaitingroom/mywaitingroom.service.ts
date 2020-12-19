@@ -5,12 +5,14 @@ import { Model, Types } from 'mongoose';
 import { MyWaitingRoom } from "./interfaces/mywaitingroom.interface";
 import { CreateMyWaitingRoomDto } from "./dto/mywaitingroom.dto";
 import { User } from "./../users/interfaces/user.interface";
+import { SuccesfulReservation } from "./../successfulreservation/interfaces/successfulreservation.interface";
 
 @Injectable()
 export class MywaitingroomService {
     constructor(
         @InjectModel('MyWaitingRoom') private myWaitingRoomModel : Model<MyWaitingRoom>,
-        @InjectModel('User') private userModel :  Model<User>
+        @InjectModel('User') private userModel :  Model<User>,
+        @InjectModel('SuccessfulReservation') private successfulReservationModel : Model<SuccesfulReservation>
     ){}
 
     async createMyWaitingRoom( myWaitingRoom : MyWaitingRoom ) : Promise<MyWaitingRoom> {
@@ -53,7 +55,7 @@ export class MywaitingroomService {
         return temp; 
     }
 
-    async checkUserCondition (user_Id : Types.ObjectId){
+    async checkUserCondition ( user_Id : Types.ObjectId ){
         const test_query : User = await this.userModel.findById(user_Id);
 
         if(test_query == null){
@@ -72,7 +74,7 @@ export class MywaitingroomService {
 
     }
 
-    async joinMember( user_Id : Types.ObjectId , acode : String) : Promise<MyWaitingRoom>{
+    async joinMember( user_Id : Types.ObjectId , acode : String ) : Promise<MyWaitingRoom>{
 
         await this.checkUserCondition(user_Id);
 
@@ -87,7 +89,7 @@ export class MywaitingroomService {
         return myWaitingRoom[0].save();
     } 
 
-    async cancelMyWaitingRoom( myWaitingRoomID : MyWaitingRoom) : Promise<MyWaitingRoom>{
+    async cancelMyWaitingRoom( myWaitingRoomID : Types.ObjectId ) : Promise<MyWaitingRoom>{
         var temp : MyWaitingRoom = await this.myWaitingRoomModel.findByIdAndDelete(myWaitingRoomID);
         if(temp === null){
             throw new HttpException("This my waiting room doesn't exist.", HttpStatus.BAD_REQUEST);
@@ -95,5 +97,8 @@ export class MywaitingroomService {
         return temp;
     }
 
-    
+    async acceptingMyWaitingRoom ( myWaitingRoomID : Types.ObjectId ) : Promise<SuccesfulReservation>{
+        
+        return ;
+    }
 }

@@ -5,7 +5,7 @@ const Booking_time = new mongoose.Schema({
     end_time : Number
 });
 
-export const SuccesfulReservationSchema = new mongoose.Schema({
+export const SuccessfulReservationSchema = new mongoose.Schema({
     sport_id : mongoose.Types.ObjectId,
     court_number : Number,
     date : Date,

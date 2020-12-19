@@ -5,6 +5,7 @@ import { UsersModule } from 'src/users/users.module';
 import { MywaitingroomController } from "./mywaitingroom.controller";
 import { MywaitingroomService } from "./mywaitingroom.service";
 import { MyWaitingRoomSchema } from "./schemas/mywaitingroom.schema";
+import {  } from "module";
 
 @Module({
     imports : [
