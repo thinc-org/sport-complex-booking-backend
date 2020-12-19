@@ -112,15 +112,24 @@ export class DisableCourtsService {
         There might be some overlaping and/or duplicate intervals, use mergeTimeArr(timeArr) if this is not desired.
     */
     async findClosedTimes(sport_id: string, court_num: number, date: Date): Promise<Array<[number, number]>> {
-        let time = performance.now();
+        // max rps: ~600 rps
+        // response time: <10 ms for 1 councurrent user, ~160ms for 100 concurrent user, ~1.6s for 1000 concurrent user
+
         date.setUTCHours(0, 0, 0);
-        let results = await this.disableCourtModel.find({ starting_date: { $lte: date }, expired_date: { $gte: date }, sport_id, court_num });
-        let timeArr: Array<[number, number]> = [];
         let day = date.getDay();
+
+        let results = await this.disableCourtModel.find({ 
+            starting_date: { $lte: date }, 
+            expired_date: { $gte: date }, 
+            sport_id, 
+            court_num,
+            disable_time: { $elemMatch: {day} }
+        }).select('disable_time');
+
+        let timeArr: Array<[number, number]> = [];
         results.forEach(disableCourt => {
-            this.extractTimes(disableCourt, day, timeArr);
+            timeArr = timeArr.concat(disableCourt.disable_time.map(disableTime => [disableTime.start_time,disableTime.end_time]));
         });
-        console.log('findClosedTime: (ms) '+ (performance.now() - time) );
         return timeArr;
     }
 
@@ -146,40 +155,22 @@ export class DisableCourtsService {
     */
 
     private async findOverlap(disableCourt: DisableCourt): Promise<Array<string>> {
-        // good enough for small data
-        let time = performance.now();
-        
-        let results = await this.disableCourtModel.find({ starting_date: { $lte: disableCourt.expired_date }, expired_date: { $gte: disableCourt.starting_date } });
 
-        type DisableInfo = {
-            start_time: number
-            end_time: number
-            from: string
+        let overlaps: string[] = [];
+        let queryOrArray = []
+        
+        for(const disableTime of disableCourt.disable_time) {
+            queryOrArray.push({start_time: { $lt: disableTime.end_time }, end_time: { $gt: disableTime.start_time }, day: disableTime.day })
         }
-        let closed = new Map<number, Array<DisableInfo>>();
-        for (let i = 0; i < 7; ++i) closed.set(i, []);
-        
-        
-        results.forEach(result => {
-            result.disable_time.forEach(disableTime => {
-                closed.get(disableTime.day).push({
-                    start_time: disableTime.start_time,
-                    end_time: disableTime.end_time,
-                    from: result.description
-                });
-            });
-        });
 
-        let overlaps: Array<string> = [];
-        disableCourt.disable_time.forEach(disableTime => {
-            closed.get(disableTime.day).forEach( info  => {
-                if (info.start_time < disableTime.end_time && info.end_time > disableTime.start_time) {
-                    overlaps.push(info.from);
-                }
-            });
-        });
-        
-        console.log('findOverlap: (ms) ' + (performance.now()-time) );
+        let results = await this.disableCourtModel.find({ 
+            sport_id: disableCourt.sport_id,
+            court_num: disableCourt.court_num,
+            starting_date: { $lte: disableCourt.expired_date }, 
+            expired_date: { $gte: disableCourt.starting_date },
+            disable_time: { $elemMatch:{$or: queryOrArray} } 
+        }).select("_id");
+        results.forEach(disableCourt => overlaps.push(disableCourt._id));
 
         return overlaps;
     }
