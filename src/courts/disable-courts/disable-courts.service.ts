@@ -41,18 +41,30 @@ export class DisableCourtsService {
         }
         if (data.sport_id != null) query = query.find({ sport_id: data.sport_id });
         if (data.court_num != null) query = query.find({ court_num: data.court_num });
+        if (data.description != null) query = query.find({ description: {$regex:'.*' + data.description + '.*'} });
 
         if (data.lean) query.select('-disable_time');
 
         // populate sport_id field
         //await query.populate('sport_id');
 
-        const results = await query.sort('starting_date expired_date').skip(data.start).limit(data.end-data.start+1);
+        const results = await query.sort('starting_date expired_date');
+
+        let start: number;
+        let end: number;
+        
+        if(data.start == null) start = 0;
+        else start = data.start;
+        
+        if(data.end == null || data.end >= results.length) end = results.length-1;
+        else end = data.end;
+
+        const sliced_results = results.slice(start, end+1);
 
         return {
             total_found: results.length,
-            total_returned: results.length, // included to avoid confusion with total_found
-            sliced_results: results
+            total_returned: sliced_results.length, // included to avoid confusion with total_found
+            sliced_results: sliced_results
         };
     }
 
