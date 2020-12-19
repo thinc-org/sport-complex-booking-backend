@@ -16,11 +16,12 @@ export class UsersController {
 
     @Get('/login')
     async login(@Body() loginUserDto: LoginUserDto, @Res() res): Promise<string> {
-        const id  = await this.userService.login(loginUserDto.username,loginUserDto.password);
+        const user  = await this.userService.login(loginUserDto.username,loginUserDto.password);
         return res.status(201).json({
             statusCode: 201,
             message: 'Login successfully',
-            jwt: this.authService.generateJWT(id).token,
+            jwt: this.authService.generateJWT(user["_id"]).token,
+            is_thai_language: user["is_thai_language"],
         });
     }
 

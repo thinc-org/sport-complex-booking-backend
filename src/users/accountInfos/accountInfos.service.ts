@@ -63,7 +63,7 @@ export class AccountInfosService {
         if (user.verification_status == Verification.Submitted || user.verification_status == Verification.Verified) {
             throw new HttpException('Please contact admin to modify account data', HttpStatus.FORBIDDEN)
         }
-        let updt = {verification_status: Verification.Submitted}
+        let updt = {verification_status: Verification.Submitted,rejected_info:[]}
         Object.assign(updt, info)
         const updatedUser =  await this.otherUserModel.findByIdAndUpdate(userId,updt,{new: true, lean: true, omitUndefined: true}).select("-password").exec();
         if (updatedUser == null) throw new HttpException('cannot find user: ' + userId, HttpStatus.NOT_FOUND)

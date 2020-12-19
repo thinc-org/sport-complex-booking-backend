@@ -96,7 +96,7 @@ export interface OtherUser extends User {
     membership_type: string
     password: string //pass=phone(editable)
     verification_status: Verification
-    rejected_info: [string]
+    rejected_info: string[]
     account_expiration_date :Date
     user_photo: mongoose.Types.ObjectId //(ของcollectionที่เก็บรูป)
     medical_certificate: mongoose.Types.ObjectId
