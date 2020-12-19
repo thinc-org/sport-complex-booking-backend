@@ -24,23 +24,7 @@ export class MywaitingroomService {
                             sport_Id : Types.ObjectId ,
                             createMyWaitingRoomDto : CreateMyWaitingRoomDto ) : Promise<MyWaitingRoom> { 
                             // In the practicion use sport name to find the sport ID. 
-        const test_query : User = await this.userModel.findById(user_Id);
-
-        if(test_query == null){
-            throw new HttpException("There isn't this user ID.", HttpStatus.NOT_FOUND);
-        }
-
-        if(test_query.is_penalize === true){
-            throw new HttpException("This user is penalize.", HttpStatus.BAD_REQUEST);
-        }
-
-        const test_query2 : MyWaitingRoom[] = await this.myWaitingRoomModel.find({list_member : user_Id});
-
-        console.log(test_query2);
-
-        if(test_query2.length !== 0){
-            throw new HttpException("This user is exist in a waiting room.", HttpStatus.BAD_REQUEST);
-        }
+        await this.checkUserCondition(user_Id);
 
         const newMyWaitingRoom = new this.myWaitingRoomModel(createMyWaitingRoomDto);
 
@@ -68,4 +52,48 @@ export class MywaitingroomService {
         }
         return temp; 
     }
+
+    async checkUserCondition (user_Id : Types.ObjectId){
+        const test_query : User = await this.userModel.findById(user_Id);
+
+        if(test_query == null){
+            throw new HttpException("This UserId doesn't exist.", HttpStatus.NOT_FOUND);
+        }
+
+        if(test_query.is_penalize === true){
+            throw new HttpException("This user is penalize.", HttpStatus.BAD_REQUEST);
+        }
+
+        const test_query2 : MyWaitingRoom[] = await this.myWaitingRoomModel.find({list_member : user_Id});
+
+        if(test_query2.length !== 0){
+            throw new HttpException("This user is exist in a waiting room.", HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    async joinMember( user_Id : Types.ObjectId , acode : String) : Promise<MyWaitingRoom>{
+
+        await this.checkUserCondition(user_Id);
+
+        var myWaitingRoom : MyWaitingRoom[] = await this.myWaitingRoomModel.find({access_code : acode});
+
+        if(myWaitingRoom.length === 0){
+            throw new HttpException("This access code doesn't belong to any MyWaitingRoom", HttpStatus.BAD_REQUEST);
+        }
+
+        myWaitingRoom[0].list_member.push(user_Id);
+        
+        return myWaitingRoom[0].save();
+    } 
+
+    async cancelMyWaitingRoom( myWaitingRoomID : MyWaitingRoom) : Promise<MyWaitingRoom>{
+        var temp : MyWaitingRoom = await this.myWaitingRoomModel.findByIdAndDelete(myWaitingRoomID);
+        if(temp === null){
+            throw new HttpException("This my waiting room doesn't exist.", HttpStatus.BAD_REQUEST);
+        }
+        return temp;
+    }
+
+    
 }
