@@ -14,7 +14,7 @@ export class UsersController {
         private readonly httpService: HttpService, private readonly configService: ConfigService){}
 
 
-    @Get('/login')
+    @Post('/login')
     async login(@Body() loginUserDto: LoginUserDto, @Res() res): Promise<string> {
         const user  = await this.userService.login(loginUserDto.username,loginUserDto.password);
         return res.status(201).json({
