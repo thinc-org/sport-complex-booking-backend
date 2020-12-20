@@ -16,7 +16,7 @@ export class StaffsController {
         return staff
     }
 
-    @Get('/login')
+    @Post('/login')
     async login(@Body() loginStaffDto: CreateStaffDto, @Res() res): Promise<string> {
         const staff = await this.staffsService.login(loginStaffDto);
         return res.status(201).json({
