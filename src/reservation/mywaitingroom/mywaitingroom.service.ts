@@ -2,10 +2,9 @@ import { Injectable,HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from 'mongoose';
 
-import { MyWaitingRoom } from "./interfaces/mywaitingroom.interface";
+import { MyWaitingRoom, SuccesfulReservation } from "./../interfaces/reservation.interface";
 import { CreateMyWaitingRoomDto } from "./dto/mywaitingroom.dto";
-import { User } from "./../users/interfaces/user.interface";
-import { SuccesfulReservation } from "./../successfulreservation/interfaces/successfulreservation.interface";
+import { User } from "./../../users/interfaces/user.interface";
 
 @Injectable()
 export class MywaitingroomService {

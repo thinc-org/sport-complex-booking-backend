@@ -1,6 +1,6 @@
 import { Controller ,UseGuards ,Post ,Get, Body, Param, Delete } from '@nestjs/common';
 import { MywaitingroomService } from './mywaitingroom.service';
-import { MyWaitingRoom } from "./interfaces/mywaitingroom.interface";
+import { MyWaitingRoom } from "./../interfaces/reservation.interface";
 import { CreateMyWaitingRoomDto } from "./dto/mywaitingroom.dto";
 
 @Controller('mywaitingroom')

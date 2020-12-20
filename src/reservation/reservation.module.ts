@@ -3,6 +3,7 @@ import { MongooseModule, getModelToken } from "@nestjs/mongoose";
 
 import { ReservationService } from './reservation.service';
 import { ReservationController } from './reservation.controller';
+import { MywaitingroomModule } from "./mywaitingroom/mywaitingroom.module";
 
 import { ReservationSchema, SuccesfulReservationSchema, MyWaitingRoomSchema } from "./schema/reservation.schema";
 
@@ -24,12 +25,17 @@ const successfulReservationProviderFactory = {
   imports : [MongooseModule.forFeature([{
       name : 'Reservation',
       schema : ReservationSchema,
-    }])
+    }]),
+    MywaitingroomModule
   ],
   providers: [ReservationService,
               myWaintingRoomProviderFactory,
               successfulReservationProviderFactory
             ],
-  controllers: [ReservationController]
+  controllers: [ReservationController],
+  exports: [
+    myWaintingRoomProviderFactory,
+    successfulReservationProviderFactory
+  ]
 })
 export class ReservationModule {}
