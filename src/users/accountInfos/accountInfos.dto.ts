@@ -224,3 +224,10 @@ export class PostOtherAccountInfoDTO {
     @IsOptional()
     medical_condition: string
 }
+
+export class ChangePasswordDTO {
+    @IsString()
+    oldPassword: string;
+    @IsString()
+    newPassword: string;
+}

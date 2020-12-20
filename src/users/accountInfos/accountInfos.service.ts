@@ -5,6 +5,7 @@ import { validateOrReject } from 'class-validator';
 import { Model } from 'mongoose';
 import { Account, CuStudentUser, OtherUser, SatitCuPersonelUser, User, Verification } from 'src/users/interfaces/user.interface';
 import { editCuAccountInfoDTO, editOtherAccountInfoDTO, editSatitCuPersonelAccountInfoDTO, postCuAccountInfoDTO, PostOtherAccountInfoDTO } from './accountInfos.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AccountInfosService {
@@ -31,6 +32,7 @@ export class AccountInfosService {
 
     async editAccountInfo(userId: string, data: any) {
         let user = await this.userModel.findById(userId)
+        if(user == null) throw new HttpException('cannot find user: ' + userId, HttpStatus.NOT_FOUND)
         const accountType = user.account_type
 
         let info = null
@@ -86,6 +88,7 @@ export class AccountInfosService {
 
     async postAccountInfo(userId: string, data: any) {
         let user = await this.userModel.findById(userId)
+        if(user == null) throw new HttpException('cannot find user: ' + userId, HttpStatus.NOT_FOUND)
         const accountType = user.account_type
 
         let info = null
@@ -111,6 +114,33 @@ export class AccountInfosService {
                 throw new HttpException('WTF', HttpStatus.I_AM_A_TEAPOT) // if this happens, something is terribly wrong.
 
         }
+    }
+
+    async changePassword(userId: string, oldPassword: string, newPassword: string){
+        const user = await this.userModel.findById(userId);
+        if(user == null) throw new HttpException('cannot find user: ' + userId, HttpStatus.NOT_FOUND);
+
+        let isMatch = false;
+        let castedUser: SatitCuPersonelUser | OtherUser;
+
+        switch(user.account_type) {
+            case Account.CuStudent:
+                throw new HttpException('CuStudent cannot change password', HttpStatus.FORBIDDEN);
+            case Account.SatitAndCuPersonel:
+                castedUser = user as SatitCuPersonelUser;
+                isMatch = await bcrypt.compare(oldPassword, castedUser.password);
+                break;
+            case Account.Other:
+                castedUser = user as OtherUser;
+                isMatch = await bcrypt.compare(oldPassword, castedUser.password);
+                break;
+            default:
+                throw new HttpException('WTF', HttpStatus.I_AM_A_TEAPOT) // if this happens, something is terribly wrong.
+        }
+        
+        if(!isMatch) throw new HttpException('old password does not match', HttpStatus.UNAUTHORIZED);
+        castedUser.password = await bcrypt.hash(newPassword, Number(process.env.HASH_SALT));
+        await castedUser.save();
     }
 
 }
