@@ -14,9 +14,20 @@ export class CourtManagerService {
       ){}
 
 //might get deleted, no error handling
-async write_setting(setting: Setting) : Promise<Setting>{
+async write_setting() : Promise<Setting>{
+      const setting= {
+            "waiting_room_duration": 15,
+            "late_cancelation_punishment": 30,
+            "absence_punishment": 30,
+            "late_cancelation_day": 2
+      };
       const court_setting = new this.Setting(setting);
       return court_setting.save();
+}
+
+async update_setting( new_setting: Setting) : Promise<Setting>{
+      const setting_doc = await this.Setting.findOneAndUpdate({}, new_setting, {new:true});
+      return setting_doc.save();
 }
 
 //function: get all Sport List from db
@@ -57,10 +68,6 @@ async update_CourtbyID(sportID: string, newSetting: [Court]) : Promise<List_Spor
       const doc = await this.find_SportList_byID(sportID);
       doc.list_court = newSetting;
       return await doc.save();
-}
-
-async validateStaffToken(token: string){
-      
 }
 
 }
