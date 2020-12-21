@@ -97,7 +97,14 @@ export class MywaitingroomService {
     }
 
     async acceptingMyWaitingRoom ( myWaitingRoomID : Types.ObjectId ) : Promise<SuccesfulReservation>{
-        
+        //morethan 3 users
+        console.log(new Date());
         return ;
     }
+
+    async expiredChecker( myWaitingRoomID : Types.ObjectId ) : Promise<[Boolean,User[]]>{
+        //Checking
+        //penalize all user 
+        return ;
+    } 
 }

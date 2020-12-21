@@ -1,6 +1,6 @@
 import { Controller ,UseGuards ,Post ,Get, Body, Param, Delete } from '@nestjs/common';
 import { MywaitingroomService } from './mywaitingroom.service';
-import { MyWaitingRoom } from "./../interfaces/reservation.interface";
+import { MyWaitingRoom, SuccesfulReservation } from "./../interfaces/reservation.interface";
 import { CreateMyWaitingRoomDto } from "./dto/mywaitingroom.dto";
 
 @Controller('mywaitingroom')
@@ -26,5 +26,10 @@ export class MywaitingroomController {
     @Delete('/:mywaitingroomid')
     async cancelMyWaitingRoom(@Param() param) : Promise<MyWaitingRoom>{
         return this.mywaitingroomService.cancelMyWaitingRoom(param.mywaitingroomid);
+    }
+
+    @Post('/accept/:mywaitingroomid')
+    async aceptMyWaitingRoom(@Param() param) : Promise<SuccesfulReservation> {
+        return this.mywaitingroomService.acceptingMyWaitingRoom(param.mywaitingroomid);
     }
 }
