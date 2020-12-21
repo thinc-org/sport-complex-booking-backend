@@ -5,37 +5,15 @@ import { ReservationService } from './reservation.service';
 import { ReservationController } from './reservation.controller';
 import { MywaitingroomModule } from "./mywaitingroom/mywaitingroom.module";
 
-import { ReservationSchema, SuccessfulReservationSchema, MyWaitingRoomSchema } from "./schema/reservation.schema";
-
-const myWaintingRoomProviderFactory = {
-  provide: getModelToken('MyWaitingRoom'),
-  useFactory: (reservationModel) =>
-  reservationModel.discriminator('MyWaitingRoom', MyWaitingRoomSchema),
-  inject: [getModelToken('Reservation')]
-}
-
-const successfulReservationProviderFactory = {
-  provide: getModelToken('SuccessfulReservation'),
-  useFactory: (reservationModel) =>
-  reservationModel.discriminator('SuccessfulReservation', SuccessfulReservationSchema),
-  inject: [getModelToken('Reservation')]
-}
+import { ReservationSchema, WaitingRoomSchema } from "./schema/reservation.schema";
 
 @Module({
-  imports : [MongooseModule.forFeature([{
-      name : 'Reservation',
-      schema : ReservationSchema,
-    }]),
-    MywaitingroomModule
+  imports : [MongooseModule.forFeature(
+    [{ name: 'WaitingRoom', schema: WaitingRoomSchema, collection: 'list_waiting_room'}]),
+    MongooseModule.forFeature(
+      [{ name: 'Reservation', schema: ReservationSchema, collection: 'list_reservation'}])
   ],
-  providers: [ReservationService,
-              myWaintingRoomProviderFactory,
-              successfulReservationProviderFactory
-            ],
-  controllers: [ReservationController],
-  exports: [
-    myWaintingRoomProviderFactory,
-    successfulReservationProviderFactory
-  ]
+  providers: [ReservationService],
+  controllers: [ReservationController]
 })
 export class ReservationModule {}
