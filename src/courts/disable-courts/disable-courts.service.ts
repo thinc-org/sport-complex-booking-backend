@@ -25,17 +25,11 @@ export class DisableCourtsService {
         }
 
         let overlapReservations = await this.findOverlapReservation(disableCourt);
-        
         if( overlapReservations.length != 0){
             throw new HttpException({ statusCode: HttpStatus.CONFLICT, message: 'There are some overlapping reservations', overlapReservations }, HttpStatus.CONFLICT);
         }
 
         return await disableCourt.save();
-    }
-
-    async findOverlapReservation(disableCour: DisableCourt){
-        // waiting for implementation in Reservation Module
-        return []
     }
 
     async queryDisableCourt(data: QueryDisableCourtDTO): Promise<QueryResult> {
@@ -108,6 +102,10 @@ export class DisableCourtsService {
             throw new HttpException({ statusCode: HttpStatus.CONFLICT, message: 'There are some overlapping times', overlaps }, HttpStatus.CONFLICT);
         }
         
+        let overlapReservations = await this.findOverlapReservation(disableCourt);
+        if( overlapReservations.length != 0){
+            throw new HttpException({ statusCode: HttpStatus.CONFLICT, message: 'There are some overlapping reservations', overlapReservations }, HttpStatus.CONFLICT);
+        }
 
         if (!this.verifyStartAndEndDate(disableCourt.starting_date, disableCourt.expired_date))
             throw new HttpException('starting_date cannot be after expired_date', HttpStatus.BAD_REQUEST);
@@ -160,6 +158,11 @@ export class DisableCourtsService {
     /*
         private utility methods
     */
+
+   private async findOverlapReservation(disableCour: DisableCourt){
+        // waiting for implementation in Reservation Module
+        return [];
+    }
 
     private async findOverlap(disableCourt: DisableCourt): Promise<Array<string>> {
 
