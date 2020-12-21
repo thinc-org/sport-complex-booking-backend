@@ -57,7 +57,7 @@ export class MywaitingroomService {
     async checkUserCondition ( user_Id : Types.ObjectId ){
         const test_query : User = await this.userModel.findById(user_Id);
 
-        if(test_query == null){
+        if(test_query === null){
             throw new HttpException("This UserId doesn't exist.", HttpStatus.NOT_FOUND);
         }
 
