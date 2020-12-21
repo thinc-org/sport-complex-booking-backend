@@ -99,12 +99,22 @@ export class DisableCourtsService {
 
         let overlaps = await this.findOverlap(disableCourt);
         if(overlaps.length != 0) {
-            throw new HttpException({ statusCode: HttpStatus.CONFLICT, message: 'There are some overlapping times', overlaps }, HttpStatus.CONFLICT);
+            throw new HttpException({ 
+                statusCode: HttpStatus.CONFLICT,
+                message: 'There are some overlapping times',
+                reason: 0,
+                overlaps 
+            }, HttpStatus.CONFLICT);
         }
         
         let overlapReservations = await this.findOverlapReservation(disableCourt);
         if( overlapReservations.length != 0){
-            throw new HttpException({ statusCode: HttpStatus.CONFLICT, message: 'There are some overlapping reservations', overlapReservations }, HttpStatus.CONFLICT);
+            throw new HttpException({ 
+                statusCode: HttpStatus.CONFLICT, 
+                message: 'There are some overlapping reservations', 
+                reason: 1, 
+                overlapReservations 
+            }, HttpStatus.CONFLICT);
         }
 
         if (!this.verifyStartAndEndDate(disableCourt.starting_date, disableCourt.expired_date))
@@ -179,9 +189,9 @@ export class DisableCourtsService {
             starting_date: { $lte: disableCourt.expired_date }, 
             expired_date: { $gte: disableCourt.starting_date },
             disable_time: { $elemMatch:{$or: queryOrArray} } 
-        }).select("_id");
+        }).select("_id description");
         results.forEach(dis => {
-            if(!disableCourt._id.equals(dis._id)) overlaps.push(dis._id)
+            if(!disableCourt._id.equals(dis._id)) overlaps.push(dis.description);
         });
 
         return overlaps;
