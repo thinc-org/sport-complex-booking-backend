@@ -24,7 +24,18 @@ export class DisableCourtsService {
             throw new HttpException({ statusCode: HttpStatus.CONFLICT, message: 'There are some overlapping times', overlaps }, HttpStatus.CONFLICT);
         }
 
+        let overlapReservations = await this.findOverlapReservation(disableCourt);
+        
+        if( overlapReservations.length != 0){
+            throw new HttpException({ statusCode: HttpStatus.CONFLICT, message: 'There are some overlapping reservations', overlapReservations }, HttpStatus.CONFLICT);
+        }
+
         return await disableCourt.save();
+    }
+
+    async findOverlapReservation(disableCour: DisableCourt){
+        // waiting for implementation in Reservation Module
+        return []
     }
 
     async queryDisableCourt(data: QueryDisableCourtDTO): Promise<QueryResult> {
@@ -123,7 +134,6 @@ export class DisableCourtsService {
         
         note: 
         The resulting array isn't sorted. 
-        There might be some overlaping and/or duplicate intervals, use mergeTimeArr(timeArr) if this is not desired.
     */
     async findClosedTimes(sport_id: string, court_num: number, date: Date): Promise<Array<[number, number]>> {
         // max rps: ~600 rps
