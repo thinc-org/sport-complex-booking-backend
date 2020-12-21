@@ -1,24 +1,25 @@
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { SuccesfulReservation , MyWaitingRoom } from "./interfaces/reservation.interface";
+import { Reservation , WaitingRoom } from "./interfaces/reservation.interface";
 
 @Injectable()
 export class ReservationService {
     constructor(
-        @InjectModel('MyWaitingRoom') private myWaitingRoomModel : Model<MyWaitingRoom> ,
-        @InjectModel('SuccessfulReservation') private succesfullReservationModel : Model<SuccesfulReservation>
+        @InjectModel('WaitingRoom') private WaitingRoomModel : Model<WaitingRoom> ,
+        @InjectModel('Reservation') private ReservationModel : Model<Reservation>
     ){}
     
     //Test na krub by NON
-    async createMyWaitingRoom( myWaitingRoom : MyWaitingRoom) : Promise<MyWaitingRoom>{
-        const newMyWaitingRoom = new this.myWaitingRoomModel(myWaitingRoom);
+    async createWaitingRoom( WaitingRoom : WaitingRoom) : Promise<WaitingRoom>{
+        const newMyWaitingRoom = new this.WaitingRoomModel(WaitingRoom);
         return newMyWaitingRoom.save();
     }
 
     //Test na krub by NON
-    async createSuccessfulReservation( succesfulReservation : SuccesfulReservation) : Promise<SuccesfulReservation>{
-        const newSuccessfulReservation = new this.succesfullReservationModel(succesfulReservation);
+    async createReservation( Reservation : Reservation) : Promise<Reservation>{
+        const newSuccessfulReservation = new this.ReservationModel(Reservation);
         return newSuccessfulReservation.save();
     }
 
