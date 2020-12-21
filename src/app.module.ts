@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApprovalModule } from './approval/approval.module'
 import { FSModule } from './fs/fs.module';
 import { AccountInfosModule } from './users/accountInfos/accountInfos.module';
+import { CourtManagerModule } from './court-manager/court-manager.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { AccountInfosModule } from './users/accountInfos/accountInfos.module';
     AuthModule,
     StaffsModule,
     FSModule,
-    AccountInfosModule
+    AccountInfosModule,
+    CourtManagerModule
   ],
   controllers: [AppController],
   providers: [AppService],
