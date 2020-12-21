@@ -2,7 +2,6 @@ import { Module,forwardRef } from '@nestjs/common';
 import { MongooseModule } from "@nestjs/mongoose";
 
 import { UsersModule } from 'src/users/users.module';
-import { ReservationModule } from "./../reservation.module";
 import { MywaitingroomController } from "./mywaitingroom.controller";
 import { MywaitingroomService } from "./mywaitingroom.service";
 import { WaitingRoomSchema, ReservationSchema } from "./../schema/reservation.schema";
