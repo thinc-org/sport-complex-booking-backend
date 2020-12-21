@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { SatitCuPersonelUser, OtherUser, User ,Account, CuStudentUser} from 'src/users/interfaces/user.interface';
 import { max } from 'class-validator';
-import { SatitCuPersonelSchema } from 'src/users/schemas/users.schema';
+import { UV_FS_O_FILEMAP } from 'constants';
 
 
 @Injectable()
@@ -209,7 +209,7 @@ export class listAllUserService {
         return updatedResponse
     }
 
-    async changePassWord(id , oldPassword : string , newPassWord : string , isStaff : boolean) : Promise<User>{
+    async changePassWord(id , newPassWord : string , isStaff : boolean) : Promise<User>{
 
         if (!isStaff) {
             throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
@@ -220,17 +220,19 @@ export class listAllUserService {
 
         var tempUser : User = await this.userModel.findById(id);
 
-        if( tempUser.hasOwnProperty('password') ){
+        console.log(tempUser);
 
-            const type = (await this.userModel.findById(id)).account_type;
-            const newHashPassWord : string = await this.hashPassword(newPassWord);
 
-            if(type === Account.SatitAndCuPersonel){
-                return this.satitStudentModel.findByIdAndUpdate(id,{password : newHashPassWord}, {useFindAndModify: false,new: true});
-            }
-            else if(type === Account.Other){
-                return this.otherUserModel.findByIdAndUpdate(id,{password : newHashPassWord}, {useFindAndModify: false,new: true});
-            }
+        console.log("Has password.");
+
+        const type = (await this.userModel.findById(id)).account_type;
+        const newHashPassWord : string = await this.hashPassword(newPassWord) ;
+
+        if(type === Account.SatitAndCuPersonel){
+            return await this.satitStudentModel.findByIdAndUpdate(id,{password : newHashPassWord}, {useFindAndModify: false,new: true});
+        }
+        else if(type === Account.Other){
+            return await this.otherUserModel.findByIdAndUpdate(id,{password : newHashPassWord}, {useFindAndModify: false,new: true});
         }
         
         throw new HttpException("This user can't change passowrd.", HttpStatus.BAD_REQUEST)
