@@ -2,32 +2,32 @@ import { Injectable,HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from 'mongoose';
 
-import { MyWaitingRoom, Reservation, SuccessfulReservation } from "./../interfaces/reservation.interface";
-import { CreateMyWaitingRoomDto,CreateSuccessfulReservationDto } from "./dto/mywaitingroom.dto";
+import { WaitingRoom, Reservation } from "./../interfaces/reservation.interface";
+import { CreateWaitingRoomDto,CreateReservationDto } from "./dto/mywaitingroom.dto";
 import { User } from "./../../users/interfaces/user.interface";
 
 @Injectable()
 export class MywaitingroomService {
     constructor(
-        @InjectModel('MyWaitingRoom') private myWaitingRoomModel : Model<MyWaitingRoom>,
+        @InjectModel('MyWaitingRoom') private waitingRoomModel : Model<WaitingRoom>,
         @InjectModel('User') private userModel :  Model<User>,
-        @InjectModel('SuccessfulReservation') private successfulReservationModel : Model<SuccessfulReservation>
+        @InjectModel('SuccessfulReservation') private reservationModel : Model<Reservation>
     ){}
 
-    async createMyWaitingRoom( myWaitingRoom : MyWaitingRoom ) : Promise<MyWaitingRoom> {
+    async createMyWaitingRoom( waitingRoom : WaitingRoom ) : Promise<WaitingRoom> {
 
-        const newMyWaitingRoom = new this.myWaitingRoomModel(myWaitingRoom);
+        const newMyWaitingRoom = new this.waitingRoomModel(waitingRoom);
 
         return newMyWaitingRoom.save();
     }
 
     async addMyWaitingRoom( user_Id : Types.ObjectId , 
                             sport_Id : Types.ObjectId ,
-                            createMyWaitingRoomDto : CreateMyWaitingRoomDto ) : Promise<MyWaitingRoom> { 
+                            createMyWaitingRoomDto : CreateWaitingRoomDto ) : Promise<WaitingRoom> { 
                             // In the practicion use sport name to find the sport ID. 
         await this.checkUserCondition(user_Id);
 
-        const newMyWaitingRoom = new this.myWaitingRoomModel(createMyWaitingRoomDto);
+        const newMyWaitingRoom = new this.waitingRoomModel(createMyWaitingRoomDto);
 
         newMyWaitingRoom.sport_id = sport_Id;
         newMyWaitingRoom.list_member.push(user_Id);
@@ -45,7 +45,7 @@ export class MywaitingroomService {
             for(let i =0;i<number;i++){
                 temp+=temp2.charAt(Math.ceil(Math.random()*62));
             }
-            var test_qeury : MyWaitingRoom[] = await this.myWaitingRoomModel.find({access_code : temp});
+            var test_qeury : WaitingRoom[] = await this.waitingRoomModel.find({access_code : temp});
             if(test_qeury.length === 0 && temp.length == number){
                 break;
             }
@@ -65,7 +65,7 @@ export class MywaitingroomService {
             throw new HttpException("This user is penalize.", HttpStatus.BAD_REQUEST);
         }
 
-        const test_query2 : MyWaitingRoom[] = await this.myWaitingRoomModel.find({list_member : user_Id});
+        const test_query2 : WaitingRoom[] = await this.waitingRoomModel.find({list_member : user_Id});
 
         if(test_query2.length !== 0){
             throw new HttpException("This user is exist in a waiting room.", HttpStatus.BAD_REQUEST);
@@ -73,11 +73,11 @@ export class MywaitingroomService {
 
     }
 
-    async joinMember( user_Id : Types.ObjectId , acode : String ) : Promise<MyWaitingRoom>{
+    async joinMember( user_Id : Types.ObjectId , acode : String ) : Promise<WaitingRoom>{
 
         await this.checkUserCondition(user_Id);
 
-        var tempMyWaitingRoom : MyWaitingRoom[] = await this.myWaitingRoomModel.find({access_code : acode});
+        var tempMyWaitingRoom : WaitingRoom[] = await this.waitingRoomModel.find({access_code : acode});
 
         if(tempMyWaitingRoom.length === 0){
             throw new HttpException("This access code doesn't belong to any MyWaitingRoom", HttpStatus.BAD_REQUEST);
@@ -88,22 +88,22 @@ export class MywaitingroomService {
         return tempMyWaitingRoom[0].save();
     } 
 
-    async cancelMyWaitingRoom( myWaitingRoomID : Types.ObjectId ) : Promise<MyWaitingRoom>{
-        var tempMyWaitingRoom : MyWaitingRoom = await this.myWaitingRoomModel.findByIdAndDelete(myWaitingRoomID);
+    async cancelMyWaitingRoom( myWaitingRoomID : Types.ObjectId ) : Promise<WaitingRoom>{
+        var tempMyWaitingRoom : WaitingRoom = await this.waitingRoomModel.findByIdAndDelete(myWaitingRoomID);
         if(tempMyWaitingRoom === null){
             throw new HttpException("This my waiting room doesn't exist.", HttpStatus.BAD_REQUEST);
         }
         return tempMyWaitingRoom;
     }
 
-    async acceptingMyWaitingRoom ( myWaitingRoomID : Types.ObjectId ) : Promise<SuccessfulReservation>{
-        const tempMyWaitingRoom : MyWaitingRoom  = await this.myWaitingRoomModel.findByIdAndDelete(myWaitingRoomID);
+    async acceptingMyWaitingRoom ( myWaitingRoomID : Types.ObjectId ) : Promise<Reservation>{
+        const tempMyWaitingRoom : WaitingRoom  = await this.waitingRoomModel.findByIdAndDelete(myWaitingRoomID);
 
         if(tempMyWaitingRoom === null){
             throw new HttpException("This my waiting room doesn't exist.", HttpStatus.BAD_REQUEST);
         }
 
-        var temp = new CreateSuccessfulReservationDto();
+        var temp = new CreateReservationDto();
 
         temp.list_member = tempMyWaitingRoom.list_member;
         temp.sport_id = tempMyWaitingRoom.sport_id;
@@ -112,14 +112,13 @@ export class MywaitingroomService {
         temp.is_check = false;
         temp.date = tempMyWaitingRoom.date;
 
-        const newSuccesfulReservation : SuccessfulReservation = (temp as SuccessfulReservation);
-        const newSuccesfulReservationModel = new this.successfulReservationModel(newSuccesfulReservation);
+        var newSuccesfulReservationModel = new this.reservationModel(temp);
 
         return newSuccesfulReservationModel.save();
     }
 
     async expiredChecker( myWaitingRoomID : Types.ObjectId ) : Promise<Boolean>{
-        const tempMyWaitingRoom : MyWaitingRoom  = await this.myWaitingRoomModel.findByIdAndDelete(myWaitingRoomID);
+        const tempMyWaitingRoom : WaitingRoom  = await this.waitingRoomModel.findByIdAndDelete(myWaitingRoomID);
         if(new Date() > tempMyWaitingRoom.expired_date ){
             for( let user_id of tempMyWaitingRoom.list_member){
                 const temp = await this.userModel.findByIdAndUpdate(user_id, {is_penalize : true});

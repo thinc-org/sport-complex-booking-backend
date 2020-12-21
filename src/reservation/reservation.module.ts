@@ -3,7 +3,6 @@ import { MongooseModule, getModelToken } from "@nestjs/mongoose";
 
 import { ReservationService } from './reservation.service';
 import { ReservationController } from './reservation.controller';
-import { MywaitingroomModule } from "./mywaitingroom/mywaitingroom.module";
 
 import { ReservationSchema, WaitingRoomSchema } from "./schema/reservation.schema";
 
