@@ -9,9 +9,9 @@ import { User } from "./../../users/interfaces/user.interface";
 @Injectable()
 export class MywaitingroomService {
     constructor(
-        @InjectModel('MyWaitingRoom') private waitingRoomModel : Model<WaitingRoom>,
+        @InjectModel('WaitingRoom') private waitingRoomModel : Model<WaitingRoom>,
         @InjectModel('User') private userModel :  Model<User>,
-        @InjectModel('SuccessfulReservation') private reservationModel : Model<Reservation>
+        @InjectModel('Reservation') private reservationModel : Model<Reservation>
     ){}
 
     async createMyWaitingRoom( waitingRoom : WaitingRoom ) : Promise<WaitingRoom> {

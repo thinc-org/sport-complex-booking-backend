@@ -6,13 +6,16 @@ import { ReservationController } from './reservation.controller';
 
 import { ReservationSchema, WaitingRoomSchema } from "./schema/reservation.schema";
 
+import { MywaitingroomModule } from "./mywaitingroom/mywaitingroom.module";
+
 @Module({
   imports : [MongooseModule.forFeature(
     [{ name: 'WaitingRoom', schema: WaitingRoomSchema, collection: 'list_waiting_room'}]),
     MongooseModule.forFeature(
-      [{ name: 'Reservation', schema: ReservationSchema, collection: 'list_reservation'}])
+      [{ name: 'Reservation', schema: ReservationSchema, collection: 'list_reservation'}]),
+    MywaitingroomModule
   ],
   providers: [ReservationService],
-  controllers: [ReservationController]
+  controllers: [ReservationController],
 })
 export class ReservationModule {}

@@ -9,14 +9,14 @@ export class MywaitingroomController {
 
     // Delete
     @Post()
-    async createMyWaitingRoom(@Body() myWaitingRoom : WaitingRoom) : Promise<WaitingRoom> {
-        return this.mywaitingroomService.createMyWaitingRoom(myWaitingRoom);
+    async createMyWaitingRoom(@Body() waitingRoom : WaitingRoom) : Promise<WaitingRoom> {
+        return this.mywaitingroomService.createMyWaitingRoom(waitingRoom);
     }
 
     //@UseGuards()
     @Post('/add/:user_id/:sport_id')
-    async addMyWaitingRoom(@Param() param,@Body() createMyWaitingRoomDto : CreateWaitingRoomDto) : Promise<WaitingRoom>{
-        return this.mywaitingroomService.addMyWaitingRoom(param.user_id,param.sport_id,createMyWaitingRoomDto);
+    async addMyWaitingRoom(@Param() param,@Body() createWaitingRoomDto : CreateWaitingRoomDto) : Promise<WaitingRoom>{
+        return this.mywaitingroomService.addMyWaitingRoom(param.user_id,param.sport_id,createWaitingRoomDto);
     }
 
     @Post('/join/:user_id/:access_code')
@@ -24,19 +24,19 @@ export class MywaitingroomController {
         return this.mywaitingroomService.joinMember(param.user_id,param.access_code);
     } 
 
-    @Delete('/:mywaitingroomid')
+    @Delete('/:waitingroomid')
     async cancelMyWaitingRoom(@Param() param) : Promise<WaitingRoom>{
-        return this.mywaitingroomService.cancelMyWaitingRoom(param.mywaitingroomid);
+        return this.mywaitingroomService.cancelMyWaitingRoom(param.waitingroomid);
     }
 
-    @Post('/accept/:mywaitingroomid')
+    @Post('/accept/:waitingroomid')
     async aceptMyWaitingRoom(@Param() param) : Promise<Reservation> {
-        return this.mywaitingroomService.acceptingMyWaitingRoom(param.mywaitingroomid);
+        return this.mywaitingroomService.acceptingMyWaitingRoom(param.waitingroomid);
     }
 
-    @Get('/expire/:mywaitingroomid')
+    @Get('/expire/:waitingroomid')
     async expireMyWaitingRoom(@Param() param) : Promise<Boolean>{
-        return this.mywaitingroomService.expiredChecker(param.mywaitingroomid);
+        return this.mywaitingroomService.expiredChecker(param.waitingroomid);
     }
 
 }
