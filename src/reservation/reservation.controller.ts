@@ -2,7 +2,7 @@ import { Controller, Post , Body} from '@nestjs/common';
 
 import { ReservationService } from "./reservation.service";
 
-import { SuccesfulReservation , MyWaitingRoom } from "./interfaces/reservation.interface";
+import { Reservation , WaitingRoom } from "./interfaces/reservation.interface";
 
 
 @Controller('reservation')
@@ -10,14 +10,14 @@ export class ReservationController {
     constructor( private readonly reservationService: ReservationService ){}
 
     //Test na krub by NON
-    @Post('/mywaitingroom')
-    async createMyWaitingRoom( @Body() myWaitingRoom : MyWaitingRoom ) : Promise<MyWaitingRoom>    {
-        return this.reservationService.createMyWaitingRoom(myWaitingRoom);
+    @Post('/waitingroom')
+    async createMyWaitingRoom( @Body() WaitingRoom : WaitingRoom ) : Promise<WaitingRoom>    {
+        return this.reservationService.createWaitingRoom(WaitingRoom);
     }
 
     //Test na krub by NON
-    @Post('/successfulReservation')
-    async createSuccessfulReservation( @Body() succesfulReservation : SuccesfulReservation ) : Promise<MyWaitingRoom>    {
-        return this.reservationService.createSuccessfulReservation(succesfulReservation);
+    @Post('/reservation')
+    async createSuccessfulReservation( @Body() Reservation : Reservation ) : Promise<Reservation>    {
+        return this.reservationService.createReservation(Reservation);
     }
 }

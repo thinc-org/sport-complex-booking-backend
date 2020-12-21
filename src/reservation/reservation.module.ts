@@ -4,9 +4,9 @@ import { MongooseModule, getModelToken } from "@nestjs/mongoose";
 import { ReservationService } from './reservation.service';
 import { ReservationController } from './reservation.controller';
 
-import { ReservationSchema, SuccesfulReservationSchema, MyWaitingRoomSchema } from "./schema/reservation.schema";
+import { ReservationSchema, WaitingRoomSchema } from "./schema/reservation.schema";
 
-const myWaintingRoomProviderFactory = {
+/*const myWaintingRoomProviderFactory = {
   provide: getModelToken('MyWaitingRoom'),
   useFactory: (reservationModel) =>
   reservationModel.discriminator('MyWaitingRoom', MyWaitingRoomSchema),
@@ -19,17 +19,15 @@ const successfulReservationProviderFactory = {
   reservationModel.discriminator('SuccessfulReservation', SuccesfulReservationSchema),
   inject: [getModelToken('Reservation')]
 }
+*/
 
 @Module({
-  imports : [MongooseModule.forFeature([{
-      name : 'Reservation',
-      schema : ReservationSchema,
-    }])
+  imports : [MongooseModule.forFeature(
+    [{ name: 'WaitingRoom', schema: WaitingRoomSchema, collection: 'list_waiting_room'}]),
+    MongooseModule.forFeature(
+      [{ name: 'Reservation', schema: ReservationSchema, collection: 'list_reservation'}])
   ],
-  providers: [ReservationService,
-              myWaintingRoomProviderFactory,
-              successfulReservationProviderFactory
-            ],
+  providers: [ReservationService],
   controllers: [ReservationController]
 })
 export class ReservationModule {}
