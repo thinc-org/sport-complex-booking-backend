@@ -69,9 +69,9 @@ export class listAllUserController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Patch('/changePW/:id/:oldPassWord/:newPassWord') 
-    async chanegPassWord(@Param() param): Promise<User>{
-        return ;
+    @Patch('/changePW/:id/:newPassWord') 
+    async chanegPassWord(@Param() param, @Req() req): Promise<User>{
+        return this.addUserService.changePassWord(param.id,param.newPassWord,req.user.isStaff);
     }
 }
 
