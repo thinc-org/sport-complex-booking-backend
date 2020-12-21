@@ -1,9 +1,8 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Put, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
-import { postCuAccountInfoDTO } from './accountInfos.dto';
+import { ChangePasswordDTO, postCuAccountInfoDTO } from './accountInfos.dto';
 import { AccountInfosService } from './accountInfos.service';
-const mongoose = require('mongoose')
 
 
 @Controller('account_info')
@@ -30,6 +29,13 @@ export class AccountInfosController {
     async postAccountInfo(@Req() req, @Body() body){
         if(req.user.isStaff) throw new HttpException("This is for users only",HttpStatus.FORBIDDEN)
         return await this.accountInfoService.postAccountInfo(req.user.userId,body)
+    }
+
+    @UsePipes(new ValidationPipe())
+    @UseGuards(JwtAuthGuard)
+    @Post('/change_password')
+    async changePassword(@Body() body: ChangePasswordDTO, @Req() req){
+        await this.accountInfoService.changePassword(req.user.userId, body.oldPassword, body.newPassword);
     }
 
 }
