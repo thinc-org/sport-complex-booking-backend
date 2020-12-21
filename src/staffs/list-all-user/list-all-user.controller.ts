@@ -67,6 +67,12 @@ export class listAllUserController {
     async editById(@Param() param,@Body() body, @Req() req) : Promise<User>{
         return this.addUserService.editById(param.id,body,req.user.isStaff);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Patch('/changePW/:id/:oldPassWord/:newPassWord') 
+    async chanegPassWord(@Param() param): Promise<User>{
+        return ;
+    }
 }
 
 
