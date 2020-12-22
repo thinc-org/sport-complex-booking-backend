@@ -5,13 +5,14 @@ import { createWriteStream, existsSync, unlink, unlinkSync } from 'fs';
 import { Model } from 'mongoose';
 import { extname } from 'path';
 import { OtherUser } from 'src/users/interfaces/user.interface';
+import { UsersService } from 'src/users/users.service';
 import { FileInfo, FileInfoDocument } from './fileInfo.schema';
 const path = require('path');
 
 
 @Injectable()
 export class FSService {
-  constructor(@InjectModel(FileInfo.name) private fileInfoModel: Model<FileInfoDocument>, @InjectModel('Other') private otherUserModel: Model<OtherUser>, private readonly jwtService: JwtService) { }
+  constructor(@InjectModel(FileInfo.name) private fileInfoModel: Model<FileInfoDocument>, private readonly jwtService: JwtService, private userService: UsersService) { }
 
   async getFileInfo(fileId: string) {
     const fileInfo = await this.fileInfoModel.findById(fileId);
@@ -32,7 +33,7 @@ export class FSService {
     let result: any
     result = {}
     
-    const user = await this.otherUserModel.findById(owner)
+    const user = await this.userService.findById(owner);
     
     if (user == null) {
       throw new HttpException('cannot find user: ' + owner, HttpStatus.NOT_FOUND)
@@ -71,7 +72,7 @@ export class FSService {
 
     const fileInfo = await this.getFileInfo(fileId)
     const fullPath = fileInfo.full_path
-    const owner = await this.otherUserModel.findById(fileInfo.owner)
+    const owner = await this.userService.findById(fileInfo.owner);
 
     owner[fileInfo.file_type] = null
     try{
@@ -96,8 +97,8 @@ export class FSService {
     }
   }
 
-  async verifyUserEligibility(userId: any) {
-    const user = await this.otherUserModel.findById(userId)
+  async verifyUserEligibility(userId: string) {
+    const user = await this.userService.findById(userId);
     return user != null
   }
   

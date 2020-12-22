@@ -17,12 +17,12 @@ export class AccountInfosController {
     
     @Put()
     async editAccountInfo(@Req() req, @Body() body:postCuAccountInfoDTO) {
-        return await this.accountInfoService.editAccountInfo(req.user.userId,body)
+        return await this.accountInfoService.editAccountInfo(req.user.userId,body,false)
     }
 
     @Post()
     async postAccountInfo(@Req() req, @Body() body){
-        return await this.accountInfoService.postAccountInfo(req.user.userId,body)
+        return await this.accountInfoService.editAccountInfo(req.user.userId,body,true)
     }
 
     @UsePipes(new ValidationPipe())
