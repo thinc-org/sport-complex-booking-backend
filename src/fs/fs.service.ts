@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import { createWriteStream, existsSync, unlink } from 'fs';
+import { createWriteStream, existsSync, unlink, unlinkSync } from 'fs';
 import { Model } from 'mongoose';
 import { extname } from 'path';
 import { OtherUser } from 'src/users/interfaces/user.interface';
@@ -38,7 +38,7 @@ export class FSService {
       throw new HttpException('cannot find user: ' + owner, HttpStatus.NOT_FOUND)
     }
     
-    for (let field in files) {
+    for (const field of files) {
       
       const file = ((files[field] == null) ? null : files[field][0])
       if (file == null) continue
@@ -74,9 +74,12 @@ export class FSService {
     const owner = await this.otherUserModel.findById(fileInfo.owner)
 
     owner[fileInfo.file_type] = null
-    unlink(fullPath, (err) => {
-      if (err) console.log('cant delete file', err)
-    })
+    try{
+      unlinkSync(fullPath);
+    }catch(err) {
+      console.log('Cannot delete file: ' + fileId);
+      throw new HttpException('Cannot delete file', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
     await owner.save()
     await fileInfo.remove()
   }
