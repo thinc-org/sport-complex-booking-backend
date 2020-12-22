@@ -30,8 +30,8 @@ import { ReservationModule } from './reservation/reservation.module';
     StaffsModule,
     FSModule,
     AccountInfosModule,
-    CourtManagerModule
-    ReservationModule,
+    CourtManagerModule,
+    ReservationModule
   ],
   controllers: [AppController],
   providers: [AppService],
