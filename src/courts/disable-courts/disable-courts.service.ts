@@ -16,14 +16,14 @@ export class DisableCourtsService {
 
         data.starting_date.setUTCHours(0, 0, 0, 0);
         data.expired_date.setUTCHours(23, 0, 0, 0);
-        let disableCourt = this.disableCourtfromCreateDTO(data);
+        const disableCourt = this.disableCourtfromCreateDTO(data);
 
-        let overlaps = await this.findOverlap(disableCourt);
+        const overlaps = await this.findOverlap(disableCourt);
         if (overlaps.length != 0) {
             throw new HttpException({ statusCode: HttpStatus.CONFLICT, message: 'There are some overlapping times', overlaps }, HttpStatus.CONFLICT);
         }
 
-        let overlapReservations = await this.findOverlapReservation(disableCourt);
+        const overlapReservations = await this.findOverlapReservation(disableCourt);
         if (overlapReservations.length != 0) {
             throw new HttpException({ statusCode: HttpStatus.CONFLICT, message: 'There are some overlapping reservations', overlapReservations }, HttpStatus.CONFLICT);
         }
@@ -73,7 +73,7 @@ export class DisableCourtsService {
     }
 
     async getDisableCourt(id: string): Promise<DisableCourt> {
-        let disableCourt = await this.disableCourtModel.findById(id);
+        const disableCourt = await this.disableCourtModel.findById(id);
         if (disableCourt == null)
             throw new HttpException("Cannot find DisableCourt with id: " + id, HttpStatus.NOT_FOUND);
         return disableCourt;
@@ -96,7 +96,7 @@ export class DisableCourtsService {
 
         disableCourt = this.disableCourtfromEditDTO(disableCourt, data);
 
-        let overlaps = await this.findOverlap(disableCourt);
+        const overlaps = await this.findOverlap(disableCourt);
         if (overlaps.length != 0) {
             throw new HttpException({
                 statusCode: HttpStatus.CONFLICT,
@@ -106,7 +106,7 @@ export class DisableCourtsService {
             }, HttpStatus.CONFLICT);
         }
 
-        let overlapReservations = await this.findOverlapReservation(disableCourt);
+        const overlapReservations = await this.findOverlapReservation(disableCourt);
         if (overlapReservations.length != 0) {
             throw new HttpException({
                 statusCode: HttpStatus.CONFLICT,
@@ -127,7 +127,7 @@ export class DisableCourtsService {
     async addDisableTime(id: string, disable_times: Array<DisableTime>): Promise<void> {
         if (!this.verifyDisableTimes(disable_times))
             throw new HttpException('there is an invalid DisableTime', HttpStatus.BAD_REQUEST);
-        let disableCourt = await this.getDisableCourt(id);
+        const disableCourt = await this.getDisableCourt(id);
         disable_times.forEach(disable_time => {
             disableCourt.disable_time.push(disable_time);
         });
@@ -147,9 +147,9 @@ export class DisableCourtsService {
         // response time: <10 ms for 1 councurrent user, ~160ms for 100 concurrent user, ~1.6s for 1000 concurrent user
 
         date.setUTCHours(0, 0, 0);
-        let day = date.getDay();
+        const day = date.getDay();
 
-        let results = await this.disableCourtModel.find({
+        const results = await this.disableCourtModel.find({
             starting_date: { $lte: date },
             expired_date: { $gte: date },
             sport_id,
@@ -157,9 +157,9 @@ export class DisableCourtsService {
             disable_time: { $elemMatch: { day } }
         }).select('disable_time');
 
-        let timeArr: Array<[number, number]> = [];
+        const timeArr: Array<[number, number]> = [];
         results.forEach(disableCourt => {
-            timeArr = timeArr.concat(disableCourt.disable_time.map(disableTime => [disableTime.start_time, disableTime.end_time]));
+            timeArr.push(...disableCourt.disable_time.map<[number, number]>(disableTime => [disableTime.start_time, disableTime.end_time]));
         });
         return timeArr;
     }
@@ -175,14 +175,14 @@ export class DisableCourtsService {
 
     private async findOverlap(disableCourt: DisableCourt): Promise<Array<string>> {
 
-        let overlaps: string[] = [];
-        let queryOrArray = []
+        const overlaps: string[] = [];
+        const queryOrArray = []
 
         for (const disableTime of disableCourt.disable_time) {
             queryOrArray.push({ start_time: { $lt: disableTime.end_time }, end_time: { $gt: disableTime.start_time }, day: disableTime.day })
         }
 
-        let results = await this.disableCourtModel.find({
+        const results = await this.disableCourtModel.find({
             sport_id: disableCourt.sport_id,
             court_num: disableCourt.court_num,
             starting_date: { $lte: disableCourt.expired_date },
@@ -203,7 +203,7 @@ export class DisableCourtsService {
 
     private verifyDisableTimes(disable_times: Array<DisableTime>): boolean {
         if (disable_times == null) return true;
-        for (let disable_time of disable_times) {
+        for (const disable_time of disable_times) {
             if (disable_time.start_time > disable_time.end_time) return false;
         }
         return true;
@@ -226,7 +226,7 @@ export class DisableCourtsService {
     }
 
     private disableCourtfromCreateDTO(data: CreateDisableCourtDTO): DisableCourt {
-        let disableCourt = new this.disableCourtModel();
+        const disableCourt = new this.disableCourtModel();
         disableCourt.description = data.description;
         disableCourt.sport_id = data.sport_id;
         disableCourt.starting_date = data.starting_date;
