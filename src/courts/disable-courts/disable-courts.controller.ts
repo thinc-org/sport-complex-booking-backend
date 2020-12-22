@@ -4,11 +4,11 @@ import { AddDisableTimeDTO, CreateDisableCourtDTO, EditDisableCourtDTO, QueryDis
 import { DisableCourtsService } from './disable-courts.service';
 import { DisableCourt } from './interfaces/disable-courts.interface';
 
-@UsePipes(new ValidationPipe({transform: true}))
+@UsePipes(new ValidationPipe({ transform: true }))
 @Controller('courts/disable-courts')
 export class DisableCourtsController {
     constructor(private readonly disableCourtsService: DisableCourtsService) { }
-    
+
     @UseGuards(JwtAuthGuard)
     @Post('')
     async createDisableCourt(@Req() req, @Body() body: CreateDisableCourtDTO): Promise<DisableCourt> {
@@ -17,7 +17,7 @@ export class DisableCourtsController {
     }
 
     @Post('/search')
-    async getDisableCourt(@Body() data: QueryDisableCourtDTO ): Promise<QueryResult> {
+    async getDisableCourt(@Body() data: QueryDisableCourtDTO): Promise<QueryResult> {
         return await this.disableCourtsService.queryDisableCourt(data);
     }
 
@@ -48,14 +48,14 @@ export class DisableCourtsController {
     @UseGuards(JwtAuthGuard)
     @Put(':id')
     async editDisableCourt(@Req() req, @Param('id') id: string, @Body() body: EditDisableCourtDTO): Promise<DisableCourt> {
-        if(!req.user.isStaff) throw new HttpException("Not a Staff",HttpStatus.UNAUTHORIZED);
-        return await this.disableCourtsService.editDisableCourt(id,body);
+        if (!req.user.isStaff) throw new HttpException("Not a Staff", HttpStatus.UNAUTHORIZED);
+        return await this.disableCourtsService.editDisableCourt(id, body);
     }
 
     @UseGuards(JwtAuthGuard)
     @Put(':id/add_disable_time')
-    async addDisableTime(@Req() req, @Param('id') id: string, @Body() body: AddDisableTimeDTO){
-        if(!req.user.isStaff) throw new HttpException("Not a Staff",HttpStatus.UNAUTHORIZED);
-        await this.disableCourtsService.addDisableTime(id,body.disable_times);
+    async addDisableTime(@Req() req, @Param('id') id: string, @Body() body: AddDisableTimeDTO) {
+        if (!req.user.isStaff) throw new HttpException("Not a Staff", HttpStatus.UNAUTHORIZED);
+        await this.disableCourtsService.addDisableTime(id, body.disable_times);
     }
 }
