@@ -29,6 +29,15 @@ async updateSetting( @Body() new_setting: Setting, @Req() req) : Promise<Setting
       return await this.courtManagerService.update_setting(new_setting);
 }
 
+@UseGuards(JwtAuthGuard)
+@Get('/setting')
+async getSetting(@Req() req):Promise<Setting>{
+      if(req.user.is_admin){
+            throw new HttpException('Staff or Admin only', HttpStatus.UNAUTHORIZED);
+      }
+      return await this.courtManagerService.get_setting();
+}
+
 //get all list sport
 @UseGuards(JwtAuthGuard)
 @Get('/getAll')      

@@ -30,6 +30,10 @@ async update_setting( new_setting: Setting) : Promise<Setting>{
       return setting_doc.save();
 }
 
+async get_setting() : Promise<Setting>{
+      return await this.Setting.findOne({});
+}
+
 //function: get all Sport List from db
 async find_allSportList() : Promise<List_Sport[]>{
       return await this.List_Sport.find({});
