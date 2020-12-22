@@ -8,6 +8,7 @@ import {AuthModule} from 'src/auth/auth.module'
     imports:[forwardRef(()=>UsersModule),
         forwardRef(()=>AuthModule)],
     providers:[ApprovalService],
-    controllers: [ApprovalController]
+    controllers: [ApprovalController],
+    exports: [ApprovalModule]
 })
 export class ApprovalModule {}

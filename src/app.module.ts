@@ -9,6 +9,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ApprovalModule } from './approval/approval.module'
 import { FSModule } from './fs/fs.module';
 import { AccountInfosModule } from './users/accountInfos/accountInfos.module';
+import { CourtManagerModule } from './court-manager/court-manager.module';
 import { ReservationModule } from './reservation/reservation.module';
 
 @Module({
@@ -29,6 +30,7 @@ import { ReservationModule } from './reservation/reservation.module';
     StaffsModule,
     FSModule,
     AccountInfosModule,
+    CourtManagerModule
     ReservationModule,
   ],
   controllers: [AppController],
