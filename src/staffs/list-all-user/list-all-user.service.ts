@@ -40,10 +40,8 @@ export class listAllUserService {
         return false;
     }
 
-    async getUsers(isStaff: boolean ,name : string , penalize : boolean , begin:number, end:number , account:Account ): Promise<[number,User[]]> {
-        if (!isStaff) {
-            throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
-        }        
+    async getUsers(name : string , penalize : boolean , begin:number, end:number , account:Account ): Promise<[number,User[]]> {
+     
         var query = this.userModel.find();
         
         if(name !== undefined){
@@ -83,10 +81,7 @@ export class listAllUserService {
         const user = await this.userModel.findOne({ username: username });
         return user
     }
-    async getUserById(id: string, isStaff: boolean): Promise<User> {
-        if (!isStaff) {
-            throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
-        }
+    async getUserById(id: string): Promise<User> {
         return await this.userModel.findById(id);
     }
 
@@ -99,10 +94,7 @@ export class listAllUserService {
         return !(/^\d+$/.test(username));
     }
 
-    async createSatitUser(user: SatitCuPersonelUser, isStaff: boolean) {
-        if (!isStaff) {
-            throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
-        }
+    async createSatitUser(user: SatitCuPersonelUser) {
 
         if(!this.checkUsername(user.username)){
             throw new HttpException('Please include at least one letter in username', HttpStatus.BAD_REQUEST);
@@ -128,10 +120,7 @@ export class listAllUserService {
         await newUser.save();
     }
 
-    async createOtherUser(user: OtherUser, isStaff: boolean) {
-        if (!isStaff) {
-            throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
-        }
+    async createOtherUser(user: OtherUser) {
 
         if(!this.checkUsername(user.username)){
             throw new HttpException('Please include at least one letter in username', HttpStatus.BAD_REQUEST);
@@ -153,10 +142,8 @@ export class listAllUserService {
         await newUser.save();
     }
 
-    async deleteUser(id: string, isStaff: boolean) {
-        if (!isStaff) {
-            throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
-        }
+    async deleteUser(id: string) {
+
         if (!isValidObjectId(id)) {
             throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
         }
@@ -167,10 +154,7 @@ export class listAllUserService {
         return deleteResponse
     }
 
-    async unbanById(id, isStaff: boolean): Promise<User>{
-        if (!isStaff) {
-            throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
-        }
+    async unbanById(id): Promise<User>{
         if (!isValidObjectId(id)) {
             throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
         }
@@ -181,10 +165,8 @@ export class listAllUserService {
         return updatedResponse
     }
 
-    async editById(id , update, isStaff: boolean): Promise<User>{
-        if (!isStaff) {
-            throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
-        }
+    async editById(id , update): Promise<User>{
+
         if (!isValidObjectId(id)) {
             throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
         }
@@ -209,11 +191,8 @@ export class listAllUserService {
         return updatedResponse
     }
 
-    async changePassWord(id , newPassWord : string , isStaff : boolean) : Promise<User>{
+    async changePassWord(id , newPassWord : string ) : Promise<User>{
 
-        if (!isStaff) {
-            throw new HttpException("Staff only", HttpStatus.BAD_REQUEST)
-        }
         if (!isValidObjectId(id)) {
             throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
         }
