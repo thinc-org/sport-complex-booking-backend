@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { createWriteStream, existsSync, unlink, unlinkSync } from 'fs';
 import { Model } from 'mongoose';
 import { extname } from 'path';
-import { OtherUser } from 'src/users/interfaces/user.interface';
+import { Account, OtherUser } from 'src/users/interfaces/user.interface';
 import { UsersService } from 'src/users/users.service';
 import { FileInfo, FileInfoDocument } from './fileInfo.schema';
 const path = require('path');
@@ -99,7 +99,7 @@ export class FSService {
 
   async verifyUserEligibility(userId: string) {
     const user = await this.userService.findById(userId);
-    return user != null
+    return user != null && user.account_type == Account.Other;
   }
   
 }
