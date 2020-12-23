@@ -17,7 +17,12 @@ import { ApprovalModule } from 'src/approval/approval.module';
 ],
       controllers: [CourtManagerController],
       providers: [CourtManagerService],
-      exports: [ ]
+      exports: [ 
+            MongooseModule.forFeature([{name: 'Courts', schema: CourtSchema}]),
+            MongooseModule.forFeature([{name: 'List_Sport', schema: List_SportSchema, collection: 'List_Sport'}]),
+            MongooseModule.forFeature([{name: 'Setting', schema: SettingSchema, collection: 'Setting'}]),
+            CourtManagerService
+      ]
 })
 export class CourtManagerModule {}
 
