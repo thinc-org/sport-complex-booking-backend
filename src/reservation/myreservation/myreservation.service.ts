@@ -130,7 +130,20 @@ export class MyReservationService {
     }
 
     async checkReservation( reservation_id : Types.ObjectId ) : Promise<Reservation>{
-        return this.reservationModel.findByIdAndUpdate(reservation_id, { is_check : true });
+        
+        if (!isValidObjectId(reservation_id)) {
+            throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST);
+        }
+
+        var temp : Reservation = await this.reservationModel.findById(reservation_id);
+
+        if ( temp === null ){
+            throw new HttpException("Invalid reservation.", HttpStatus.NOT_FOUND)
+        }
+
+        temp.is_check = true;
+        temp.save();
+        return temp;
     }
 
     //Delete 
