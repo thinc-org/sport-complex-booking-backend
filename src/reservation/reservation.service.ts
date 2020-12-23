@@ -54,8 +54,8 @@ export class ReservationService {
     }
 
     async checkTimeSlot(waitingroomdto: WaitingRoomDto) {
-        const open_time = 17
-        const close_time = 40
+        const open_time = 17  //เวลาตรงนี้ต้องไปเอามาจากsetting
+        const close_time = 40 //เวลาตรงนี้ต้องไปเอามาจากsetting
         let availableTime = new Set<Number>()
         for (let i = open_time; i <= close_time;i++){
             availableTime.add(i)
@@ -72,7 +72,7 @@ export class ReservationService {
                 availableTime.delete(waitingroom[i].time_slot[j])
             }
         }
-        const disable_time = [21,22,23,24]
+        const disable_time = [21,22,23,24] //เวลาตรงนี้ต้องไปเอามาจากfirm
         for (let i = 0; i < disable_time.length; i++){
             availableTime.delete(disable_time[i])
         }
@@ -90,11 +90,15 @@ export class ReservationService {
     }
 
     async createWaitingRoom(waitingroomdto: WaitingRoomDto, id: string): Promise<WaitingRoom> {
-        const availableTime = this.checkTimeSlot(waitingroomdto)
+        const availableTime = await this.checkTimeSlot(waitingroomdto)
         if(await this.checkQuota(waitingroomdto,id)<waitingroomdto.time_slot.length){
             throw new HttpException("You have not enough quotas", HttpStatus.UNAUTHORIZED)
         }
-        //if((await availableTime).includes(waitingroomdto.time_slot.values)
+        for(let i = 0; i< waitingroomdto.time_slot.length;i++){
+            if(!availableTime.includes(waitingroomdto.time_slot[i])){
+                throw new HttpException("Your choosed time is unavailable", HttpStatus.UNAUTHORIZED)
+            }
+        }
         const waitingroom = new this.WaitingRoomModel(waitingroomdto)
         waitingroom.list_member.push(Types.ObjectId(id))
         let date: Date = new Date();
@@ -118,6 +122,9 @@ export class ReservationService {
         if (!waitingroom) {
             throw new HttpException("The code is wrong.", HttpStatus.BAD_REQUEST)
         }
+        if(await this.checkQuota(waitingroom,id) < waitingroom.time_slot.length){
+            throw new HttpException("You have not enough quotas", HttpStatus.UNAUTHORIZED)
+        }
         waitingroom.list_member.push(Types.ObjectId(id))
         let required_member: number = 2 //เลขตรงนี้ต้องไปเอามาจากsport
         if (waitingroom.list_member.length == required_member) {
@@ -137,11 +144,9 @@ export class ReservationService {
 
     async checkQuota(waitingroomdto: WaitingRoomDto, id: string) {
         const joinedReservation = await this.ReservationModel.find({ list_member: { $in: [Types.ObjectId(id)] }, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
-        let quota: number = 6 //เลขตรงนี้ต้องไปเอามาจากsport
+        let quota: number = 4 //เลขตรงนี้ต้องไปเอามาจากsport
         for (let i = 0; i < joinedReservation.length; i++) {
-            for (let j = 0; j < joinedReservation[i].time_slot.length; j++) {
-                quota = quota - joinedReservation[i].time_slot.length
-            }
+            quota = quota - joinedReservation[i].time_slot.length
         }
         return quota
     }
