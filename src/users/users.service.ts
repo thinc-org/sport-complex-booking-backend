@@ -1,10 +1,9 @@
-import { BadRequestException, Injectable, HttpStatus, HttpException } from '@nestjs/common';
+import { BadRequestException, Injectable, HttpStatus, HttpException, NotFoundException } from '@nestjs/common';
 import { Account, CuStudentUser, OtherUser, SatitCuPersonelUser, User } from './interfaces/user.interface';
-import { Model, isValidObjectId } from 'mongoose';
+import { Model, isValidObjectId, FilterQuery, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import {InjectModel} from '@nestjs/mongoose';
 import { SsoContent } from './interfaces/sso.interface';
-import { authenticate } from 'passport';
 
 @Injectable()
 export class UsersService {
@@ -20,19 +19,22 @@ export class UsersService {
         return user;
     }
 
-    async findUserById(id: string): Promise<CuStudentUser> {
+    async findCUById(id: string): Promise<CuStudentUser> {
         if (!isValidObjectId(id)) {
             throw new HttpException("Invalid Id", HttpStatus.BAD_REQUEST);
         }
         const acc = await this.cuStudentModel.findOne({ _id: id })
         if (!acc) {
-            throw new BadRequestException("This Id does not exist.")
+            throw new NotFoundException("This Id does not exist.")
         }
         //return an item that has its id matches to the parameter
         return acc;
     }
 
     async findSatitByid(id: string): Promise<SatitCuPersonelUser> {
+        if(!isValidObjectId(id)) {
+            throw new BadRequestException('Invalid Id');
+        }
         const user = await this.satitStudentModel.findOne({ _id: id });
         return user;
     }
@@ -40,6 +42,38 @@ export class UsersService {
     async findOtherByid(id: string): Promise<OtherUser> {
         const user = await this.otherUserModel.findOne({ _id: id });
         return user;
+    }
+
+
+
+    async findById(id: Types.ObjectId | string, select? : string): Promise<User> {
+        if(!isValidObjectId(id)){
+            throw new BadRequestException('Invalid Id');
+        }
+        const user = await this.userModel.findById(id).select(select);
+        if(user == null){
+            throw new NotFoundException('User not found');
+        }
+        return user;
+    }
+
+    async find(filter, select? : string, account_type?: Account ): Promise<User[]> {
+        let model: Model<User> | Model<CuStudentUser> | Model<SatitCuPersonelUser> | Model<OtherUser>
+        switch(account_type) {
+            case Account.CuStudent: 
+                model = this.cuStudentModel;
+                break;
+            case Account.Other:
+                model = this.otherUserModel;
+                break;
+            case Account.SatitAndCuPersonel:
+                model = this.satitStudentModel
+                break;
+            default:
+                model = this.userModel
+                break;
+        }
+        return await model.find(filter).select(select);
     }
 
     async login(username:string, password:string): Promise<string> {
@@ -88,7 +122,7 @@ export class UsersService {
     
     //for change email, languange, phone number (send all 3 variable for each change)
     async changeData(input:{is_thai_language: boolean, personal_email: string, phone:string},id:string) {    
-        const acc = await this.findUserById(id);
+        const acc = await this.findCUById(id);
         acc.is_thai_language = input.is_thai_language;
         acc.personal_email = input.personal_email;
         acc.phone = input.phone;

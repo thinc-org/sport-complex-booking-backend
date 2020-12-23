@@ -1,17 +1,18 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import { createWriteStream, existsSync, unlink } from 'fs';
+import { createWriteStream, existsSync, unlink, unlinkSync } from 'fs';
 import { Model } from 'mongoose';
 import { extname } from 'path';
-import { OtherUser } from 'src/users/interfaces/user.interface';
+import { Account, OtherUser } from 'src/users/interfaces/user.interface';
+import { UsersService } from 'src/users/users.service';
 import { FileInfo, FileInfoDocument } from './fileInfo.schema';
 const path = require('path');
 
 
 @Injectable()
 export class FSService {
-  constructor(@InjectModel(FileInfo.name) private fileInfoModel: Model<FileInfoDocument>, @InjectModel('Other') private otherUserModel: Model<OtherUser>, private readonly jwtService: JwtService) { }
+  constructor(@InjectModel(FileInfo.name) private fileInfoModel: Model<FileInfoDocument>, private readonly jwtService: JwtService, private userService: UsersService) { }
 
   async getFileInfo(fileId: string) {
     const fileInfo = await this.fileInfoModel.findById(fileId);
@@ -32,13 +33,13 @@ export class FSService {
     let result: any
     result = {}
     
-    const user = await this.otherUserModel.findById(owner)
+    const user = await this.userService.findById(owner);
     
     if (user == null) {
       throw new HttpException('cannot find user: ' + owner, HttpStatus.NOT_FOUND)
     }
     
-    for (let field in files) {
+    for (const field of files) {
       
       const file = ((files[field] == null) ? null : files[field][0])
       if (file == null) continue
@@ -71,12 +72,15 @@ export class FSService {
 
     const fileInfo = await this.getFileInfo(fileId)
     const fullPath = fileInfo.full_path
-    const owner = await this.otherUserModel.findById(fileInfo.owner)
+    const owner = await this.userService.findById(fileInfo.owner);
 
     owner[fileInfo.file_type] = null
-    unlink(fullPath, (err) => {
-      if (err) console.log('cant delete file', err)
-    })
+    try{
+      unlinkSync(fullPath);
+    }catch(err) {
+      console.log('Cannot delete file: ' + fileId);
+      throw new HttpException('Cannot delete file', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
     await owner.save()
     await fileInfo.remove()
   }
@@ -93,9 +97,9 @@ export class FSService {
     }
   }
 
-  async verifyUserEligibility(userId: any) {
-    const user = await this.otherUserModel.findById(userId)
-    return user != null
+  async verifyUserEligibility(userId: string) {
+    const user = await this.userService.findById(userId);
+    return user != null && user.account_type == Account.Other;
   }
   
 }

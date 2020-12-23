@@ -11,6 +11,7 @@ import { FSModule } from './fs/fs.module';
 import { AccountInfosModule } from './users/accountInfos/accountInfos.module';
 import { CourtManagerModule } from './court-manager/court-manager.module';
 import { ReservationModule } from './reservation/reservation.module';
+import { DisableCourtsModule } from './courts/disable-courts/disable-courts.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { ReservationModule } from './reservation/reservation.module';
     FSModule,
     AccountInfosModule,
     CourtManagerModule,
-    ReservationModule
+    ReservationModule,
+    DisableCourtsModule
   ],
   controllers: [AppController],
   providers: [AppService],

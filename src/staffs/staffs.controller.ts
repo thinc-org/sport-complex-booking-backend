@@ -22,7 +22,7 @@ export class StaffsController {
         return res.status(201).json({
             statusCode: 201,
             message: 'Login successfully',
-            jwt: this.authService.generateAdminJWT(staff._id).token,
+            jwt: this.authService.generateJWT(staff._id, true).token,
         });
     }
 

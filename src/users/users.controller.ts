@@ -20,7 +20,7 @@ export class UsersController {
         return res.status(201).json({
             statusCode: 201,
             message: 'Login successfully',
-            jwt: this.authService.generateJWT(user["_id"]).token,
+            jwt: this.authService.generateJWT(user["_id"], false).token,
             is_thai_language: user["is_thai_language"],
         });
     }
@@ -52,7 +52,7 @@ export class UsersController {
                     acc = db_acc
                 }
                 const payload = {
-                token: this.authService.generateJWT(acc["_id"]).token, 
+                token: this.authService.generateJWT(acc["_id"], false).token, 
                 is_first_login: acc["is_first_login"], 
                 is_thai_language: acc["is_thai_language"]};
                 return payload;
