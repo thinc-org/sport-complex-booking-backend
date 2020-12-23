@@ -1,6 +1,6 @@
 import { Controller, Get ,Param,Patch,Body, Query,UseGuards,Req,HttpException,HttpStatus} from '@nestjs/common';
 import { ApprovalService } from './approval.service';
-import {JwtAuthGuard, StaffGuard } from 'src/auth/jwt.guard'
+import { StaffGuard } from 'src/auth/jwt.guard'
 
 @UseGuards(StaffGuard)
 @Controller('approval')
@@ -19,11 +19,11 @@ export class ApprovalController {
 
   @Patch("/approve")
   approve(@Body('id') id:string,@Body('newExpiredDate') newExpiredDate:Date,@Req() req){
-    return this.approvalService.approve(id,newExpiredDate);
+    return this.approvalService.setApprovalstatus(id,true,newExpiredDate,null);
   }
 
   @Patch("/reject")
   reject(@Body('id') id:string,@Body('reject_info') reject_info:string[],@Req() req){
-    return this.approvalService.reject(id,reject_info);
+    return this.approvalService.setApprovalstatus(id,false,null,reject_info);
   }
 }

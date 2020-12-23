@@ -47,22 +47,19 @@ export class ApprovalService {
     return [length,user];
   
   }
-
-  async approve(id:string,newExpiredDate:Date) :Promise<User>{
-    const user =await this.userModel.findByIdAndUpdate(id, {$set:{"verification_status":Verification.Verified,"account_expiration_date":newExpiredDate}},{new:true,strict: false}).exec();
-
+  async setApprovalstatus(id:string,isApprove:boolean,newExpiredDate:Date,reject_info:string[]) : Promise<User>
+  {
+    var user;
+    
+    if(isApprove)
+      user =await this.userModel.findByIdAndUpdate(id, {$set:{verification_status:Verification.Verified,account_expiration_date:newExpiredDate}},{new:true,strict: false}).exec();
+    else 
+      user =await this.userModel.findByIdAndUpdate(id, {$set:{verification_status:Verification.Rejected,rejected_info:reject_info}},{new:true,strict: false}).exec();  
+      
     if(!user)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     return user;
   }
-
-  async reject(id:string,info:string[]) :Promise<User>{
   
-    const user =await this.userModel.findByIdAndUpdate(id, {$set:{verification_status:Verification.Rejected,rejected_info:info}},{new:true,strict: false}).exec();
-
-    if(!user)
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-    return user;
-  }
 
 }
