@@ -35,7 +35,7 @@ export class ReservationService {
         if(user.account_type == Account.Other){
             let otherUser = user as OtherUser
             let date: Date = new Date();
-            date.setHours(date.getHours()+7)//บวก7จะเปนเวลาประเทศไทย
+            date.setHours(date.getHours()+7)//บวก7จะเปนเวลาประเทศไทย(เช็คกับฟังก์ชั่นที่approveอีกที)
             if(otherUser.verification_status != Verification.Verified){
                 throw new HttpException("Your account has to verify first", HttpStatus.UNAUTHORIZED)
             }
@@ -123,7 +123,7 @@ export class ReservationService {
 
     async checkQuota(waitingroomdto: WaitingRoomDto,id: string){
         const joinedReservation = await this.ReservationModel.find({ list_member: { $in: [Types.ObjectId(id)]},date: waitingroomdto.date,sport_id:waitingroomdto.sport_id})
-        let quota: number = 5 //เลขตรงนี้ต้องไปเอามาจากsport
+        let quota: number = 6 //เลขตรงนี้ต้องไปเอามาจากsport
         for(let i = 0; i<joinedReservation.length;i++){
             for(let j = 0; j<joinedReservation[i].time_slot.length;j++){
                 quota = quota - (Number(joinedReservation[i].time_slot[j].end_time)-Number(joinedReservation[i].time_slot[j].start_time))/30
