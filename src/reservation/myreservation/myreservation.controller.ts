@@ -4,7 +4,7 @@ import { Reservation } from "./../interfaces/reservation.interface";
 import { MyReservationDto } from "./dto/myreservation.dto";
 
 import { MyReservationService } from "./myreservation.service";
-import { JwtAuthGuard } from 'src/auth/jwt.guard'
+import { JwtAuthGuard, StaffGuard } from 'src/auth/jwt.guard'
 
 @Controller('myreservation')
 export class MyReservationController {
@@ -27,6 +27,9 @@ export class MyReservationController {
     async cancelReservation(@Param() param,@Req() req) : Promise<Reservation> { 
         return this.myResrvationService.cancelMyReservation(req.user.userId,param.id);
     }
+
+    @UseGuards(StaffGuard)
+    
 
     @Get('/unbanall')
     async unbanAll(){

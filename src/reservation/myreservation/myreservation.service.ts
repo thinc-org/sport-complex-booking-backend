@@ -23,7 +23,6 @@ export class MyReservationService {
         private readonly userService : UsersService
     ){}
 
-    //Change sport Id to sport name.
     async reservationToDto( myreservation : Reservation , is_thai_language : boolean ) :  Promise<MyReservationDto>{
         var temp = new MyReservationDto();
             
