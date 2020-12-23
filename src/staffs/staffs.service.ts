@@ -37,11 +37,9 @@ export class StaffsService {
   async login(staff: Staff): Promise<Staff> {
     //if username is not exist
     const isUsernameExist = await this.findByUsername(staff.username);
-    console.log(isUsernameExist)
     if (!isUsernameExist) {
       throw new BadRequestException('Username or Password is wrong');
     }
-    console.log(isUsernameExist.password)
     const isPasswordMatching = await bcrypt.compare(staff.password, isUsernameExist.password);
     if (!isPasswordMatching) {
       throw new BadRequestException('Username or Password is wrong');
