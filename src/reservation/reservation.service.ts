@@ -2,95 +2,95 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, Types } from 'mongoose';
-import { Account, OtherUser, User, Verification} from 'src/users/interfaces/user.interface';
+import { Account, OtherUser, User, Verification } from 'src/users/interfaces/user.interface';
 import { WaitingRoomDto } from './dto/waiting-room.dto';
-import { Reservation , WaitingRoom } from "./interfaces/reservation.interface";
+import { Reservation, WaitingRoom } from "./interfaces/reservation.interface";
 
 
 @Injectable()
 export class ReservationService {
     constructor(
-        @InjectModel('WaitingRoom') private WaitingRoomModel : Model<WaitingRoom> ,
-        @InjectModel('Reservation') private ReservationModel : Model<Reservation>,
+        @InjectModel('WaitingRoom') private WaitingRoomModel: Model<WaitingRoom>,
+        @InjectModel('Reservation') private ReservationModel: Model<Reservation>,
         @InjectModel('User') private userModel: Model<User>
-    ){}
-    
+    ) { }
+
     //Test na krub by NON
-    async createTestWaitingRoom( WaitingRoom : WaitingRoom) : Promise<WaitingRoom>{
+    async createTestWaitingRoom(WaitingRoom: WaitingRoom): Promise<WaitingRoom> {
         const newMyWaitingRoom = new this.WaitingRoomModel(WaitingRoom);
         return newMyWaitingRoom.save();
     }
 
     //Test na krub by NON
-    async createReservation( Reservation : Reservation) : Promise<Reservation>{
+    async createReservation(Reservation: Reservation): Promise<Reservation> {
         const newSuccessfulReservation = new this.ReservationModel(Reservation);
         return newSuccessfulReservation.save();
     }
 
-    async checkValidity(id: string) : Promise<boolean> {
+    async checkValidity(id: string): Promise<boolean> {
         const user = await this.userModel.findById(id);
         if (user == null) {
             throw new HttpException("This Id does not exist.", HttpStatus.BAD_REQUEST)
         }
-        if(user.account_type == Account.Other){
+        if (user.account_type == Account.Other) {
             let otherUser = user as OtherUser
             let date: Date = new Date();
-            date.setHours(date.getHours()+7)//บวก7จะเปนเวลาประเทศไทย(เช็คกับฟังก์ชั่นที่approveอีกที)
-            if(otherUser.verification_status != Verification.Verified){
+            date.setHours(date.getHours() + 7)//บวก7จะเปนเวลาประเทศไทย(เช็คกับฟังก์ชั่นที่approveอีกที)
+            if (otherUser.verification_status != Verification.Verified) {
                 throw new HttpException("Your account has to verify first", HttpStatus.UNAUTHORIZED)
             }
-            else if(otherUser.account_expiration_date < date){
+            else if (otherUser.account_expiration_date < date) {
                 throw new HttpException("Your account has already expired, please contact staff", HttpStatus.UNAUTHORIZED)
             }
         }
-        if(user.is_penalize){
+        if (user.is_penalize) {
             throw new HttpException("Your account has been banned, please contact staff", HttpStatus.UNAUTHORIZED)
         }
-        const haveWaitingRoom = await this.WaitingRoomModel.findOne({ list_member: { $in: [Types.ObjectId(id)]} })
-        if(haveWaitingRoom){
+        const haveWaitingRoom = await this.WaitingRoomModel.findOne({ list_member: { $in: [Types.ObjectId(id)] } })
+        if (haveWaitingRoom) {
             throw new HttpException("You already have waiting room", HttpStatus.UNAUTHORIZED)
         }
         return true
     }
 
-    async checkTimeSlot(waitingroomdto: WaitingRoomDto){
+    async checkTimeSlot(waitingroomdto: WaitingRoomDto) {
         let unavailableTime = []
-        const reservation = await this.ReservationModel.find({ court_number:waitingroomdto.court_number,date: waitingroomdto.date,sport_id:waitingroomdto.sport_id})
-        const waitingroom = await this.WaitingRoomModel.find({ court_number:waitingroomdto.court_number,date: waitingroomdto.date,sport_id:waitingroomdto.sport_id})
-        for(let i = 0; i<reservation.length;i++){
-            for(let j = 0; j<reservation[i].time_slot.length;j++){
-                unavailableTime.push([Number(reservation[i].time_slot[j].start_time),Number(reservation[i].time_slot[j].end_time)])
+        const reservation = await this.ReservationModel.find({ court_number: waitingroomdto.court_number, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
+        const waitingroom = await this.WaitingRoomModel.find({ court_number: waitingroomdto.court_number, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
+        for (let i = 0; i < reservation.length; i++) {
+            for (let j = 0; j < reservation[i].time_slot.length; j++) {
+                unavailableTime.push(reservation[i].time_slot)
             }
         }
-        for(let i = 0; i<waitingroom.length;i++){
-            for(let j = 0; j<waitingroom[i].time_slot.length;j++){
-                unavailableTime.push([Number(waitingroom[i].time_slot[j].start_time),Number(waitingroom[i].time_slot[j].end_time)])
+        for (let i = 0; i < waitingroom.length; i++) {
+            for (let j = 0; j < waitingroom[i].time_slot.length; j++) {
+                unavailableTime.push(waitingroom[i].time_slot)
             }
         }
         return unavailableTime
     }
 
-    makeid(length) : string {
+    makeid(length): string {
         let result: string = '';
         let characters: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let charactersLength:number = characters.length;
-        for ( let i = 0; i < length; i++ ) {
-           result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        let charactersLength: number = characters.length;
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
         }
         return result;
     }
 
-    async createWaitingRoom(waitingroomdto: WaitingRoomDto,id: string): Promise<WaitingRoom> {
+    async createWaitingRoom(waitingroomdto: WaitingRoomDto, id: string): Promise<WaitingRoom> {
         const waitingroom = new this.WaitingRoomModel(waitingroomdto)
         waitingroom.list_member.push(Types.ObjectId(id))
         let date: Date = new Date();
         let waiting_room_duration: number = 15 //เวลาตรงนี้ต้องไปเอามาจากsetting
-        date.setMinutes(date.getMinutes()+waiting_room_duration)
+        date.setMinutes(date.getMinutes() + waiting_room_duration)
         waitingroom.expired_date = date
         let access_code: string = this.makeid(6);
-        while(true){
+        while (true) {
             const sameCode = await this.WaitingRoomModel.findOne({ access_code: access_code })
-            if(!sameCode){
+            if (!sameCode) {
                 break
             }
             access_code = this.makeid(6);
@@ -99,14 +99,14 @@ export class ReservationService {
         return await waitingroom.save()
     }
 
-    async joinWaitingRoom(access_code: string,id:string){
+    async joinWaitingRoom(access_code: string, id: string) {
         const waitingroom = await this.WaitingRoomModel.findOne({ access_code: access_code })
-        if(!waitingroom){
+        if (!waitingroom) {
             throw new HttpException("The code is wrong.", HttpStatus.BAD_REQUEST)
         }
         waitingroom.list_member.push(Types.ObjectId(id))
-        let required_member:number = 2 //เลขตรงนี้ต้องไปเอามาจากsport
-        if(waitingroom.list_member.length==required_member){
+        let required_member: number = 2 //เลขตรงนี้ต้องไปเอามาจากsport
+        if (waitingroom.list_member.length == required_member) {
             const reservation = new this.ReservationModel({
                 sport_id: waitingroom.sport_id,
                 court_number: waitingroom.court_number,
@@ -115,18 +115,18 @@ export class ReservationService {
                 list_member: waitingroom.list_member,
                 is_check: false
             })
-           await waitingroom.remove()
+            await waitingroom.remove()
             return await reservation.save()
         }
         return await waitingroom.save()
     }
 
-    async checkQuota(waitingroomdto: WaitingRoomDto,id: string){
-        const joinedReservation = await this.ReservationModel.find({ list_member: { $in: [Types.ObjectId(id)]},date: waitingroomdto.date,sport_id:waitingroomdto.sport_id})
+    async checkQuota(waitingroomdto: WaitingRoomDto, id: string) {
+        const joinedReservation = await this.ReservationModel.find({ list_member: { $in: [Types.ObjectId(id)] }, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
         let quota: number = 6 //เลขตรงนี้ต้องไปเอามาจากsport
-        for(let i = 0; i<joinedReservation.length;i++){
-            for(let j = 0; j<joinedReservation[i].time_slot.length;j++){
-                quota = quota - (Number(joinedReservation[i].time_slot[j].end_time)-Number(joinedReservation[i].time_slot[j].start_time))/30
+        for (let i = 0; i < joinedReservation.length; i++) {
+            for (let j = 0; j < joinedReservation[i].time_slot.length; j++) {
+                quota = quota - joinedReservation[i].time_slot.length
             }
         }
         return quota
