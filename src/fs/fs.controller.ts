@@ -1,7 +1,7 @@
 import { Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Query, Req, Res, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { JwtAuthGuard } from 'src/auth/jwt.guard';
+import { JwtAuthGuard, StaffGuard } from 'src/auth/jwt.guard';
 import { FSService } from './fs.service';
 
 @Controller('fs')
@@ -44,16 +44,15 @@ export class FSController {
   }
 
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(StaffGuard)
   @Delete('admin/delete/:fileId')
   async deleteFileAdmin(@Req() req, @Param('fileId') fileId: string) {
-    if (!req.user.isStaff) throw new HttpException('Not an admin', HttpStatus.UNAUTHORIZED)
     const fileInfo = await this.fsService.getFileInfo(fileId)
     await this.fsService.deleteFile(fileInfo._id)
     return fileInfo
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(StaffGuard)
   @Post('admin/upload/:userId')
   @UseInterceptors(FileFieldsInterceptor([
     { name: 'user_photo', maxCount: 1 },
@@ -63,7 +62,6 @@ export class FSController {
     { name: 'relationship_verification_document', maxCount: 1 },
   ]))
   async uploadFileAdmin(@UploadedFiles() files, @Req() req, @Res() res, @Param('userId') userId: string) {
-    if (!req.user.isStaff) throw new HttpException('Not an admin', HttpStatus.UNAUTHORIZED)
     res.send(await this.fsService.saveFiles(this.configService.get('UPLOAD_DEST'), userId, files))
   }
 }
