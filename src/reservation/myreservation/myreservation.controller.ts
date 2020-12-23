@@ -1,4 +1,4 @@
-import { Controller ,UseGuards ,Post ,Get, Body, Param, Delete, Req } from '@nestjs/common';
+import { Controller ,UseGuards ,Post ,Get, Body, Param, Delete, Req, Patch } from '@nestjs/common';
 
 import { Reservation } from "./../interfaces/reservation.interface";
 import { MyReservationDto } from "./dto/myreservation.dto";
@@ -13,7 +13,7 @@ export class MyReservationController {
     @UseGuards(JwtAuthGuard)
     @Get('/getallreservation')
     async getAllReservation(@Req() req) : Promise<MyReservationDto[]> {
-        return this.myResrvationService.getAllMyReservation(req.user.userId); // Not sure that JWT that contain is_thai_language
+        return this.myResrvationService.getAllMyReservation(req.user.userId);
     } 
 
     @UseGuards(JwtAuthGuard)
@@ -29,7 +29,10 @@ export class MyReservationController {
     }
 
     @UseGuards(StaffGuard)
-    
+    @Patch('/check/:id')
+    async checkReservation(@Param() param) : Promise<Reservation>{
+        return this.myResrvationService.checkReservation(param.id);
+    }
 
     @Get('/unbanall')
     async unbanAll(){

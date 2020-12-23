@@ -1,6 +1,6 @@
 import { Injectable,HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, Mongoose, Types } from 'mongoose';
+import { Model, isValidObjectId, Types } from 'mongoose';
 
 import { WaitingRoom, Reservation } from "./../interfaces/reservation.interface";
 
@@ -90,7 +90,15 @@ export class MyReservationService {
     } 
 
     async cancelMyReservation( user_id : Types.ObjectId , reservation_id : Types.ObjectId ) : Promise<Reservation> { 
-        const test_qeury : Reservation = await this.reservationModel.findByIdAndDelete(reservation_id);
+
+        if (!isValidObjectId(reservation_id)) {
+            throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
+        }
+        if (!isValidObjectId(user_id)) {
+            throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
+        }
+
+        const test_qeury : Reservation = await this.reservationModel.findById(reservation_id);
 
         if( test_qeury === null ){
             throw new HttpException("This reservation doesn't exist.", HttpStatus.NOT_FOUND);
@@ -98,6 +106,8 @@ export class MyReservationService {
         if( !test_qeury.list_member.includes(user_id) ){
             throw new HttpException("This user isn't in the reservation.", HttpStatus.UNAUTHORIZED);
         }
+
+        test_qeury.remove();
 
         var date1 : Date = new Date(); 
         var date2 : Date = test_qeury.date; 
@@ -107,7 +117,6 @@ export class MyReservationService {
         var late_cancelation_punishment : number = setting.late_cancelation_punishment,
             late_cancelation_day : number = setting.late_cancelation_day;
 
-        // Get the expired_penalize_date from setting
         if(0 <= diffDate && diffDate <= late_cancelation_day){
             for( let userid of test_qeury.list_member){
                 var new_expired_penalize_date = new Date();
@@ -118,6 +127,10 @@ export class MyReservationService {
         }
 
         return test_qeury;
+    }
+
+    async checkReservation( reservation_id : Types.ObjectId ) : Promise<Reservation>{
+        return this.reservationModel.findByIdAndUpdate(reservation_id, { is_check : true });
     }
 
     //Delete 
