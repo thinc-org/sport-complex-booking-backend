@@ -54,20 +54,29 @@ export class ReservationService {
     }
 
     async checkTimeSlot(waitingroomdto: WaitingRoomDto) {
-        let unavailableTime = []
+        const open_time = 17
+        const close_time = 40
+        let availableTime = new Set<Number>()
+        for (let i = open_time; i <= close_time;i++){
+            availableTime.add(i)
+        }
         const reservation = await this.ReservationModel.find({ court_number: waitingroomdto.court_number, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
         const waitingroom = await this.WaitingRoomModel.find({ court_number: waitingroomdto.court_number, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
         for (let i = 0; i < reservation.length; i++) {
             for (let j = 0; j < reservation[i].time_slot.length; j++) {
-                unavailableTime.push(reservation[i].time_slot)
+                availableTime.delete(reservation[i].time_slot[j])
             }
         }
         for (let i = 0; i < waitingroom.length; i++) {
             for (let j = 0; j < waitingroom[i].time_slot.length; j++) {
-                unavailableTime.push(waitingroom[i].time_slot)
+                availableTime.delete(waitingroom[i].time_slot[j])
             }
         }
-        return unavailableTime
+        const disable_time = [21,22,23,24]
+        for (let i = 0; i < disable_time.length; i++){
+            availableTime.delete(disable_time[i])
+        }
+        return Array.from(availableTime)
     }
 
     makeid(length): string {
@@ -81,10 +90,15 @@ export class ReservationService {
     }
 
     async createWaitingRoom(waitingroomdto: WaitingRoomDto, id: string): Promise<WaitingRoom> {
+        const availableTime = this.checkTimeSlot(waitingroomdto)
+        if(await this.checkQuota(waitingroomdto,id)<waitingroomdto.time_slot.length){
+            throw new HttpException("You have not enough quotas", HttpStatus.UNAUTHORIZED)
+        }
+        //if((await availableTime).includes(waitingroomdto.time_slot.values)
         const waitingroom = new this.WaitingRoomModel(waitingroomdto)
         waitingroom.list_member.push(Types.ObjectId(id))
         let date: Date = new Date();
-        let waiting_room_duration: number = 15 //เวลาตรงนี้ต้องไปเอามาจากsetting
+        const waiting_room_duration: number = 15 //เวลาตรงนี้ต้องไปเอามาจากsetting
         date.setMinutes(date.getMinutes() + waiting_room_duration)
         waitingroom.expired_date = date
         let access_code: string = this.makeid(6);
