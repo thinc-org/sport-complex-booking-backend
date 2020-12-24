@@ -59,7 +59,9 @@ async create_Sport(court_data: Sport) : Promise<Sport>{
 }
 
 //update only sport setting, not court's setting
-async update_Sport(sportID: string, newSportSetting: Sport) : Promise<Sport>{
+async update_Sport(sportID: string, newSportSetting: {sport_name_th: string, sport_name_en: string, 
+      required_user: number, quota: number}) : Promise<Sport>{
+            
       const Sport = await this.find_Sport_byID(sportID);
       Sport.required_user = newSportSetting.required_user;
       Sport.quota = newSportSetting.quota;
@@ -89,7 +91,6 @@ async sportRegexQuery(start: number, end: number, search_filter: string) : Promi
             end = list_doc.length;
       }
       const allSport_length = list_doc.length;  //every sports in a query (not yet sliced)
-
       
       return {allSport_length: allSport_length, sport_list: list_doc.slice(start, end)};
 }
