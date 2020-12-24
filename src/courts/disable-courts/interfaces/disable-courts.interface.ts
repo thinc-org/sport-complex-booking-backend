@@ -1,8 +1,7 @@
 import { Document, Mongoose, Types } from "mongoose";
 
 export interface DisableTime {
-    start_time: number
-    end_time: number
+    time_slot: Array<number>
     day: number
 }
 

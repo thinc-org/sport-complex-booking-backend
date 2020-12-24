@@ -29,13 +29,11 @@ export class CreateDisableCourtDTO {
 }
 
 export class CreateDisableTimeDTO {
-    @IsInt()
-    @Min(0)
-    start_time: number
-
-    @IsInt()
-    @Min(0)
-    end_time: number
+    @ArrayMinSize(1)
+    @IsNumber({}, {each: true})
+    @Min(1, {each: true})
+    @Max(48, {each: true})
+    time_slot: Array<number>
 
     @IsInt()
     @Min(0)
@@ -46,40 +44,34 @@ export class CreateDisableTimeDTO {
 export class EditDisableCourtDTO {
     @IsOptional()
     @IsString()
-    description: string
+    description?: string
 
     @IsOptional()
     @IsString()
-    sport_id: Types.ObjectId
+    sport_id?: Types.ObjectId
 
     @IsOptional()
     @IsInt()
     @Min(0)
-    court_num: number
+    court_num?: number
 
     @IsOptional()
     @Type(() => Date)
     @IsDate()
-    starting_date: Date
+    starting_date?: Date
 
     @IsOptional()
     @Type(() => Date)
     @IsDate()
-    expired_date: Date
+    expired_date?: Date
     
     @IsOptional()
     @ArrayMinSize(1)
     @ValidateNested({ each: true })
     @Type(() => CreateDisableTimeDTO)
-    disable_time: Array<CreateDisableTimeDTO>
+    disable_time?: Array<CreateDisableTimeDTO>
 }
 
-export class AddDisableTimeDTO {
-    @ArrayMinSize(1)
-    @ValidateNested({ each: true })
-    @Type(() => CreateDisableTimeDTO)
-    disable_times: Array<CreateDisableTimeDTO>
-}
 
 export class QueryResult {
     total_found: number
@@ -91,35 +83,35 @@ export class QueryDisableCourtDTO {
     @IsOptional()
     @Type(()=>Date)
     @IsDate()
-    starting_date: Date
+    starting_date?: Date
 
     @IsOptional()
     @Type(()=>Date)
     @IsDate()
-    expired_date: Date
+    expired_date?: Date
 
     @IsOptional()
     @IsString()
-    sport_id: string
+    sport_id?: string
 
     @IsOptional()
     @IsInt()
     @Min(0)
-    court_num: number
+    court_num?: number
 
     @IsOptional()
     @IsInt()
-    start: number
+    start?: number
 
     @IsOptional()
     @IsInt()
-    end: number
+    end?: number
 
     @IsOptional()
     @IsBoolean()
-    lean: boolean = true
+    lean?: boolean = true
     
     @IsOptional()
     @IsString()
-    description: string
+    description?: string
 }
