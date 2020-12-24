@@ -62,12 +62,12 @@ async getSportList(@Body() input: {start:number, end:number, search_filter: stri
 
 //can be use for courts displaying 
 @UseGuards(JwtAuthGuard)
-@Get('getSportbyID')
-async getSport(@Body() id : {id: string}, @Req() req) : Promise<Sport>{
+@Get('/:id')
+async getSport(@Param('id') id: string , @Req() req) : Promise<Sport>{
       if(!req.user.isStaff){ 
             throw new HttpException('Staff or Admin only', HttpStatus.UNAUTHORIZED);
       }
-      return await this.courtManagerService.find_Sport_byID(id.id);
+      return await this.courtManagerService.find_Sport_byID(id);
 }
 
 //create new document for each sport using body as sport
@@ -83,7 +83,9 @@ async createSport(@Body() sport_data: Sport, @Req() req): Promise<Sport>{
 //for updating sport_name_th, sport_name_en, quotas, required_users
 @UseGuards(JwtAuthGuard)
 @Put('/:id')
-async updateSport(@Param('id') id: string,@Body() sport_data: Sport, @Req() req): Promise<Sport>{
+async updateSport(@Param('id') id: string,@Body() sport_data: {sport_name_th: string, sport_name_en: string, 
+      required_user: number, quota: number}, @Req() req): Promise<Sport>{
+            
       if(!req.user.isStaff){ 
             throw new HttpException('Staff or Admin only', HttpStatus.UNAUTHORIZED);
       }
@@ -101,8 +103,6 @@ async deleteSport(@Param('id') id: string, @Req() req): Promise<Sport>{
 }
 
 //Param is sportType ex. Basketball (in english)
-//maybe fix this for hk, sending only one Court. If not, will have to create delete and update time slot for each court
-//court number cant be repeated
 @UseGuards(JwtAuthGuard)
 @Put('court-setting/update')     
 async changeCourtSetting( @Body() new_court: {"sport_id": string, "new_setting": Court[]}, @Req() req) : Promise<Sport>{
