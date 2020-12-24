@@ -23,7 +23,7 @@ export class listAllUserService {
     }
 
     isThaiLang(keyword: string) {
-        for (var idx = 0; idx < keyword.length; idx++) {
+        for (let idx = 0; idx < keyword.length; idx++) {
             if (!("A" <= keyword.charAt(idx) && keyword.charAt(idx) <= "z")) {
                 return true;
             }
@@ -32,7 +32,7 @@ export class listAllUserService {
     }
 
     isEngLang(keyword: string) {
-        for (var idx = 0; idx < keyword.length; idx++) {
+        for (let idx = 0; idx < keyword.length; idx++) {
             if ("A" <= keyword.charAt(idx) && keyword.charAt(idx) <= "z") {
                 return true;
             }
@@ -42,7 +42,7 @@ export class listAllUserService {
 
     async filterUser(qparam): Promise<[number,User[]]> {
 
-        var begin : number = 0 , end : number , is_thai_language : boolean = false , has_end : boolean = false;
+        let begin : number = 0 , end : number , is_thai_language : boolean = false , has_end : boolean = false;
 
         if(qparam.hasOwnProperty('begin')){
             begin = qparam.begin;
@@ -59,20 +59,20 @@ export class listAllUserService {
             is_thai_language = this.isThaiLang(qparam.name);
         }
 
-        var seletingProperty : string = 'username is_penalize ';
+        let seletedProperty : string = 'username is_penalize ';
 
         if(is_thai_language){
-            seletingProperty += 'name_th surname_th';
+            seletedProperty += 'name_th surname_th';
             qparam.name_th = { $regex: ".*" + qparam.name + ".*", $options: 'i' };
         }
         else{
-            seletingProperty += 'name_en surname_en';
+            seletedProperty += 'name_en surname_en';
             qparam.name_en = { $regex: ".*" + qparam.name + ".*", $options: 'i' };
         }
 
         delete qparam['name'];
 
-        var temp : User[] = await this.usersService.find(qparam,seletingProperty);
+        let temp : User[] = await this.usersService.find(qparam,seletedProperty);
 
         if(!has_end){
             end = temp.length;
@@ -91,7 +91,7 @@ export class listAllUserService {
             throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST);
         }
 
-        var tempUser : User = await this.userModel.findById(id);
+        let tempUser : User = await this.userModel.findById(id);
 
         if( tempUser === null ){
             throw new HttpException("Invalid User", HttpStatus.NOT_FOUND);
@@ -176,7 +176,7 @@ export class listAllUserService {
             throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST);
         }
 
-        var tempUser : User = await this.userModel.findByIdAndUpdate(id, update);
+        let tempUser : User = await this.userModel.findByIdAndUpdate(id, update);
 
         if( tempUser === null ){
             throw new HttpException("Invalid User", HttpStatus.NOT_FOUND);
@@ -188,7 +188,7 @@ export class listAllUserService {
 
     async changePassWord( id : Types.ObjectId , body ) : Promise<User>{
 
-        var tempUser : User = await this.getUserById(id);
+        let tempUser : User = await this.getUserById(id);
 
         if( !body.hasOwnProperty('password') ){
             throw new HttpException("The body doesn't exist a password.", HttpStatus.CONFLICT)

@@ -2,10 +2,10 @@ import { Injectable,HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, isValidObjectId, Types } from 'mongoose';
 
-import { WaitingRoom, Reservation } from "./../interfaces/reservation.interface";
+import { Reservation } from "./../interfaces/reservation.interface";
 
 import { User } from "./../../users/interfaces/user.interface";
-import { MyReservationDto } from "./dto/myreservation.dto";
+import { MyReservationDto, firstClass , secondClass } from "./dto/myreservation.dto";
 import { List_Sport } from "./../../court-manager/interfaces/sportCourt.interface";
 
 import { CourtManagerService } from "./../../court-manager/court-manager.service";
@@ -16,19 +16,18 @@ import { Setting } from "./../../court-manager/interfaces/setting.interface";
 @Injectable()
 export class MyReservationService {
     constructor(
-        @InjectModel('WaitingRoom') private waitingRoomModel : Model<WaitingRoom>,
         @InjectModel('User') private userModel :  Model<User>,
         @InjectModel('Reservation') private reservationModel : Model<Reservation>,
         private readonly courtManagerService : CourtManagerService,
         private readonly userService : UsersService
     ){}
 
-    async reservationToDto( myreservation : Reservation , is_thai_language : boolean ) :  Promise<MyReservationDto>{
-        var temp = new MyReservationDto();
-            
-        temp.my_reservation_id = myreservation._id;
+    async reservationToDtoFirst( myreservation : Reservation , is_thai_language : boolean ) :  Promise<firstClass>{
+        let temp : firstClass = new firstClass();
 
         const sport : List_Sport = await this.courtManagerService.find_SportList_byID(myreservation.sport_id.toString());
+
+        temp.my_reservation_id = myreservation._id;
         
         if(is_thai_language){
             temp.sport_name = sport.sport_name_th;
@@ -37,14 +36,22 @@ export class MyReservationService {
             temp.sport_name = sport.sport_name_en;
         }
 
-        temp.court_num = sport.court_num;
+        temp.court_num = myreservation.court_number;
         temp.time_slot = myreservation.time_slot;
+        temp.date = myreservation.date;
+
+        return temp;
+    }
+
+    async reservationToDtoSecond( myreservation : Reservation , is_thai_language : boolean ) :  Promise<secondClass>{
+        let temp : secondClass = new secondClass();
+
         temp.list_member_id = myreservation.list_member;
 
-        var user_name : String[] = new Array();
+        let user_name : String[] = new Array();
 
         for (let user_id of temp.list_member_id ){
-            var user = await this.userService.findById(user_id);
+            let user = await this.userService.findById(user_id);
             if(is_thai_language)
             {
                 user_name.push(user.name_th);
@@ -55,7 +62,7 @@ export class MyReservationService {
         }
 
         temp.list_member_name = user_name;
-
+        
         return temp;
     }
 
@@ -66,11 +73,12 @@ export class MyReservationService {
     async getAllMyReservation( user_id : Types.ObjectId) : Promise<MyReservationDto[]>{
 
         const temp_myreservations : Reservation[] = await this.reservationModel.find({list_member : user_id}).sort({sport_id : 1 , date : 1 , time_slot : -1});
-        var output : MyReservationDto[] = new  Array();
+        let output : MyReservationDto[] = new  Array(temp_myreservations.length);
         const is_thai_language = await this.getLanguage(user_id);
 
-        for ( let myreservation of temp_myreservations ){
-            output.push(await this.reservationToDto(myreservation,is_thai_language));
+        for ( let i in temp_myreservations ){
+            output[i] = new MyReservationDto();
+            output[i].first = await this.reservationToDtoFirst(temp_myreservations[i],is_thai_language);
         }
 
         return output;
@@ -86,7 +94,12 @@ export class MyReservationService {
         if( test_qeury.list_member.includes(user_id) ){
             throw new HttpException("This user isn't in the reservation.", HttpStatus.UNAUTHORIZED);
         }
-        return this.reservationToDto(test_qeury,is_thai_language);
+
+        let temp : MyReservationDto = new MyReservationDto();
+        temp.first = await this.reservationToDtoFirst(test_qeury,is_thai_language);
+        temp.second = await this.reservationToDtoSecond(test_qeury,is_thai_language);
+
+        return temp;
     } 
 
     async cancelMyReservation( user_id : Types.ObjectId , reservation_id : Types.ObjectId ) : Promise<Reservation> { 
@@ -109,17 +122,17 @@ export class MyReservationService {
 
         test_qeury.remove();
 
-        var date1 : Date = new Date(); 
-        var date2 : Date = test_qeury.date; 
-        var diffDate = (date2.getTime()-date1.getTime())/(1000 * 3600 * 24);
+        const date1 : Date = new Date(); 
+        const date2 : Date = test_qeury.date; 
+        const diffDate = (date2.getTime()-date1.getTime())/(1000 * 3600 * 24);
 
-        var setting : Setting = await this.courtManagerService.get_setting();
-        var late_cancelation_punishment : number = setting.late_cancelation_punishment,
+        const setting : Setting = await this.courtManagerService.get_setting();
+        const late_cancelation_punishment : number = setting.late_cancelation_punishment,
             late_cancelation_day : number = setting.late_cancelation_day;
 
         if(0 <= diffDate && diffDate <= late_cancelation_day){
             for( let userid of test_qeury.list_member){
-                var new_expired_penalize_date = new Date();
+                let new_expired_penalize_date = new Date();
                 new_expired_penalize_date.setDate(new_expired_penalize_date.getDate()+late_cancelation_punishment);
                 await this.userModel.findByIdAndUpdate(userid,{is_penalize : true ,
                                                                 expired_penalize_date : new_expired_penalize_date});
@@ -135,7 +148,7 @@ export class MyReservationService {
             throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST);
         }
 
-        var temp : Reservation = await this.reservationModel.findById(reservation_id);
+        let temp : Reservation = await this.reservationModel.findById(reservation_id);
 
         if ( temp === null ){
             throw new HttpException("Invalid reservation.", HttpStatus.NOT_FOUND)
@@ -146,15 +159,4 @@ export class MyReservationService {
         return temp;
     }
 
-    //Delete 
-    async unbanAll(){
-        var users : User[] = await this.userModel.find({is_penalize : true});
-        console.log(users);
-
-        for(let user of users){
-            console.log(user._id);
-            await this.userModel.findByIdAndUpdate(user._id,{is_penalize : false},{useFindAndModify: false,new: true});
-        }
-
-    }
 }

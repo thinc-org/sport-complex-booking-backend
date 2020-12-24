@@ -1,6 +1,6 @@
 import { Injectable,HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from 'mongoose';
+import { Model, Types, isValidObjectId } from 'mongoose';
 
 import { WaitingRoom, Reservation } from "./../interfaces/reservation.interface";
 import { CreateWaitingRoomDto,CreateReservationDto } from "./dto/mywaitingroom.dto";
@@ -19,39 +19,6 @@ export class MywaitingroomService {
         const newMyWaitingRoom = new this.waitingRoomModel(waitingRoom);
 
         return newMyWaitingRoom.save();
-    }
-
-    async addMyWaitingRoom( user_Id : Types.ObjectId , 
-                            sport_Id : Types.ObjectId ,
-                            createMyWaitingRoomDto : CreateWaitingRoomDto ) : Promise<WaitingRoom> { 
-                            // In the practicion use sport name to find the sport ID. 
-        await this.checkUserCondition(user_Id);
-
-        const newMyWaitingRoom = new this.waitingRoomModel(createMyWaitingRoomDto);
-
-        newMyWaitingRoom.sport_id = sport_Id;
-        newMyWaitingRoom.list_member.push(user_Id);
-        newMyWaitingRoom.expired_date = (new Date());
-        newMyWaitingRoom.expired_date.setDate(newMyWaitingRoom.expired_date.getDate() + 1);
-        newMyWaitingRoom.access_code = await this.randomAccessCode(5);
-
-        return newMyWaitingRoom.save();
-    }
-
-    async randomAccessCode( number : Number ) : Promise<String>{
-        var temp : String = new String(), 
-            temp2 : String = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-        while(true){
-            for(let i =0;i<number;i++){
-                temp+=temp2.charAt(Math.ceil(Math.random()*62));
-            }
-            var test_qeury : WaitingRoom[] = await this.waitingRoomModel.find({access_code : temp});
-            if(test_qeury.length === 0 && temp.length == number){
-                break;
-            }
-            temp = new String();
-        }
-        return temp; 
     }
 
     async checkUserCondition ( user_Id : Types.ObjectId ){
@@ -73,23 +40,8 @@ export class MywaitingroomService {
 
     }
 
-    async joinMember( user_Id : Types.ObjectId , acode : String ) : Promise<WaitingRoom>{
-
-        await this.checkUserCondition(user_Id);
-
-        var tempMyWaitingRoom : WaitingRoom[] = await this.waitingRoomModel.find({access_code : acode});
-
-        if(tempMyWaitingRoom.length === 0){
-            throw new HttpException("This access code doesn't belong to any MyWaitingRoom", HttpStatus.BAD_REQUEST);
-        }
-
-        tempMyWaitingRoom[0].list_member.push(user_Id);
-        
-        return tempMyWaitingRoom[0].save();
-    } 
-
     async cancelMyWaitingRoom( myWaitingRoomID : Types.ObjectId ) : Promise<WaitingRoom>{
-        var tempMyWaitingRoom : WaitingRoom = await this.waitingRoomModel.findByIdAndDelete(myWaitingRoomID);
+        let tempMyWaitingRoom : WaitingRoom = await this.waitingRoomModel.findByIdAndDelete(myWaitingRoomID);
         if(tempMyWaitingRoom === null){
             throw new HttpException("This my waiting room doesn't exist.", HttpStatus.BAD_REQUEST);
         }
@@ -103,7 +55,7 @@ export class MywaitingroomService {
             throw new HttpException("This my waiting room doesn't exist.", HttpStatus.BAD_REQUEST);
         }
 
-        var temp = new CreateReservationDto();
+        let temp = new CreateReservationDto();
 
         temp.list_member = tempMyWaitingRoom.list_member;
         temp.sport_id = tempMyWaitingRoom.sport_id;
@@ -112,7 +64,7 @@ export class MywaitingroomService {
         temp.is_check = false;
         temp.date = tempMyWaitingRoom.date;
 
-        var newSuccesfulReservationModel = new this.reservationModel(temp);
+        let newSuccesfulReservationModel = new this.reservationModel(temp);
 
         return newSuccesfulReservationModel.save();
     }
@@ -127,4 +79,32 @@ export class MywaitingroomService {
         }
         return false;
     } 
+
+    async excludeUser( myWaitingRoomID : Types.ObjectId , userID : Types.ObjectId) : Promise<WaitingRoom>{
+
+        if (!isValidObjectId(myWaitingRoomID)) {
+            throw new HttpException("Invalid MyWaitingRoomID", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!isValidObjectId(userID)) {
+            throw new HttpException("Invalid UserID", HttpStatus.BAD_REQUEST);
+        }
+
+        let tempWaitingRoom : WaitingRoom = await this.waitingRoomModel.findById(myWaitingRoomID);
+
+        if(tempWaitingRoom === null){
+            throw new HttpException("Invalid MyWaitingRoom", HttpStatus.NOT_FOUND);
+        }
+        
+        const index : number = tempWaitingRoom.list_member.indexOf(userID);
+        
+        if( index === -1 ){
+            throw new HttpException("Mywaitingroom doesn't exist the userID.", HttpStatus.BAD_REQUEST);
+        }
+
+        tempWaitingRoom.list_member.splice( index , 1 );
+        tempWaitingRoom.save()
+
+        return tempWaitingRoom;
+    }
 }
