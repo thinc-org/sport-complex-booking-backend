@@ -2,7 +2,7 @@ import { Controller, Get ,Param,Patch,Body, Query,UseGuards} from '@nestjs/commo
 import { ApprovalService } from './approval.service';
 import { StaffGuard } from 'src/auth/jwt.guard'
 
-//@UseGuards(StaffGuard)
+@UseGuards(StaffGuard)
 @Controller('approval')
 export class ApprovalController {
     constructor(private readonly approvalService: ApprovalService) {}
@@ -19,11 +19,11 @@ export class ApprovalController {
 
   @Patch("/approve")
   approve(@Body('id') id:string,@Body('newExpiredDate') newExpiredDate:Date){
-    return this.approvalService.setApprovalstatus(id,true,newExpiredDate,null);
+    return this.approvalService.setApprovalstatus(id,true,{newExpiredDate:newExpiredDate});
   }
 
   @Patch("/reject")
-  reject(@Body('id') id:string,@Body('reject_info') reject_info:string[]){
-    return this.approvalService.setApprovalstatus(id,false,null,reject_info);
+  reject(@Body('id') id:string,@Body('reject_info') rejectInfo:string[]){
+    return this.approvalService.setApprovalstatus(id,false,{rejectInfo:rejectInfo});
   }
 }
