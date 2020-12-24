@@ -19,7 +19,7 @@ export class ApprovalService {
 
   async getSearchResult(name:string,start:number,end:number) : Promise<[Number,User[]]> {
 
-    var filter=this.userModel.find({verification_status:Verification.Submitted},{"_id":1,"name_en":1,"surname_en":1,"username":1,"name_th":1,"surname_th":1});
+    let filter=this.userModel.find({verification_status:Verification.Submitted},{"_id":1,"name_en":1,"surname_en":1,"username":1,"name_th":1,"surname_th":1});
 
     if(name!==undefined){
       
@@ -29,7 +29,7 @@ export class ApprovalService {
         filter= filter.find({ $or:[ {"name_th":{$regex:name}},{"surname_th":{$regex:name}}]});
     }
 
-    var user=await filter;
+    let user=await filter;
     const length=user.length;
     if(start !== undefined){
 
@@ -45,13 +45,20 @@ export class ApprovalService {
     return [length,user];
   
   }
-  async setApprovalstatus(id:string,isApprove:boolean,newExpiredDate:Date,reject_info:string[]) : Promise<User>
+  async setApprovalstatus(id:string,isApprove:boolean,options:{newExpiredDate?:Date,rejectInfo?:string[]}) : Promise<User>
   {
-    var user;
-    
-    if(isApprove) user =await this.userModel.findByIdAndUpdate(id, {$set:{verification_status:Verification.Verified,account_expiration_date:newExpiredDate}},{new:true,strict: false}).exec();
-    else user =await this.userModel.findByIdAndUpdate(id, {$set:{verification_status:Verification.Rejected,rejected_info:reject_info}},{new:true,strict: false}).exec();  
+
+    if(isApprove && options.newExpiredDate===null)
+      throw new HttpException('Cannot find newExpiredDate in req.body', HttpStatus.BAD_REQUEST);
       
+    if(!isApprove && options.rejectInfo===null)
+      throw new HttpException('Cannot find reject_info in req.body', HttpStatus.BAD_REQUEST);
+    
+    const setBlock= (isApprove)? {verification_status:Verification.Verified,account_expiration_date:options.newExpiredDate}
+                              :{verification_status:Verification.Rejected,rejected_info:options.rejectInfo};
+    
+    const user=await this.userModel.findByIdAndUpdate(id, {$set:setBlock},{new:true,strict: false}).exec();
+    
     if(!user)
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     return user;
