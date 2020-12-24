@@ -12,6 +12,8 @@ import { AccountInfosModule } from './users/accountInfos/accountInfos.module';
 import { CourtManagerModule } from './court-manager/court-manager.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { DisableCourtsModule } from './courts/disable-courts/disable-courts.module';
+import { StaffManagerModule } from './staffs/staff-manager/staff-manager.module';
+import { CourtManagerModule } from './court-manager/court-manager.module';
 
 @Module({
   imports: [
@@ -33,7 +35,9 @@ import { DisableCourtsModule } from './courts/disable-courts/disable-courts.modu
     AccountInfosModule,
     CourtManagerModule,
     ReservationModule,
-    DisableCourtsModule
+    DisableCourtsModule,
+    CourtManagerModule,
+    StaffManagerModule
   ],
   controllers: [AppController],
   providers: [AppService],
