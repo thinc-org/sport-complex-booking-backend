@@ -103,8 +103,9 @@ export class AccountInfosService {
         for (const source of sources) {
             for (const key of Object.keys(source)) {
                 const val = source[key];
-                if (val !== undefined) {
-                    target[key] = val;
+                if (val != undefined) {
+                    if(val instanceof Object) this.assignDefined(target[key], val);
+                    else target[key] = val;
                 }
             }
         }

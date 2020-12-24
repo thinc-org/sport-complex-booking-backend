@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import { createWriteStream, existsSync, unlink, unlinkSync } from 'fs';
+import { createWriteStream, existsSync, unlinkSync } from 'fs';
 import { Model } from 'mongoose';
 import { extname } from 'path';
-import { Account, OtherUser } from 'src/users/interfaces/user.interface';
+import { AuthService } from 'src/auth/auth.service';
+import { Account } from 'src/users/interfaces/user.interface';
 import { UsersService } from 'src/users/users.service';
 import { FileInfo, FileInfoDocument } from './fileInfo.schema';
 const path = require('path');
@@ -12,7 +12,11 @@ const path = require('path');
 
 @Injectable()
 export class FSService {
-  constructor(@InjectModel(FileInfo.name) private fileInfoModel: Model<FileInfoDocument>, private readonly jwtService: JwtService, private userService: UsersService) { }
+  constructor(
+    @InjectModel(FileInfo.name) private fileInfoModel: Model<FileInfoDocument>, 
+    private userService: UsersService, 
+    private authService: AuthService
+  ) { }
 
   async getFileInfo(fileId: string) {
     const fileInfo = await this.fileInfoModel.findById(fileId);
@@ -39,7 +43,7 @@ export class FSService {
       throw new HttpException('cannot find user: ' + owner, HttpStatus.NOT_FOUND)
     }
     
-    for (const field of files) {
+    for (const field of Object.keys(files)) {
       
       const file = ((files[field] == null) ? null : files[field][0])
       if (file == null) continue
@@ -86,12 +90,12 @@ export class FSService {
   }
 
   generateViewFileToken(fileId: string): string {
-    return this.jwtService.sign({ fileId }, { expiresIn: '2m' })
+    return this.authService.generateCustomJWT({ fileId }, {expiresIn: '2m'})
   }
 
   extractFileId(token: string): string {
     try {
-      return this.jwtService.verify(token).fileId
+      return this.authService.verifyJWT(token).fileId
     } catch (err) {
       throw new HttpException('Invalid Token', HttpStatus.BAD_REQUEST)
     }
