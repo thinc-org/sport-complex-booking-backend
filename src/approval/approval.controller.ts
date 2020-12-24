@@ -1,29 +1,29 @@
-import { Controller, Get ,Param,Patch,Body, Query,UseGuards,Req,HttpException,HttpStatus} from '@nestjs/common';
+import { Controller, Get ,Param,Patch,Body, Query,UseGuards} from '@nestjs/common';
 import { ApprovalService } from './approval.service';
 import { StaffGuard } from 'src/auth/jwt.guard'
 
-@UseGuards(StaffGuard)
+//@UseGuards(StaffGuard)
 @Controller('approval')
 export class ApprovalController {
     constructor(private readonly approvalService: ApprovalService) {}
 
   @Get()
-  getSearchResult(@Query() query,@Req() req){
+  getSearchResult(@Query() query){
     return this.approvalService.getSearchResult(query.name,query.start,query.end);
   }
   
   @Get("/:id")
-  getPersonalData(@Param('id') id:string,@Req() req){
+  getPersonalData(@Param('id') id:string){
     return this.approvalService.getPersonalData(id);
   }
 
   @Patch("/approve")
-  approve(@Body('id') id:string,@Body('newExpiredDate') newExpiredDate:Date,@Req() req){
+  approve(@Body('id') id:string,@Body('newExpiredDate') newExpiredDate:Date){
     return this.approvalService.setApprovalstatus(id,true,newExpiredDate,null);
   }
 
   @Patch("/reject")
-  reject(@Body('id') id:string,@Body('reject_info') reject_info:string[],@Req() req){
+  reject(@Body('id') id:string,@Body('reject_info') reject_info:string[]){
     return this.approvalService.setApprovalstatus(id,false,null,reject_info);
   }
 }
