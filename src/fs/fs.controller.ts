@@ -7,17 +7,22 @@ import { FSService } from './fs.service';
 @Controller('fs')
 export class FSController {
 
-  constructor(private readonly fsService: FSService, private readonly configService: ConfigService) { }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('upload')
-  @UseInterceptors(FileFieldsInterceptor([
+  private static fileUploadConfig =  [
     { name: 'user_photo', maxCount: 1 },
     { name: 'medical_certificate', maxCount: 1 },
     { name: 'national_id_photo', maxCount: 1 },
     { name: 'house_registration_number', maxCount: 1 },
     { name: 'relationship_verification_document', maxCount: 1 },
-  ]))
+  ]
+
+  private static maxFileSize = 20 * 1000 * 1000
+
+  constructor(private readonly fsService: FSService, private readonly configService: ConfigService) { 
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('upload')
+  @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfig, {limits: { fileSize: FSController.maxFileSize }}))
   async uploadFile(@UploadedFiles() files, @Req() req) {
     const eligible = await this.fsService.verifyUserEligibility(req.user.userId)
     if (!eligible) throw new HttpException('This user cannot upload', HttpStatus.FORBIDDEN)
@@ -54,13 +59,7 @@ export class FSController {
 
   @UseGuards(StaffGuard)
   @Post('admin/upload/:userId')
-  @UseInterceptors(FileFieldsInterceptor([
-    { name: 'user_photo', maxCount: 1 },
-    { name: 'medical_certificate', maxCount: 1 },
-    { name: 'national_id_photo', maxCount: 1 },
-    { name: 'house_registration_number', maxCount: 1 },
-    { name: 'relationship_verification_document', maxCount: 1 },
-  ]))
+  @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfig, {limits: { fileSize: FSController.maxFileSize }}))
   async uploadFileAdmin(@UploadedFiles() files, @Req() req, @Res() res, @Param('userId') userId: string) {
     res.send(await this.fsService.saveFiles(this.configService.get('UPLOAD_DEST'), userId, files))
   }

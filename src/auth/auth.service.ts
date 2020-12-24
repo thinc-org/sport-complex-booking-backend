@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -7,6 +7,14 @@ export class AuthService {
 
     generateJWT(userId: string, isStaff: boolean){
         return {token: this.jwtService.sign({userId ,isStaff})}
+    }
+
+    generateCustomJWT(payload, signOptions?: JwtSignOptions) {
+        return this.jwtService.sign(payload, signOptions);
+    }
+
+    verifyJWT(jwt) {
+        return this.jwtService.verify(jwt);
     }
     
 }
