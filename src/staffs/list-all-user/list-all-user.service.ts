@@ -1,10 +1,9 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { isValidObjectId, Model } from 'mongoose';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { isValidObjectId, Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { SatitCuPersonelUser, OtherUser, User ,Account, CuStudentUser} from 'src/users/interfaces/user.interface';
-import { max } from 'class-validator';
-import { UV_FS_O_FILEMAP } from 'constants';
+import { UsersService } from "./../../users/users.service";
 
 
 @Injectable()
@@ -13,7 +12,8 @@ export class listAllUserService {
         @InjectModel('SatitCuPersonel') private satitStudentModel: Model<SatitCuPersonelUser>,
         @InjectModel('Other') private otherUserModel: Model<OtherUser>,
         @InjectModel('CuStudent') private cuStudentModel: Model<CuStudentUser>,
-        @InjectModel('User') private userModel: Model<User>
+        @InjectModel('User') private userModel: Model<User>,
+        private readonly usersService : UsersService
         ) 
         { }
 
@@ -22,7 +22,7 @@ export class listAllUserService {
         return await bcrypt.hash(password, Number(process.env.HASH_SALT));
     }
 
-    async isThaiLang(keyword: string): Promise<boolean> {
+    isThaiLang(keyword: string) {
         for (var idx = 0; idx < keyword.length; idx++) {
             if (!("A" <= keyword.charAt(idx) && keyword.charAt(idx) <= "z")) {
                 return true;
@@ -31,7 +31,7 @@ export class listAllUserService {
         return false;
     }
 
-    async isEngLang(keyword: string): Promise<boolean> {
+    isEngLang(keyword: string) {
         for (var idx = 0; idx < keyword.length; idx++) {
             if ("A" <= keyword.charAt(idx) && keyword.charAt(idx) <= "z") {
                 return true;
@@ -40,49 +40,65 @@ export class listAllUserService {
         return false;
     }
 
-    async getUsers(name : string , penalize : boolean , begin:number, end:number , account:Account ): Promise<[number,User[]]> {
-     
-        var query = this.userModel.find();
-        
-        if(name !== undefined){
-            if (await this.isEngLang(name)) {
-                query = query.find({ name_en: { $regex: ".*" + name + ".*", $options: 'i' } });
-            }
-            if (await this.isThaiLang(name)) {
-                query = query.find({ name_th: { $regex: ".*" + name + ".*", $options: 'i' } });
-            }
+    async filterUser(qparam): Promise<[number,User[]]> {
+
+        var begin : number = 0 , end : number , is_thai_language : boolean = false , has_end : boolean = false;
+
+        if(qparam.hasOwnProperty('begin')){
+            begin = qparam.begin;
+            delete qparam['begin'];
         }
 
-        if(penalize !== undefined){
-            query = query.find({is_penalize : penalize});
+        if(qparam.hasOwnProperty('end')){
+            end = qparam.end;
+            has_end = true;
+            delete qparam['end'];
         }
 
-        if(account !== undefined){
-            query = query.find({account_type : account});
+        if(qparam.hasOwnProperty('name')){
+            is_thai_language = this.isThaiLang(qparam.name);
         }
 
-        var output : User[] = await query;
+        var seletingProperty : string = 'username is_penalize ';
 
-        var size:number = output.length;
-
-        if(begin !== undefined){
-            if(end === undefined){
-                output = output.slice(begin);
-            }
-            else {
-                output = output.slice(begin,end);
-            }
+        if(is_thai_language){
+            seletingProperty += 'name_th surname_th';
+            qparam.name_th = { $regex: ".*" + qparam.name + ".*", $options: 'i' };
         }
-        
-        return [size,output];
+        else{
+            seletingProperty += 'name_en surname_en';
+            qparam.name_en = { $regex: ".*" + qparam.name + ".*", $options: 'i' };
+        }
+
+        delete qparam['name'];
+
+        var temp : User[] = await this.usersService.find(qparam,seletingProperty);
+
+        if(!has_end){
+            end = temp.length;
+        }
+
+        return [ temp.length , temp.slice(begin,end) ];
     }
 
     async findUserByUsername(username: string): Promise<User> {
         const user = await this.userModel.findOne({ username: username });
         return user
     }
-    async getUserById(id: string): Promise<User> {
-        return await this.userModel.findById(id);
+    async getUserById(id: Types.ObjectId ): Promise<User> {
+
+        if (!isValidObjectId(id)) {
+            throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST);
+        }
+
+        var tempUser : User = await this.userModel.findById(id);
+
+        if( tempUser === null ){
+            throw new HttpException("Invalid User", HttpStatus.NOT_FOUND);
+        }
+
+        return tempUser;
+
     }
 
     async findUserByEmail(email: string): Promise<User> {
@@ -142,7 +158,7 @@ export class listAllUserService {
         await newUser.save();
     }
 
-    async deleteUser(id: string) {
+    async deleteUser(id : Types.ObjectId) : Promise<User> {
 
         if (!isValidObjectId(id)) {
             throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
@@ -154,66 +170,47 @@ export class listAllUserService {
         return deleteResponse
     }
 
-    async unbanById(id): Promise<User>{
+    async editById(id : Types.ObjectId , update ): Promise<User>{
+
         if (!isValidObjectId(id)) {
-            throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
+            throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST);
         }
-        const updatedResponse = await this.userModel.findByIdAndUpdate(id,{is_penalize:false}, {useFindAndModify: false,new: true});
-        if (!updatedResponse) {
-          throw new HttpException('Staff not found', HttpStatus.NOT_FOUND);
+
+        var tempUser : User = await this.userModel.findByIdAndUpdate(id, update);
+
+        if( tempUser === null ){
+            throw new HttpException("Invalid User", HttpStatus.NOT_FOUND);
         }
-        return updatedResponse
+
+        return tempUser;
+
     }
 
-    async editById(id , update): Promise<User>{
+    async changePassWord( id : Types.ObjectId , body ) : Promise<User>{
 
-        if (!isValidObjectId(id)) {
-            throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
-        }
-        var updatedResponse;
+        var tempUser : User = await this.getUserById(id);
 
-        const type = (await this.userModel.findById(id)).account_type;
-
-        if(type === Account.CuStudent){
-            updatedResponse = this.cuStudentModel.findByIdAndUpdate(id,update, {useFindAndModify: false,new: true});
-        }
-        else if(type === Account.SatitAndCuPersonel){
-            updatedResponse = this.satitStudentModel.findByIdAndUpdate(id,update, {useFindAndModify: false,new: true});
-        }
-        else if(type === Account.Other){
-            updatedResponse = this.otherUserModel.findByIdAndUpdate(id,update, {useFindAndModify: false,new: true});
+        if( !body.hasOwnProperty('password') ){
+            throw new HttpException("The body doesn't exist a password.", HttpStatus.CONFLICT)
         }
 
-        if (!updatedResponse) {
-          throw new HttpException('User not found', HttpStatus.NOT_FOUND);
-        }
-
-        return updatedResponse
-    }
-
-    async changePassWord(id , newPassWord : string ) : Promise<User>{
-
-        if (!isValidObjectId(id)) {
-            throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
-        }
-
-        var tempUser : User = await this.userModel.findById(id);
-
-        console.log(tempUser);
-
-
-        console.log("Has password.");
-
-        const type = (await this.userModel.findById(id)).account_type;
-        const newHashPassWord : string = await this.hashPassword(newPassWord) ;
+        const type = tempUser.account_type;
+        const newHashPassWord : string = await this.hashPassword(body['password']) ;
 
         if(type === Account.SatitAndCuPersonel){
-            return await this.satitStudentModel.findByIdAndUpdate(id,{password : newHashPassWord}, {useFindAndModify: false,new: true});
+            (tempUser as SatitCuPersonelUser).password = newHashPassWord;
         }
         else if(type === Account.Other){
-            return await this.otherUserModel.findByIdAndUpdate(id,{password : newHashPassWord}, {useFindAndModify: false,new: true});
+            (tempUser as OtherUser).password = newHashPassWord;
         }
+        else{
+            throw new HttpException("This user can't change passowrd.", HttpStatus.BAD_REQUEST)
+        }
+
+        tempUser.save();
+        return tempUser
         
-        throw new HttpException("This user can't change passowrd.", HttpStatus.BAD_REQUEST)
     }
+
+    
 }
