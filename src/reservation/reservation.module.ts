@@ -5,7 +5,7 @@ import { ReservationService } from './reservation.service';
 import { ReservationController } from './reservation.controller';
 import { MywaitingroomModule } from "./mywaitingroom/mywaitingroom.module";
 
-import { ReservationSchema, SuccesfulReservationSchema, MyWaitingRoomSchema } from "./schema/reservation.schema";
+import { ReservationSchema, SuccessfulReservationSchema, MyWaitingRoomSchema } from "./schema/reservation.schema";
 
 const myWaintingRoomProviderFactory = {
   provide: getModelToken('MyWaitingRoom'),
@@ -17,7 +17,7 @@ const myWaintingRoomProviderFactory = {
 const successfulReservationProviderFactory = {
   provide: getModelToken('SuccessfulReservation'),
   useFactory: (reservationModel) =>
-  reservationModel.discriminator('SuccessfulReservation', SuccesfulReservationSchema),
+  reservationModel.discriminator('SuccessfulReservation', SuccessfulReservationSchema),
   inject: [getModelToken('Reservation')]
 }
 

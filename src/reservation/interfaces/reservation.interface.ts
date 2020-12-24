@@ -13,7 +13,7 @@ export interface Reservation extends mongoose.Document {
     expired_date : Date
 }
 
-export interface SuccesfulReservation extends Reservation {
+export interface SuccessfulReservation extends Reservation {
     is_check : Boolean
 }
 

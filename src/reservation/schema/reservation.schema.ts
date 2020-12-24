@@ -14,7 +14,7 @@ export const ReservationSchema = new mongoose.Schema({
     is_check : Boolean
 });
 
-export const SuccesfulReservationSchema = new mongoose.Schema({
+export const SuccessfulReservationSchema = new mongoose.Schema({
     is_check : Boolean
 });
 

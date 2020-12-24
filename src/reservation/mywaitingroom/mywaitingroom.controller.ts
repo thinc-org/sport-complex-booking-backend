@@ -1,18 +1,19 @@
 import { Controller ,UseGuards ,Post ,Get, Body, Param, Delete } from '@nestjs/common';
 import { MywaitingroomService } from './mywaitingroom.service';
-import { MyWaitingRoom, SuccesfulReservation } from "./../interfaces/reservation.interface";
+import { MyWaitingRoom, SuccessfulReservation } from "./../interfaces/reservation.interface";
 import { CreateMyWaitingRoomDto } from "./dto/mywaitingroom.dto";
 
 @Controller('mywaitingroom')
 export class MywaitingroomController {
     constructor( private readonly mywaitingroomService : MywaitingroomService ) {}
 
-    //@UseGuards()
+    // Delete
     @Post()
     async createMyWaitingRoom(@Body() myWaitingRoom : MyWaitingRoom) : Promise<MyWaitingRoom> {
         return this.mywaitingroomService.createMyWaitingRoom(myWaitingRoom);
     }
 
+    //@UseGuards()
     @Post('/add/:user_id/:sport_id')
     async addMyWaitingRoom(@Param() param,@Body() createMyWaitingRoomDto : CreateMyWaitingRoomDto) : Promise<MyWaitingRoom>{
         return this.mywaitingroomService.addMyWaitingRoom(param.user_id,param.sport_id,createMyWaitingRoomDto);
@@ -29,7 +30,13 @@ export class MywaitingroomController {
     }
 
     @Post('/accept/:mywaitingroomid')
-    async aceptMyWaitingRoom(@Param() param) : Promise<SuccesfulReservation> {
+    async aceptMyWaitingRoom(@Param() param) : Promise<SuccessfulReservation> {
         return this.mywaitingroomService.acceptingMyWaitingRoom(param.mywaitingroomid);
     }
+
+    @Get('/expire/:mywaitingroomid')
+    async expireMyWaitingRoom(@Param() param) : Promise<Boolean>{
+        return this.mywaitingroomService.expiredChecker(param.mywaitingroomid);
+    }
+
 }
