@@ -2,7 +2,7 @@ import { Controller, Get ,Param,Patch,Body, Query,UseGuards} from '@nestjs/commo
 import { ApprovalService } from './approval.service';
 import { StaffGuard } from 'src/auth/jwt.guard'
 
-@UseGuards(StaffGuard)
+//@UseGuards(StaffGuard)
 @Controller('approval')
 export class ApprovalController {
     constructor(private readonly approvalService: ApprovalService) {}
