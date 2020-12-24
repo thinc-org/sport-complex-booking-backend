@@ -6,7 +6,7 @@ import { Reservation } from "./../interfaces/reservation.interface";
 
 import { User } from "./../../users/interfaces/user.interface";
 import { MyReservationDto, firstClass , secondClass } from "./dto/myreservation.dto";
-import { List_Sport } from "./../../court-manager/interfaces/sportCourt.interface";
+import { Sport } from "./../../court-manager/interfaces/sportCourt.interface";
 
 import { CourtManagerService } from "./../../court-manager/court-manager.service";
 import { UsersService } from "./../../users/users.service";
@@ -25,7 +25,7 @@ export class MyReservationService {
     async reservationToDtoFirst( myreservation : Reservation , is_thai_language : boolean ) :  Promise<firstClass>{
         let temp : firstClass = new firstClass();
 
-        const sport : List_Sport = await this.courtManagerService.find_SportList_byID(myreservation.sport_id.toString());
+        const sport : Sport = await this.courtManagerService.find_Sport_byID(myreservation.sport_id.toString());
 
         temp.my_reservation_id = myreservation._id;
         

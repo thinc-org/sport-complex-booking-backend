@@ -17,6 +17,11 @@ import { CourtManagerService } from './court-manager.service';
 ],
       controllers: [CourtManagerController],
       providers: [CourtManagerService],
-      exports: [ ]
+      exports: [ 
+            MongooseModule.forFeature([{name: 'Courts', schema: CourtSchema}]),
+            MongooseModule.forFeature([{name: 'Sport', schema: SportSchema, collection: 'List_Sport'}]),
+            MongooseModule.forFeature([{name: 'Setting', schema: SettingSchema, collection: 'Setting'}]),
+            CourtManagerService
+]
 })
 export class CourtManagerModule {}
