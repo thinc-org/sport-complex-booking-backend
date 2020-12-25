@@ -2,12 +2,19 @@ import { Controller, Get, Post, Put, Delete, Body, Param, BadRequestException, R
 import { CreateStaffDto } from './dto/create-staff.dto';
 import { StaffsService } from './staffs.service';
 import { Staff } from './interfaces/staff.interface';
-import { JwtAuthGuard } from 'src/auth/jwt.guard'
+import { JwtAuthGuard, StaffGuard } from 'src/auth/jwt.guard'
 import { AuthService } from 'src/auth/auth.service';
 
 @Controller('staffs')
 export class StaffsController {
     constructor(private readonly staffsService: StaffsService, private authService: AuthService) { }
+
+    @UseGuards(StaffGuard)
+    @Get('/staffProfile')
+    async getStaffProfile(@Req() req){
+        const staff = this.staffsService.getStaffProfile(req.user.userId)
+        return staff
+    }
 
     //ลบก่อนส่ง
     @Post('addFirstAdmin')

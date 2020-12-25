@@ -18,7 +18,7 @@ export class StaffsService {
     return await bcrypt.hash(password, Number(process.env.HASH_SALT));
   }
 
-  async addFirstAdmin(){
+  async addFirstAdmin() {
     const staff = {
       name: "first admin",
       surname: "pass is admin",
@@ -45,6 +45,21 @@ export class StaffsService {
       throw new BadRequestException('Username or Password is wrong');
     }
     return isUsernameExist;
+  }
+
+  async getStaffProfile(id: string): Promise<Staff> {
+
+    if (!isValidObjectId(id)) {
+      throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
+    }
+
+    const staff = await this.staffModel.findById(id);
+
+    if (!staff) {
+      throw new HttpException("User not found", HttpStatus.NOT_FOUND)
+    }
+    
+    return staff
   }
 
 }
