@@ -2,6 +2,8 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, Types } from 'mongoose';
+
+import { DisableCourtsService } from 'src/courts/disable-courts/disable-courts.service';
 import { Account, OtherUser, User, Verification } from 'src/users/interfaces/user.interface';
 import { WaitingRoomDto } from './dto/waiting-room.dto';
 import { Reservation, WaitingRoom } from "./interfaces/reservation.interface";
@@ -12,7 +14,8 @@ export class ReservationService {
     constructor(
         @InjectModel('WaitingRoom') private WaitingRoomModel: Model<WaitingRoom>,
         @InjectModel('Reservation') private ReservationModel: Model<Reservation>,
-        @InjectModel('User') private userModel: Model<User>
+        @InjectModel('User') private userModel: Model<User>,
+        private disableCourtService: DisableCourtsService
     ) { }
 
     //Test na krub by NON
@@ -72,7 +75,7 @@ export class ReservationService {
                 availableTime.delete(waitingroom[i].time_slot[j])
             }
         }
-        const disable_time = [21,22,23,24] //เวลาตรงนี้ต้องไปเอามาจากfirm
+        const disable_time = await this.disableCourtService.findClosedTimes(waitingroomdto.sport_id.toHexString(),waitingroomdto.court_number,waitingroomdto.date)
         for (let i = 0; i < disable_time.length; i++){
             availableTime.delete(disable_time[i])
         }
