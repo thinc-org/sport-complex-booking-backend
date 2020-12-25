@@ -11,7 +11,7 @@ export class StaffsController {
 
     @UseGuards(StaffGuard)
     @Get('/staffProfile')
-    async getStaffProfile(@Req() req){
+    async getStaffProfile(@Req() req): Promise<Staff> {
         const staff = this.staffsService.getStaffProfile(req.user.userId)
         return staff
     }
