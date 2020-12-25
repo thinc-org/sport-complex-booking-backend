@@ -27,7 +27,6 @@ class UserSchemaClass extends mongoose.Schema {
         this.statics.editAccountInfoDTO = EditUserInfoDTO;
 
         this.methods.editAccountInfo = async function(updt: EditUserInfoDTO) {
-            console.log('base user');
             this.is_thai_language = updt.is_thai_language ?? this.is_thai_language;
             this.personal_email = updt.personal_email ?? this.personal_email;
             this.phone = updt.phone ?? this.phone;
@@ -45,8 +44,7 @@ class UserSchemaClass extends mongoose.Schema {
         }
 
         this.methods.setPassword = function(hashedPassword: string) {
-            if(this.password) this.password = hashedPassword;
-            else throw new HttpException('password does not exist', HttpStatus.INTERNAL_SERVER_ERROR);
+            this.password = hashedPassword;
         }
 
         this.methods.getPassword = function() {
@@ -58,7 +56,7 @@ class UserSchemaClass extends mongoose.Schema {
 
 export const UserSchema = new UserSchemaClass();
 
-class CuStudentSchemaClass extends mongoose.Schema {
+class CuStudentSchemaClass extends UserSchemaClass {
     constructor() {
         super({ is_first_login: Boolean });
         this.methods.setPassword = function(hashedPassword: string){
