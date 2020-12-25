@@ -1,34 +1,33 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Post, Put, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
-import { AuthService } from 'src/auth/auth.service';
-import { JwtAuthGuard, UserGuard } from 'src/auth/jwt.guard';
-import { ChangePasswordDTO, postCuAccountInfoDTO } from './accountInfos.dto';
-import { AccountInfosService } from './accountInfos.service';
+import { UserGuard } from 'src/auth/jwt.guard';
+import { UsersService } from '../users.service';
+import { ChangePasswordDTO} from './accountInfos.dto';
 
 @UseGuards(UserGuard)
 @Controller('account_info')
 export class AccountInfosController {
-    constructor(private readonly accountInfoService: AccountInfosService, private authService: AuthService) { }
+    constructor(private readonly userService: UsersService) { }
 
     
     @Get()
     async getAccountInfo(@Req() req) {
-        return this.accountInfoService.getAccountInfo(req.user.userId);
+        return await this.userService.findById(req.user.userId, '-password');
     }
     
     @Put()
-    async editAccountInfo(@Req() req, @Body() body:postCuAccountInfoDTO) {
-        return await this.accountInfoService.editAccountInfo(req.user.userId,body,false)
+    async editAccountInfo(@Req() req, @Body() body) {
+        return await this.userService.validateAndEditAccountInfo(req.user.userId, body, false);
     }
 
     @Post()
     async postAccountInfo(@Req() req, @Body() body){
-        return await this.accountInfoService.editAccountInfo(req.user.userId,body,true)
+        return await this.userService.validateAndEditAccountInfo(req.user.userId, body, true);
     }
 
     @UsePipes(new ValidationPipe())
     @Post('/change_password')
     async changePassword(@Body() body: ChangePasswordDTO, @Req() req){
-        await this.accountInfoService.changePassword(req.user.userId, body.oldPassword, body.newPassword);
+        await this.userService.changePassword(req.user.userId, body.oldPassword, body.newPassword);
     }
 
 }

@@ -1,278 +1,140 @@
 import { Expose, Type } from 'class-transformer';
-import { IsBoolean, IsDate, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { Account } from '../interfaces/user.interface';
+import { IsBoolean, IsDate, IsEmail, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 
-export class editAccountInfoDto {
-    @IsEnum(Account)
-    account_type: Account
-
-    @IsNotEmpty()
-    data : any
-}
-
-export class editCuAccountInfoDTO {
-    @Expose()
-    @IsString()
-    @IsOptional()
-    phone?: string
-
-    @Expose()
-    @IsEmail()
-    @IsOptional()
-    personal_email?: string
-
-    @Expose()
-    @IsBoolean()
-    @IsOptional()
-    is_thai_language?: boolean
-}
-
-export class postCuAccountInfoDTO {
-    @Expose()
-    @IsString()
-    phone: string
-
-    @Expose()
-    @IsEmail()
-    personal_email: string
-
-    @Expose()
-    @IsBoolean()
-    is_thai_language: boolean
-}
-
-
-export class editSatitCuPersonelAccountInfoDTO{
-    @Expose()
-    @IsString()
-    @IsOptional()
-    phone?: string
-
-    @Expose()
-    @IsEmail()
-    @IsOptional()
-    personal_email?: string
-
-    @Expose()
-    @IsBoolean()
-    @IsOptional()
-    is_thai_language?: boolean
-}
-
-export class PostContactPersonDTO {
-    @Expose()
-    @IsString()
-    contact_person_prefix?: string
-
-    @Expose()
-    @IsString()
-    contact_person_name?: string
-
-    @Expose()
-    @IsString()
-    contact_person_surname?: string
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    contact_person_home_phone?: string
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    contact_person_phone?: string
-}
 
 export class EditContactPersonDTO {
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     contact_person_prefix?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     contact_person_name?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     contact_person_surname?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     contact_person_home_phone?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     contact_person_phone?: string
 }
 
 export class editOtherAccountInfoDTO {
     @Expose()
-    @IsBoolean()
-    @IsOptional()
+    @IsBoolean({always: true})
+    @IsOptional({groups: ['optional']})
     is_thai_language?: boolean
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     prefix?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     name_th?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     surname_th?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     name_en?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     surname_en?: string
 
     @Expose()
     @Type(()=>Date)
-    @IsDate()
-    @IsOptional()
+    @IsDate({always: true})
+    @IsOptional({groups: ['optional']})
     birthday?: Date
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     national_id?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     gender?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     marital_status?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     address?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     phone?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     home_phone?: string
 
     @Expose()
-    @IsString()
-    @IsOptional()
-    @IsEmail()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
+    @IsEmail({},{always: true})
     personal_email?: string
 
     @Expose()
-    @IsOptional()
+    @IsOptional({groups: ['optional']})
+    @IsNotEmpty({groups: ['all']})
     @Type(()=>EditContactPersonDTO)
-    @ValidateNested()
+    @ValidateNested({always: true})
     contact_person?: EditContactPersonDTO;
 
     @Expose()
-    @IsString()
-    @IsOptional()
-    medical_condition: string
-}
-
-export class PostOtherAccountInfoDTO {
-    @Expose()
-    @IsBoolean()
-    is_thai_language: boolean
-
-    @Expose()
-    @IsString()
-    prefix: string
-
-    @Expose()
-    @IsString()
-    name_th: string
-
-    @Expose()
-    @IsString()
-    surname_th: string
-
-    @Expose()
-    @IsString()
-    name_en: string
-
-    @Expose()
-    @IsString()
-    surname_en: string
-
-    @Expose()
-    @Type(()=>Date)
-    @IsDate()
-    birthday: Date
-
-    @Expose()
-    @IsString()
-    national_id: string
-
-    @Expose()
-    @IsString()
-    gender: string
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    marital_status: string
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    address: string
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    phone: string
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    home_phone: string
-
-    @Expose()
-    @IsString()
-    @IsOptional()
-    @IsEmail()
-    personal_email: string
-
-    @Expose()
-    @Type(()=>PostContactPersonDTO)
-    @ValidateNested()
-    contact_person: PostContactPersonDTO;
-    
-    @Expose()
-    @IsString()
-    @IsOptional()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
     medical_condition: string
 }
 
 export class ChangePasswordDTO {
-    @IsString()
+    @IsString({always: true})
     oldPassword: string;
-    @IsString()
+    @IsString({always: true})
     newPassword: string;
+}
+
+export class EditUserInfoDTO {
+    @Expose()
+    @IsString({always: true})
+    @IsOptional({groups: ['optional']})
+    phone?: string
+
+    @Expose()
+    @IsEmail({},{always: true})
+    @IsOptional({groups: ['optional']})
+    personal_email?: string
+
+    @Expose()
+    @IsBoolean({always: true})
+    @IsOptional({groups: ['optional']})
+    is_thai_language?: boolean
 }

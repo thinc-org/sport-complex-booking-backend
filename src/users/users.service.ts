@@ -4,6 +4,7 @@ import { Model, isValidObjectId, FilterQuery, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import {InjectModel} from '@nestjs/mongoose';
 import { SsoContent } from './interfaces/sso.interface';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UsersService {
@@ -11,8 +12,25 @@ export class UsersService {
         @InjectModel('User') private userModel: Model<User>, 
         @InjectModel('CuStudent') private cuStudentModel: Model<CuStudentUser>, 
         @InjectModel('SatitCuPersonel') private satitStudentModel: Model<SatitCuPersonelUser>,
-        @InjectModel('Other') private otherUserModel: Model<OtherUser>
+        @InjectModel('Other') private otherUserModel: Model<OtherUser>,
+        private authService: AuthService
     ) { }
+
+    async validateAndEditAccountInfo(userId: string, updt, full: boolean) {
+        const user = await this.findById(userId);
+        await user.validateAndEditAccountInfo(updt, full);
+        return await user.save();
+    }
+
+    async changePassword(userId: string,oldPassword: string, newPassword: string) {
+        const user = await this.findById(userId);
+        const isMatched = await this.authService.comparePassword(oldPassword, user.getPassword());
+        
+        if(!isMatched) throw new HttpException('old password does not match', HttpStatus.UNAUTHORIZED);
+
+        user.setPassword(await this.authService.hashPassword(newPassword));
+        await user.save();
+    }
 
     async findByUsername(username: string): Promise<User> {
         const user = await this.userModel.findOne({ username: username });
