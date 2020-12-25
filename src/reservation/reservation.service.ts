@@ -114,6 +114,7 @@ export class ReservationService {
             access_code = this.makeid(6);
         }
         waitingroom.access_code = access_code
+        waitingroom.day_of_week = waitingroom.date.getDay()
         return await waitingroom.save()
     }
 
