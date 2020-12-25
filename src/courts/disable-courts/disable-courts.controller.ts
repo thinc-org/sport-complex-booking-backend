@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Query, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
-import { AddDisableTimeDTO, CreateDisableCourtDTO, EditDisableCourtDTO, QueryDisableCourtDTO, QueryResult } from './disable-courts.dto';
+import { CreateDisableCourtDTO, EditDisableCourtDTO, QueryDisableCourtDTO, QueryResult } from './disable-courts.dto';
 import { DisableCourtsService } from './disable-courts.service';
 import { DisableCourt } from './interfaces/disable-courts.interface';
 
@@ -22,7 +22,7 @@ export class DisableCourtsController {
     }
 
     @Get('closed_time')
-    async getClosedTime(@Req() req, @Query('sport_id') sport_id: string, @Query('court_num') court_num: number, @Query('date') dateString: string): Promise<Array<[number, number]>> {
+    async getClosedTime(@Req() req, @Query('sport_id') sport_id: string, @Query('court_num') court_num: number, @Query('date') dateString: string): Promise<Array<number>> {
         return await this.disableCourtsService.findClosedTimes(sport_id, court_num, new Date(dateString));
     }
 
@@ -50,12 +50,5 @@ export class DisableCourtsController {
     async editDisableCourt(@Req() req, @Param('id') id: string, @Body() body: EditDisableCourtDTO): Promise<DisableCourt> {
         if (!req.user.isStaff) throw new HttpException("Not a Staff", HttpStatus.UNAUTHORIZED);
         return await this.disableCourtsService.editDisableCourt(id, body);
-    }
-
-    @UseGuards(JwtAuthGuard)
-    @Put(':id/add_disable_time')
-    async addDisableTime(@Req() req, @Param('id') id: string, @Body() body: AddDisableTimeDTO) {
-        if (!req.user.isStaff) throw new HttpException("Not a Staff", HttpStatus.UNAUTHORIZED);
-        await this.disableCourtsService.addDisableTime(id, body.disable_times);
     }
 }

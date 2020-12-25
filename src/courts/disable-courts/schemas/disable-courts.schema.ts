@@ -1,8 +1,7 @@
 import * as mongoose from 'mongoose';
 
 export const DisableTimeSchema = new mongoose.Schema({
-    start_time: Number,
-    end_time: Number,
+    time_slot: [Number],
     day: Number
 })
 

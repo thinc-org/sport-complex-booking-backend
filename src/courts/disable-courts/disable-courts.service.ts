@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateDisableCourtDTO, CreateDisableTimeDTO, EditDisableCourtDTO, QueryDisableCourtDTO, QueryResult } from './disable-courts.dto';
-import { DisableCourt, DisableTime } from './interfaces/disable-courts.interface';
+import { DisableCourt } from './interfaces/disable-courts.interface';
 
 @Injectable()
 export class DisableCourtsService {
@@ -11,8 +11,6 @@ export class DisableCourtsService {
 
         if (!this.verifyStartAndEndDate(data.starting_date, data.expired_date))
             throw new HttpException('starting_date cannot be after expired_date', HttpStatus.BAD_REQUEST);
-        if (!this.verifyDisableTimes(data.disable_time))
-            throw new HttpException('there is an invalid DisableTime', HttpStatus.BAD_REQUEST);
 
         data.starting_date.setUTCHours(0, 0, 0, 0);
         data.expired_date.setUTCHours(23, 0, 0, 0);
@@ -118,19 +116,8 @@ export class DisableCourtsService {
 
         if (!this.verifyStartAndEndDate(disableCourt.starting_date, disableCourt.expired_date))
             throw new HttpException('starting_date cannot be after expired_date', HttpStatus.BAD_REQUEST);
-        if (!this.verifyDisableTimes(disableCourt.disable_time))
-            throw new HttpException('there is an invalid DisableTime', HttpStatus.BAD_REQUEST);
 
         return await disableCourt.save();
-    }
-
-    async addDisableTime(id: string, disable_times: Array<DisableTime>): Promise<void> {
-        if (!this.verifyDisableTimes(disable_times))
-            throw new HttpException('there is an invalid DisableTime', HttpStatus.BAD_REQUEST);
-        const disableCourt = await this.getDisableCourt(id);
-        disable_times.forEach(disable_time => {
-            disableCourt.disable_time.push(disable_time);
-        });
     }
 
     /*
@@ -142,9 +129,7 @@ export class DisableCourtsService {
         note: 
         The resulting array isn't sorted. 
     */
-    async findClosedTimes(sport_id: string, court_num: number, date: Date): Promise<Array<[number, number]>> {
-        // max rps: ~600 rps
-        // response time: <10 ms for 1 councurrent user, ~160ms for 100 concurrent user, ~1.6s for 1000 concurrent user
+    async findClosedTimes(sport_id: string, court_num: number, date: Date): Promise<Array<number>> {
 
         date.setUTCHours(0, 0, 0);
         const day = date.getDay();
@@ -157,9 +142,11 @@ export class DisableCourtsService {
             disable_time: { $elemMatch: { day } }
         }).select('disable_time');
 
-        const timeArr: Array<[number, number]> = [];
+        const timeArr: Array<number> = [];
         results.forEach(disableCourt => {
-            timeArr.push(...disableCourt.disable_time.map<[number, number]>(disableTime => [disableTime.start_time, disableTime.end_time]));
+            disableCourt.disable_time.forEach(disableTime => {
+                timeArr.push(...disableTime.time_slot);
+            })
         });
         return timeArr;
     }
@@ -179,7 +166,7 @@ export class DisableCourtsService {
         const queryOrArray = []
 
         for (const disableTime of disableCourt.disable_time) {
-            queryOrArray.push({ start_time: { $lt: disableTime.end_time }, end_time: { $gt: disableTime.start_time }, day: disableTime.day })
+            queryOrArray.push({ day: disableTime.day, time_slot: { $in: disableTime.time_slot} })
         }
 
         const results = await this.disableCourtModel.find({
@@ -199,14 +186,6 @@ export class DisableCourtsService {
     private verifyStartAndEndDate(startDate: Date, endDate: Date): boolean {
         if (startDate == null && endDate == null) return true;
         else return startDate <= endDate;
-    }
-
-    private verifyDisableTimes(disable_times: Array<DisableTime>): boolean {
-        if (disable_times == null) return true;
-        for (const disable_time of disable_times) {
-            if (disable_time.start_time > disable_time.end_time) return false;
-        }
-        return true;
     }
 
     private disableCourtfromEditDTO(disableCourt: DisableCourt, data: EditDisableCourtDTO): DisableCourt {
@@ -234,13 +213,5 @@ export class DisableCourtsService {
         disableCourt.court_num = data.court_num;
         disableCourt.disable_time = data.disable_time;
         return disableCourt;
-    }
-
-    private extractTimes(disableCourt: DisableCourt, day: number, timeArr: Array<[number, number]>): void {
-        disableCourt.disable_time.forEach(disable_time => {
-            if (disable_time.day === day) {
-                timeArr.push([disable_time.start_time, disable_time.end_time]);
-            }
-        });
     }
 }
