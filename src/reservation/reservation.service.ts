@@ -2,6 +2,7 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, Types } from 'mongoose';
+import {  Cron } from '@nestjs/schedule';
 
 import { DisableCourtsService } from 'src/courts/disable-courts/disable-courts.service';
 import { Account, OtherUser, User, Verification } from 'src/users/interfaces/user.interface';
@@ -12,11 +13,39 @@ import { Reservation, WaitingRoom } from "./interfaces/reservation.interface";
 @Injectable()
 export class ReservationService {
     constructor(
-        @InjectModel('WaitingRoom') private WaitingRoomModel: Model<WaitingRoom>,
-        @InjectModel('Reservation') private ReservationModel: Model<Reservation>,
+        @InjectModel('WaitingRoom') private waitingRoomModel: Model<WaitingRoom>,
+        @InjectModel('Reservation') private reservationModel: Model<Reservation>,
         @InjectModel('User') private userModel: Model<User>,
         private disableCourtService: DisableCourtsService
     ) { }
+
+    @Cron('0 */30 * * * *')
+    async checkReservation(){
+        const date = new Date()
+        date.setHours(date.getHours()+7)
+        const time = date.getUTCHours()*60 + date.getMinutes()/60
+        date.setUTCHours(0, 0, 0, 0);
+        const reservations = await this.reservationModel.find({date: date})
+        for(const reservation of reservations){
+            const max = Math.max.apply(Math,reservation.time_slot)
+            if(time>=max/2){
+                if(reservation.is_check){
+                    await reservation.remove()
+                }else{
+                    for(const member of reservation.list_member){
+                        const user = await this.userModel.findById(member)
+                        user.is_penalize = true
+                        const bannedDate = new Date()
+                        const bannedDay = 30 //เวลาตรงนี้ต้องไปเอามาจากsetting
+                        bannedDate.setDate(bannedDate.getDate() + bannedDay)
+                        user.expired_penalize_date = bannedDate
+                        user.save()
+                        await reservation.remove()
+                    }
+                }
+            }
+        }
+    }
 
     async checkValidity(id: string): Promise<boolean> {
         const user = await this.userModel.findById(id);
@@ -42,7 +71,7 @@ export class ReservationService {
                 throw new HttpException("Your account has been banned, please contact staff", HttpStatus.FORBIDDEN)
             }
         }
-        const haveWaitingRoom = await this.WaitingRoomModel.findOne({ list_member: { $in: [Types.ObjectId(id)] } })
+        const haveWaitingRoom = await this.waitingRoomModel.findOne({ list_member: { $in: [Types.ObjectId(id)] } })
         if (haveWaitingRoom) {
             throw new HttpException("You already have waiting room", HttpStatus.CONFLICT)
         }
@@ -56,8 +85,8 @@ export class ReservationService {
         for (let i = open_time; i <= close_time;i++){
             availableTime.add(i)
         }
-        const reservations = await this.ReservationModel.find({ court_number: waitingRoomDto.court_number, date: waitingRoomDto.date, sport_id: waitingRoomDto.sport_id })
-        const waitingRooms = await this.WaitingRoomModel.find({ court_number: waitingRoomDto.court_number, date: waitingRoomDto.date, sport_id: waitingRoomDto.sport_id })
+        const reservations = await this.reservationModel.find({ court_number: waitingRoomDto.court_number, date: waitingRoomDto.date, sport_id: waitingRoomDto.sport_id })
+        const waitingRooms = await this.waitingRoomModel.find({ court_number: waitingRoomDto.court_number, date: waitingRoomDto.date, sport_id: waitingRoomDto.sport_id })
         for (const reservation of reservations) {
             for (const timeSlot of reservation.time_slot) {
                 availableTime.delete(timeSlot)
@@ -95,15 +124,15 @@ export class ReservationService {
                 throw new HttpException("Your choosed time is unavailable", HttpStatus.UNAUTHORIZED)
             }
         }
-        const waitingroom = new this.WaitingRoomModel(waitingroomdto)
+        const waitingroom = new this.waitingRoomModel(waitingroomdto)
         waitingroom.list_member.push(Types.ObjectId(id))
         const date = new Date();
-        const waitingRoomDuration: number = 15 //เวลาตรงนี้ต้องไปเอามาจากsetting
+        const waitingRoomDuration: number = 1 //เวลาตรงนี้ต้องไปเอามาจากsetting
         date.setMinutes(date.getMinutes() + waitingRoomDuration)
         waitingroom.expired_date = date
         let access_code: string = this.makeid(6);
         while (true) {
-            const sameCode = await this.WaitingRoomModel.findOne({ access_code: access_code })
+            const sameCode = await this.waitingRoomModel.findOne({ access_code: access_code })
             if (!sameCode) {
                 break
             }
@@ -115,7 +144,7 @@ export class ReservationService {
     }
 
     async joinWaitingRoom(access_code: string, id: string): Promise<boolean> {
-        const waitingroom = await this.WaitingRoomModel.findOne({ access_code: access_code })
+        const waitingroom = await this.waitingRoomModel.findOne({ access_code: access_code })
         if (!waitingroom) {
             throw new HttpException("The code is wrong.", HttpStatus.BAD_REQUEST)
         }
@@ -125,7 +154,7 @@ export class ReservationService {
         waitingroom.list_member.push(Types.ObjectId(id))
         const required_member = 2 //เลขตรงนี้ต้องไปเอามาจากsport
         if (waitingroom.list_member.length == required_member) {
-            const reservation = new this.ReservationModel({
+            const reservation = new this.reservationModel({
                 sport_id: waitingroom.sport_id,
                 court_number: waitingroom.court_number,
                 date: waitingroom.date,
@@ -142,7 +171,7 @@ export class ReservationService {
     }
 
     async checkQuota(waitingroomdto: WaitingRoomDto, id: string): Promise<number> {
-        const joinedReservations = await this.ReservationModel.find({ list_member: { $in: [Types.ObjectId(id)] }, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
+        const joinedReservations = await this.reservationModel.find({ list_member: { $in: [Types.ObjectId(id)] }, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
         let quota: number = 4 //เลขตรงนี้ต้องไปเอามาจากsport
         for (const joinedReservation of joinedReservations) {
             quota = quota - joinedReservation.time_slot.length
