@@ -14,35 +14,47 @@ export class ReservationController {
 
     @UseGuards(JwtAuthGuard)
     @Post('/checkvalidity')
-    async checkValidity(@Req() req) {
+    async checkValidity(@Req() req, @Res() res) {
         await this.reservationService.checkValidity(req.user.userId)
-        return {message: "valid user"}
+        return res.status(201).json({
+            statusCode: 201,
+            message: 'Valid user',
+        })
     }
 
     @UseGuards(JwtAuthGuard)
     @Post('/createwaitingroom')
-    async createWaitingRoom(@Body() waitingRoomDto: WaitingRoomDto,@Req() req): Promise<WaitingRoom>{
+    async createWaitingRoom(@Body() waitingRoomDto: WaitingRoomDto,@Req() req, @Res() res){
         await this.reservationService.checkValidity(req.user.userId)
-        return await this.reservationService.createWaitingRoom(waitingRoomDto,req.user.userId)
+        await this.reservationService.createWaitingRoom(waitingRoomDto,req.user.userId)
+        return res.status(201).json({
+            statusCode: 201,
+            message: 'waiting room is already created',
+        })
     }
 
     @UseGuards(JwtAuthGuard)
     @Post('/joinwaitingroom')
-    async joinWaitingRoom(@Body() joinWaitingRoomDto: JoinWaitingRoomDto,@Req() req){
+    async joinWaitingRoom(@Body() joinWaitingRoomDto: JoinWaitingRoomDto,@Req() req,@Res() res){
         await this.reservationService.checkValidity(req.user.userId)
-        return await this.reservationService.joinWaitingRoom(joinWaitingRoomDto.access_code,req.user.userId)
+        const isReservationCreated =  await this.reservationService.joinWaitingRoom(joinWaitingRoomDto.access_code,req.user.userId)
+        return res.status(201).json({
+            statusCode: 201,
+            message: 'Joined waiting room',
+            isReservationCreated: isReservationCreated,
+        })
     }
 
     @UseGuards(JwtAuthGuard)
     @Post('/checkquota')
-    async checkQuota(@Body() waitingRoomDto: WaitingRoomDto,@Req() req){
+    async checkQuota(@Body() waitingRoomDto: WaitingRoomDto,@Req() req): Promise<number>{
         await this.reservationService.checkValidity(req.user.userId)    
         return await this.reservationService.checkQuota(waitingRoomDto,req.user.userId)
     }
 
     @UseGuards(JwtAuthGuard)
     @Post('/checktimeslot')
-    async checkTimeSlot(@Body() waitingRoomDto: WaitingRoomDto,@Req() req){
+    async checkTimeSlot(@Body() waitingRoomDto: WaitingRoomDto,@Req() req): Promise<number[]> {
         await this.reservationService.checkValidity(req.user.userId)    
         return await this.reservationService.checkTimeSlot(waitingRoomDto)
     }
