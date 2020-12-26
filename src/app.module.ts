@@ -11,10 +11,11 @@ import { FSModule } from './fs/fs.module';
 import { AccountInfosModule } from './users/accountInfos/accountInfos.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { DisableCourtsModule } from './courts/disable-courts/disable-courts.module';
+import { ScheduleModule } from '@nestjs/schedule';
+
 
 @Module({
   imports: [
-    UsersModule,
     ConfigModule.forRoot({ envFilePath: ['.env', '.env.development'] }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -31,7 +32,8 @@ import { DisableCourtsModule } from './courts/disable-courts/disable-courts.modu
     FSModule,
     AccountInfosModule,
     ReservationModule,
-    DisableCourtsModule
+    DisableCourtsModule,
+    ScheduleModule.forRoot()
   ],
   controllers: [AppController],
   providers: [AppService],
