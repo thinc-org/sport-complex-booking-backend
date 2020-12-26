@@ -24,6 +24,6 @@ import { DisableCourtsModule } from "./../courts/disable-courts/disable-courts.m
     MyReservationModule
   ],
   providers: [ReservationService],
-  controllers: [ReservationController],
+  controllers: [ReservationController]
 })
 export class ReservationModule {}
