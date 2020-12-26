@@ -47,6 +47,13 @@ export class StaffsService {
     return isUsernameExist;
   }
 
+  async findById(id: string): Promise<Staff> {
+    if(!isValidObjectId(id)) throw new HttpException('Not a valid Object id', HttpStatus.BAD_REQUEST);
+    const staff = await this.staffModel.findById(id);
+    if(staff == null) throw new HttpException('Staff not found', HttpStatus.BAD_REQUEST);
+    return staff;
+  }
+
   async getStaffProfile(id: string): Promise<Staff> {
 
     if (!isValidObjectId(id)) {
