@@ -49,10 +49,10 @@ export class ReservationService {
         return true
     }
 
-    async checkTimeSlot(waitingRoomDto: WaitingRoomDto) {
+    async checkTimeSlot(waitingRoomDto: WaitingRoomDto): Promise<number[]>{
         const open_time = 17  //เวลาตรงนี้ต้องไปเอามาจากsetting
         const close_time = 40 //เวลาตรงนี้ต้องไปเอามาจากsetting
-        const availableTime = new Set<Number>()
+        const availableTime = new Set<number>()
         for (let i = open_time; i <= close_time;i++){
             availableTime.add(i)
         }
@@ -114,7 +114,7 @@ export class ReservationService {
         return await waitingroom.save()
     }
 
-    async joinWaitingRoom(access_code: string, id: string) {
+    async joinWaitingRoom(access_code: string, id: string): Promise<boolean> {
         const waitingroom = await this.WaitingRoomModel.findOne({ access_code: access_code })
         if (!waitingroom) {
             throw new HttpException("The code is wrong.", HttpStatus.BAD_REQUEST)
@@ -134,12 +134,14 @@ export class ReservationService {
                 is_check: false
             })
             await waitingroom.remove()
-            return await reservation.save()
+            await reservation.save()
+            return true
         }
-        return await waitingroom.save()
+        await waitingroom.save()
+        return false
     }
 
-    async checkQuota(waitingroomdto: WaitingRoomDto, id: string) {
+    async checkQuota(waitingroomdto: WaitingRoomDto, id: string): Promise<number> {
         const joinedReservations = await this.ReservationModel.find({ list_member: { $in: [Types.ObjectId(id)] }, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
         let quota: number = 4 //เลขตรงนี้ต้องไปเอามาจากsport
         for (const joinedReservation of joinedReservations) {
