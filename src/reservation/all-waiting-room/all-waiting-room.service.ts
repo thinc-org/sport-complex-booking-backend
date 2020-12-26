@@ -17,14 +17,14 @@ export class AllWaitingRoomService {
     return waitingRoom;
   }
 
-  async getWaitingRoomSearchResult(sport_id:string,court_number:number,date:Date,time_slot:number[],start:number,end:number) : Promise<[Number,WaitingRoom[]]> {
+  async getWaitingRoomSearchResult(sportId:string,courtNumber:number,date:Date,timeSlot:number[],start:number,end:number) : Promise<[Number,WaitingRoom[]]> {
 
     let waitingRoom= this.waitingRoomModel.find();
 
-    if(sport_id !==undefined)
+    if(sportId !==undefined)
     {
-      waitingRoom=waitingRoom.find({"sport_id":sport_id});
-      if(court_number !==undefined) waitingRoom=waitingRoom.find({"court_number":court_number});
+      waitingRoom=waitingRoom.find({"sport_id":sportId});
+      if(courtNumber !==undefined) waitingRoom=waitingRoom.find({"court_number":courtNumber});
     }
 
     if(date!==undefined)
@@ -35,8 +35,8 @@ export class AllWaitingRoomService {
       waitingRoom=waitingRoom.find({"date":{$gte:date,$lt:nextDate}});
    }
 
-    if(time_slot!==undefined)
-      waitingRoom=waitingRoom.find({"time_slot":{$elemMatch:{$in:time_slot}}});
+    if(timeSlot!==undefined)
+      waitingRoom=waitingRoom.find({"time_slot":{$elemMatch:{$in:timeSlot}}});
     
     let result:WaitingRoom[]=await waitingRoom;
     const length=result.length;

@@ -17,14 +17,14 @@ export class AllReservationService {
     return reservation;
   }
 
-  async getReservationSearchResult(sport_id:string,court_number:number,date:Date,time_slot:number[],start:number,end:number) : Promise<[Number,Reservation[]]> {
+  async getReservationSearchResult(sportId:string,courtNumber:number,date:Date,timeSlot:number[],start:number,end:number) : Promise<[Number,Reservation[]]> {
 
     let reservation= this.reservationModel.find();
-    if(sport_id !==undefined)
+    if(sportId !==undefined)
     {
-      reservation=reservation.find({"sport_id":sport_id});
-      if(court_number !==undefined)
-        reservation=reservation.find({"court_number":court_number});
+      reservation=reservation.find({"sport_id":sportId});
+      if(courtNumber !==undefined)
+        reservation=reservation.find({"court_number":courtNumber});
     }
 
     if(date!=null)
@@ -35,8 +35,8 @@ export class AllReservationService {
        reservation=reservation.find({"date":{$gte:date,$lt:nextDate}});
     }
     
-    if(time_slot!==undefined )
-      reservation=reservation.find({"time_slot":{$elemMatch:{$in:time_slot}}});
+    if(timeSlot!==undefined )
+      reservation=reservation.find({"time_slot":{$elemMatch:{$in:timeSlot}}});
 
     let result:Reservation[]=await reservation;
     const length=result.length;
