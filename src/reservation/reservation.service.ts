@@ -68,7 +68,7 @@ export class ReservationService {
                 availableTime.delete(timeSlot)
             }
         }
-        const disable_times = await this.disableCourtService.findClosedTimes(waitingRoomDto.sport_id.toHexString(),waitingRoomDto.court_number,waitingRoomDto.date)
+        const disable_times = await this.disableCourtService.findClosedTimes(waitingRoomDto.sport_id.toString(),waitingRoomDto.court_number,new Date(waitingRoomDto.date))
         for (const disable_time of disable_times){
             availableTime.delete(disable_time)
         }
