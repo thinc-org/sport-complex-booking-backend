@@ -11,6 +11,7 @@ import { FSModule } from './fs/fs.module';
 import { AccountInfosModule } from './users/accountInfos/accountInfos.module';
 import { ReservationModule } from './reservation/reservation.module';
 import { DisableCourtsModule } from './courts/disable-courts/disable-courts.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -25,13 +26,13 @@ import { DisableCourtsModule } from './courts/disable-courts/disable-courts.modu
       inject: [ConfigService],
     }),
     ApprovalModule,
-    UsersModule,
     AuthModule,
     StaffsModule,
     FSModule,
     AccountInfosModule,
     ReservationModule,
-    DisableCourtsModule
+    DisableCourtsModule,
+    ScheduleModule.forRoot()
   ],
   controllers: [AppController],
   providers: [AppService],
