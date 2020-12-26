@@ -1,10 +1,10 @@
-import { Module ,forwardRef} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AllReservationService } from './all-reservation.service';
 import { AllReservationController } from './all-reservation.controller';
-import { ReservationModule } from '../reservation.module';
-
+import { MongooseModule } from '@nestjs/mongoose';
+import {ReservationSchema} from 'src/reservation/schema/reservation.schema'
 @Module({
-  imports:[forwardRef(()=>ReservationModule)],
+  imports:[MongooseModule.forFeature([{ name: 'AllReservation', schema: ReservationSchema, collection: 'list_reservation' }])],
   providers: [AllReservationService],
   controllers: [AllReservationController]
 })
