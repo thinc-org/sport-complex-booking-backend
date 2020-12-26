@@ -10,7 +10,7 @@ export class StaffsController {
     constructor(private readonly staffsService: StaffsService, private authService: AuthService) { }
 
     @UseGuards(StaffGuard)
-    @Get('/staffProfile')
+    @Get('/profile')
     async getStaffProfile(@Req() req): Promise<Staff> {
         const staff = this.staffsService.getStaffProfile(req.user.userId)
         return staff
