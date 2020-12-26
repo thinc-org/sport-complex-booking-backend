@@ -18,27 +18,14 @@ export class ReservationService {
         private disableCourtService: DisableCourtsService
     ) { }
 
-    //Test na krub by NON
-    async createTestWaitingRoom(WaitingRoom: WaitingRoom): Promise<WaitingRoom> {
-        const newMyWaitingRoom = new this.WaitingRoomModel(WaitingRoom);
-        return newMyWaitingRoom.save();
-    }
-
-    //Test na krub by NON
-    async createReservation(Reservation: Reservation): Promise<Reservation> {
-        const newSuccessfulReservation = new this.ReservationModel(Reservation);
-        return newSuccessfulReservation.save();
-    }
-
     async checkValidity(id: string): Promise<boolean> {
         const user = await this.userModel.findById(id);
         if (user == null) {
             throw new HttpException("This Id does not exist.", HttpStatus.BAD_REQUEST)
         }
         if (user.account_type == Account.Other) {
-            let otherUser = user as OtherUser
-            let date: Date = new Date();
-            date.setHours(date.getHours() + 7)//บวก7จะเปนเวลาประเทศไทย(เช็คกับฟังก์ชั่นที่approveอีกที)
+            const otherUser = user as OtherUser
+            const date = new Date();
             if (otherUser.verification_status != Verification.Verified) {
                 throw new HttpException("Your account has to verify first", HttpStatus.UNAUTHORIZED)
             }
@@ -47,45 +34,51 @@ export class ReservationService {
             }
         }
         if (user.is_penalize) {
-            throw new HttpException("Your account has been banned, please contact staff", HttpStatus.UNAUTHORIZED)
+            const date = new Date();
+            if(user.expired_penalize_date < date){
+                user.is_penalize = false
+                user.save()
+            }else{
+                throw new HttpException("Your account has been banned, please contact staff", HttpStatus.FORBIDDEN)
+            }
         }
         const haveWaitingRoom = await this.WaitingRoomModel.findOne({ list_member: { $in: [Types.ObjectId(id)] } })
         if (haveWaitingRoom) {
-            throw new HttpException("You already have waiting room", HttpStatus.UNAUTHORIZED)
+            throw new HttpException("You already have waiting room", HttpStatus.CONFLICT)
         }
         return true
     }
 
-    async checkTimeSlot(waitingroomdto: WaitingRoomDto) {
+    async checkTimeSlot(waitingRoomDto: WaitingRoomDto) {
         const open_time = 17  //เวลาตรงนี้ต้องไปเอามาจากsetting
         const close_time = 40 //เวลาตรงนี้ต้องไปเอามาจากsetting
-        let availableTime = new Set<Number>()
+        const availableTime = new Set<Number>()
         for (let i = open_time; i <= close_time;i++){
             availableTime.add(i)
         }
-        const reservation = await this.ReservationModel.find({ court_number: waitingroomdto.court_number, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
-        const waitingroom = await this.WaitingRoomModel.find({ court_number: waitingroomdto.court_number, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
-        for (let i = 0; i < reservation.length; i++) {
-            for (let j = 0; j < reservation[i].time_slot.length; j++) {
-                availableTime.delete(reservation[i].time_slot[j])
+        const reservations = await this.ReservationModel.find({ court_number: waitingRoomDto.court_number, date: waitingRoomDto.date, sport_id: waitingRoomDto.sport_id })
+        const waitingRooms = await this.WaitingRoomModel.find({ court_number: waitingRoomDto.court_number, date: waitingRoomDto.date, sport_id: waitingRoomDto.sport_id })
+        for (const reservation of reservations) {
+            for (const timeSlot of reservation.time_slot) {
+                availableTime.delete(timeSlot)
             }
         }
-        for (let i = 0; i < waitingroom.length; i++) {
-            for (let j = 0; j < waitingroom[i].time_slot.length; j++) {
-                availableTime.delete(waitingroom[i].time_slot[j])
+        for (const waitingRoom of waitingRooms) {
+            for (const timeSlot of waitingRoom.time_slot) {
+                availableTime.delete(timeSlot)
             }
         }
-        const disable_time = await this.disableCourtService.findClosedTimes(waitingroomdto.sport_id.toHexString(),waitingroomdto.court_number,waitingroomdto.date)
-        for (let i = 0; i < disable_time.length; i++){
-            availableTime.delete(disable_time[i])
+        const disable_times = await this.disableCourtService.findClosedTimes(waitingRoomDto.sport_id.toHexString(),waitingRoomDto.court_number,waitingRoomDto.date)
+        for (const disable_time of disable_times){
+            availableTime.delete(disable_time)
         }
         return Array.from(availableTime)
     }
 
     makeid(length): string {
         let result: string = '';
-        let characters: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let charactersLength: number = characters.length;
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const charactersLength = characters.length;
         for (let i = 0; i < length; i++) {
             result += characters.charAt(Math.floor(Math.random() * charactersLength));
         }
@@ -97,16 +90,16 @@ export class ReservationService {
         if(await this.checkQuota(waitingroomdto,id)<waitingroomdto.time_slot.length){
             throw new HttpException("You have not enough quotas", HttpStatus.UNAUTHORIZED)
         }
-        for(let i = 0; i< waitingroomdto.time_slot.length;i++){
-            if(!availableTime.includes(waitingroomdto.time_slot[i])){
+        for(const timeSlot of waitingroomdto.time_slot){
+            if(!availableTime.includes(timeSlot)){
                 throw new HttpException("Your choosed time is unavailable", HttpStatus.UNAUTHORIZED)
             }
         }
         const waitingroom = new this.WaitingRoomModel(waitingroomdto)
         waitingroom.list_member.push(Types.ObjectId(id))
-        let date: Date = new Date();
-        const waiting_room_duration: number = 15 //เวลาตรงนี้ต้องไปเอามาจากsetting
-        date.setMinutes(date.getMinutes() + waiting_room_duration)
+        const date = new Date();
+        const waitingRoomDuration: number = 15 //เวลาตรงนี้ต้องไปเอามาจากsetting
+        date.setMinutes(date.getMinutes() + waitingRoomDuration)
         waitingroom.expired_date = date
         let access_code: string = this.makeid(6);
         while (true) {
@@ -130,7 +123,7 @@ export class ReservationService {
             throw new HttpException("You have not enough quotas", HttpStatus.UNAUTHORIZED)
         }
         waitingroom.list_member.push(Types.ObjectId(id))
-        let required_member: number = 2 //เลขตรงนี้ต้องไปเอามาจากsport
+        const required_member = 2 //เลขตรงนี้ต้องไปเอามาจากsport
         if (waitingroom.list_member.length == required_member) {
             const reservation = new this.ReservationModel({
                 sport_id: waitingroom.sport_id,
@@ -147,10 +140,10 @@ export class ReservationService {
     }
 
     async checkQuota(waitingroomdto: WaitingRoomDto, id: string) {
-        const joinedReservation = await this.ReservationModel.find({ list_member: { $in: [Types.ObjectId(id)] }, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
+        const joinedReservations = await this.ReservationModel.find({ list_member: { $in: [Types.ObjectId(id)] }, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
         let quota: number = 4 //เลขตรงนี้ต้องไปเอามาจากsport
-        for (let i = 0; i < joinedReservation.length; i++) {
-            quota = quota - joinedReservation[i].time_slot.length
+        for (const joinedReservation of joinedReservations) {
+            quota = quota - joinedReservation.time_slot.length
         }
         return quota
     }
