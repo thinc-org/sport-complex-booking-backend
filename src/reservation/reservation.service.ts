@@ -115,6 +115,10 @@ export class ReservationService {
     }
 
     async createWaitingRoom(waitingroomdto: WaitingRoomDto, id: string): Promise<WaitingRoom> {
+        //to eliminate duplicate time slot
+        const timeSlot = new Set<number>(waitingroomdto.time_slot)
+        waitingroomdto.time_slot = Array.from(timeSlot)
+        
         const availableTime = await this.checkTimeSlot(waitingroomdto)
         if(await this.checkQuota(waitingroomdto,id)<waitingroomdto.time_slot.length){
             throw new HttpException("You have not enough quotas", HttpStatus.UNAUTHORIZED)
