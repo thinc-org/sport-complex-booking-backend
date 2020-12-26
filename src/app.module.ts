@@ -15,6 +15,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { StaffManagerModule } from './staffs/staff-manager/staff-manager.module';
 import { CourtManagerModule } from './court-manager/court-manager.module';
 import { listAllUserModule } from './staffs/list-all-user/list-all-user.module';
+import { AllReservationModule } from './reservation/all-reservation/all-reservation.module';
+import { AllWaitingRoomModule } from './reservation/all-waiting-room/all-waiting-room.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { listAllUserModule } from './staffs/list-all-user/list-all-user.module';
     ScheduleModule.forRoot(),
     CourtManagerModule,
     StaffManagerModule,
+    AllReservationModule,
+    AllWaitingRoomModule
   ],
   controllers: [AppController],
   providers: [AppService],
