@@ -32,11 +32,6 @@ async get_setting() : Promise<Setting>{
       return await this.Setting.findOne({});
 }
 
-//function: get all Sport from db
-async find_allSport() : Promise<Sport[]>{
-      return await this.Sport.find({});
-}
-
 async find_Sport_byID(id: string) : Promise<Sport>{
       if(!isValidObjectId(id)){
             throw new HttpException("Invalid Id.", HttpStatus.BAD_REQUEST);
@@ -85,6 +80,12 @@ async sportRegexQuery(start: number, end: number, search_filter: string) : Promi
       if(start<0 || end<start){
             throw new HttpException("Invalid start or end number.", HttpStatus.BAD_REQUEST);
       }
+      if(search_filter === ''){     //search_filter just need to be ''
+            const list_doc = await this.Sport.find({})
+            const allSport_length = list_doc.length;
+            return { allSport_length: allSport_length, sport_list: list_doc} ;
+      }
+
       const list_doc = await this.Sport.find({sport_name_th: new RegExp(search_filter,'i')});
 
       if(end>= list_doc.length){
