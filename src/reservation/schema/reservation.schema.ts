@@ -20,6 +20,3 @@ export const WaitingRoomSchema = new mongoose.Schema({
     access_code : String,
     expired_date : Date
 });
-
-// automatically remove expired document using TTL index
-WaitingRoomSchema.index({ expired_date: 1 }, { expireAfterSeconds: 0 })
