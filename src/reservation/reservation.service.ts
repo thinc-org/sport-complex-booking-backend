@@ -8,6 +8,7 @@ import { DisableCourtsService } from 'src/courts/disable-courts/disable-courts.s
 import { Account, OtherUser, User, Verification } from 'src/users/interfaces/user.interface';
 import { WaitingRoomDto } from './dto/waiting-room.dto';
 import { Reservation, WaitingRoom } from "./interfaces/reservation.interface";
+import { CourtManagerService } from 'src/court-manager/court-manager.service';
 
 
 @Injectable()
@@ -16,7 +17,8 @@ export class ReservationService {
         @InjectModel('WaitingRoom') private waitingRoomModel: Model<WaitingRoom>,
         @InjectModel('Reservation') private reservationModel: Model<Reservation>,
         @InjectModel('User') private userModel: Model<User>,
-        private disableCourtService: DisableCourtsService
+        private disableCourtService: DisableCourtsService,
+        private courtManagerService: CourtManagerService
     ) { }
 
     @Cron('0 */30 * * * *')
@@ -36,7 +38,7 @@ export class ReservationService {
                         const user = await this.userModel.findById(member)
                         user.is_penalize = true
                         const bannedDate = new Date()
-                        const bannedDay = 30 //เวลาตรงนี้ต้องไปเอามาจากsetting
+                        const bannedDay = (await this.courtManagerService.getSetting()).absence_punishment
                         bannedDate.setDate(bannedDate.getDate() + bannedDay)
                         user.expired_penalize_date = bannedDate
                         user.save()
@@ -79,8 +81,10 @@ export class ReservationService {
     }
 
     async checkTimeSlot(waitingRoomDto: WaitingRoomDto): Promise<number[]>{
-        const open_time = 17  //เวลาตรงนี้ต้องไปเอามาจากsetting
-        const close_time = 40 //เวลาตรงนี้ต้องไปเอามาจากsetting
+        const sport = await this.courtManagerService.findSportByID(waitingRoomDto.sport_id.toString())
+        const court = sport.list_court.find(court => court.court_num == waitingRoomDto.court_number)
+        const open_time = court.open_time
+        const close_time = court.close_time
         const availableTime = new Set<number>()
         for (let i = open_time; i <= close_time;i++){
             availableTime.add(i)
@@ -114,24 +118,24 @@ export class ReservationService {
         return result;
     }
 
-    async createWaitingRoom(waitingroomdto: WaitingRoomDto, id: string): Promise<WaitingRoom> {
+    async createWaitingRoom(waitingRoomDto: WaitingRoomDto, id: string): Promise<WaitingRoom> {
         //to eliminate duplicate time slot
-        const timeSlot = new Set<number>(waitingroomdto.time_slot)
-        waitingroomdto.time_slot = Array.from(timeSlot)
+        const timeSlot = new Set<number>(waitingRoomDto.time_slot)
+        waitingRoomDto.time_slot = Array.from(timeSlot)
         
-        const availableTime = await this.checkTimeSlot(waitingroomdto)
-        if(await this.checkQuota(waitingroomdto,id)<waitingroomdto.time_slot.length){
+        const availableTime = await this.checkTimeSlot(waitingRoomDto)
+        if(await this.checkQuota(waitingRoomDto,id) < waitingRoomDto.time_slot.length){
             throw new HttpException("You have not enough quotas", HttpStatus.UNAUTHORIZED)
         }
-        for(const timeSlot of waitingroomdto.time_slot){
+        for(const timeSlot of waitingRoomDto.time_slot){
             if(!availableTime.includes(timeSlot)){
                 throw new HttpException("Your choosed time is unavailable", HttpStatus.UNAUTHORIZED)
             }
         }
-        const waitingroom = new this.waitingRoomModel(waitingroomdto)
+        const waitingroom = new this.waitingRoomModel(waitingRoomDto)
         waitingroom.list_member.push(Types.ObjectId(id))
         const date = new Date();
-        const waitingRoomDuration: number = 1 //เวลาตรงนี้ต้องไปเอามาจากsetting
+        const waitingRoomDuration: number = (await this.courtManagerService.getSetting()).waiting_room_duration
         date.setMinutes(date.getMinutes() + waitingRoomDuration)
         waitingroom.expired_date = date
         let access_code: string = this.makeid(6);
@@ -147,8 +151,8 @@ export class ReservationService {
         return await waitingroom.save()
     }
 
-    async joinWaitingRoom(access_code: string, id: string): Promise<boolean> {
-        const waitingroom = await this.waitingRoomModel.findOne({ access_code: access_code })
+    async joinWaitingRoom(accessCode: string, id: string): Promise<boolean> {
+        const waitingroom = await this.waitingRoomModel.findOne({ access_code: accessCode })
         if (!waitingroom) {
             throw new HttpException("The code is wrong.", HttpStatus.BAD_REQUEST)
         }
@@ -156,7 +160,7 @@ export class ReservationService {
             throw new HttpException("You have not enough quotas", HttpStatus.UNAUTHORIZED)
         }
         waitingroom.list_member.push(Types.ObjectId(id))
-        const required_member = 2 //เลขตรงนี้ต้องไปเอามาจากsport
+        const required_member = (await this.courtManagerService.findSportByID(waitingroom.sport_id.toString())).required_user
         if (waitingroom.list_member.length == required_member) {
             const reservation = new this.reservationModel({
                 sport_id: waitingroom.sport_id,
@@ -174,9 +178,9 @@ export class ReservationService {
         return false
     }
 
-    async checkQuota(waitingroomdto: WaitingRoomDto, id: string): Promise<number> {
-        const joinedReservations = await this.reservationModel.find({ list_member: { $in: [Types.ObjectId(id)] }, date: waitingroomdto.date, sport_id: waitingroomdto.sport_id })
-        let quota: number = 4 //เลขตรงนี้ต้องไปเอามาจากsport
+    async checkQuota(waitingRoomDto: WaitingRoomDto, id: string): Promise<number> {
+        const joinedReservations = await this.reservationModel.find({ list_member: { $in: [Types.ObjectId(id)] }, date: waitingRoomDto.date, sport_id: waitingRoomDto.sport_id })
+        let quota: number = (await this.courtManagerService.findSportByID(waitingRoomDto.sport_id.toString())).quota
         for (const joinedReservation of joinedReservations) {
             quota = quota - joinedReservation.time_slot.length
         }

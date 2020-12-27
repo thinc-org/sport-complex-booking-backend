@@ -6,8 +6,8 @@ import { ReservationController } from './reservation.controller';
 
 import { ReservationSchema, WaitingRoomSchema } from "./schema/reservation.schema";
 import { UsersModule } from 'src/users/users.module';
-import { DisableCourtsService } from 'src/courts/disable-courts/disable-courts.service';
 import { DisableCourtsModule } from 'src/courts/disable-courts/disable-courts.module';
+import { CourtManagerModule } from 'src/court-manager/court-manager.module';
 
 @Module({
   imports : [MongooseModule.forFeature(
@@ -15,7 +15,8 @@ import { DisableCourtsModule } from 'src/courts/disable-courts/disable-courts.mo
     MongooseModule.forFeature(
       [{ name: 'Reservation', schema: ReservationSchema, collection: 'list_reservation'}]),
     UsersModule,
-    DisableCourtsModule
+    DisableCourtsModule,
+    CourtManagerModule
     ],
   providers: [ReservationService],
   controllers: [ReservationController]
