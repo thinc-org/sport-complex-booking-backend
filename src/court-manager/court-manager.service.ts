@@ -13,7 +13,7 @@ export class CourtManagerService {
       ){}
 
 //might get deleted, no error handling
-async write_setting() : Promise<Setting>{
+async writeSetting() : Promise<Setting>{
       const setting= {
             "waiting_room_duration": 15,
             "late_cancelation_punishment": 30,
@@ -24,15 +24,15 @@ async write_setting() : Promise<Setting>{
       return court_setting.save();
 }
 
-async update_setting( new_setting: Setting) : Promise<Setting>{
+async updateSetting( new_setting: Setting) : Promise<Setting>{
       return await this.Setting.findOneAndUpdate({}, new_setting, {new:true});
 }
 
-async get_setting() : Promise<Setting>{
+async getSetting() : Promise<Setting>{
       return await this.Setting.findOne({});
 }
 
-async find_Sport_byID(id: string) : Promise<Sport>{
+async findSportByID(id: string) : Promise<Sport>{
       if(!isValidObjectId(id)){
             throw new HttpException("Invalid Id.", HttpStatus.BAD_REQUEST);
       }
@@ -44,7 +44,7 @@ async find_Sport_byID(id: string) : Promise<Sport>{
 }
 
 //create sport by Sport (schema)      
-async create_Sport(court_data: Sport) : Promise<Sport>{
+async createSport(court_data: Sport) : Promise<Sport>{
       const doc = await this.Sport.findOne({sport_name_th: court_data.sport_name_th});     
       if(doc){
             throw new BadRequestException("This Sport already exist.");
@@ -54,10 +54,10 @@ async create_Sport(court_data: Sport) : Promise<Sport>{
 }
 
 //update only sport setting, not court's setting
-async update_Sport(sportID: string, newSportSetting: {sport_name_th: string, sport_name_en: string, 
+async updateSport(sportID: string, newSportSetting: {sport_name_th: string, sport_name_en: string, 
       required_user: number, quota: number}) : Promise<Sport>{
             
-      const Sport = await this.find_Sport_byID(sportID);
+      const Sport = await this.findSportByID(sportID);
       Sport.required_user = newSportSetting.required_user;
       Sport.quota = newSportSetting.quota;
       
@@ -65,7 +65,7 @@ async update_Sport(sportID: string, newSportSetting: {sport_name_th: string, spo
 }
 
 //delete sport by its _id
-async delete_Sport(sportID: string): Promise<Sport>{
+async deleteSport(sportID: string): Promise<Sport>{
       if(!isValidObjectId(sportID)){
             throw new HttpException("Invalid Id.", HttpStatus.BAD_REQUEST);
       }
@@ -97,8 +97,8 @@ async sportRegexQuery(start: number, end: number, search_filter: string) : Promi
 }
 
 //update a court by court number and its data 
-async update_CourtbyID(sportID: string, newSetting: Court[]) : Promise<Sport>{
-      const doc = await this.find_Sport_byID(sportID);
+async updateCourtbyID(sportID: string, newSetting: Court[]) : Promise<Sport>{
+      const doc = await this.findSportByID(sportID);
       doc.list_court = newSetting;
       return await doc.save();
 }
