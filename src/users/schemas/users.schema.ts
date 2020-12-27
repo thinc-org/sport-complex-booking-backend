@@ -51,6 +51,19 @@ class UserSchemaClass extends mongoose.Schema {
             if(this.password) return this.password;
             else throw new HttpException('password does not exist', HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        this.methods.updateBan = function() {
+            if(!this.is_penalize){
+                return
+            } 
+            else if(this.expired_penalize_date == null) {
+                this.is_penalize = false;
+            }
+            else if(new Date() > this.expired_penalize_date) {
+                this.is_penalize = false;
+                this.expired_penalize_date = null;
+            }
+        }
     }
 }
 

@@ -39,6 +39,7 @@ export interface User extends mongoose.Document {
     editAccountInfo?: (updt: EditUserInfoDTO) => User
     setPassword?: (hashedPassword: string) => void
     getPassword?: () => string
+    updateBan?: () => void
 }
 
 export interface CuStudentUser extends User {

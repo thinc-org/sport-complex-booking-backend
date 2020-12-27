@@ -75,6 +75,12 @@ export class UsersService {
         return user;
     }
 
+    async findAndUpdateBan(id: Types.ObjectId | string): Promise<User> {
+        const user = await this.findById(id, '-password');
+        user.updateBan();
+        return user;
+    }
+
     async find(filter, select? : string, account_type?: Account ): Promise<User[]> {
         let model: Model<User> | Model<CuStudentUser> | Model<SatitCuPersonelUser> | Model<OtherUser>
         switch(account_type) {

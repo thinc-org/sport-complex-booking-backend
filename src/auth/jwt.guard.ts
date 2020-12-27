@@ -18,7 +18,6 @@ export class StaffGuard extends AuthGuard('jwt') {
     ): Promise<boolean>{
         const valid = await super.canActivate(context);
         if(!valid) return false;
-        console.log(this.staffsService)
         const staff = await this.staffsService.findById(context.switchToHttp().getRequest().user.userId);
         return staff != null;
     }

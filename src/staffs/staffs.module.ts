@@ -12,7 +12,6 @@ import { listAllUserModule } from './list-all-user/list-all-user.module'
         [{ name: 'Staff', schema: StaffSchema, collection: 'staffs'}]),
         forwardRef(()=>UsersModule),
         forwardRef(()=>AuthModule),
-        listAllUserModule
         ],
     controllers: [StaffsController],
     providers: [StaffsService],
