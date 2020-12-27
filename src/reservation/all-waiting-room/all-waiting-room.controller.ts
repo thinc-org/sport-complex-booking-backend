@@ -1,4 +1,4 @@
-import { Controller, Get ,Param,Body,UseGuards, Delete} from '@nestjs/common';
+import { Controller, Get ,Param,Body,UseGuards, Delete,Post} from '@nestjs/common';
 import { AllWaitingRoomService } from './all-waiting-room.service';
 import {StaffGuard } from 'src/auth/jwt.guard'
 
@@ -7,7 +7,7 @@ import {StaffGuard } from 'src/auth/jwt.guard'
 export class AllWaitingRoomController {
     constructor (private readonly allWaitingRoomService:AllWaitingRoomService) {}
 
-    @Get()
+    @Post()
     getSearchResult(@Body() body){
         return this.allWaitingRoomService.getWaitingRoomSearchResult(body.sport_id ,body.court_number ,body.date ,body.time_slot ,body.start ,body.end);
     }
