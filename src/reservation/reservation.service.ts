@@ -81,6 +81,16 @@ export class ReservationService {
     }
 
     async checkTimeSlot(waitingRoomDto: WaitingRoomDto): Promise<number[]>{
+        const date = new Date()
+        date.setUTCHours(0, 0, 0, 0);
+        const waitingRoomDate = new Date(waitingRoomDto.date)
+        if(waitingRoomDate < date){
+            throw new HttpException("You cannot reserve the pass day", HttpStatus.BAD_REQUEST)
+        }
+        date.setDate(date.getDate()+7)
+        if(waitingRoomDate > date){
+            throw new HttpException("You cannot reserve the time in advance over 7 days", HttpStatus.BAD_REQUEST)
+        }
         const sport = await this.courtManagerService.findSportByID(waitingRoomDto.sport_id.toString())
         const court = sport.list_court.find(court => court.court_num == waitingRoomDto.court_number)
         const open_time = court.open_time
@@ -179,6 +189,17 @@ export class ReservationService {
     }
 
     async checkQuota(waitingRoomDto: WaitingRoomDto, id: string): Promise<number> {
+        const date = new Date()
+        date.setUTCHours(0, 0, 0, 0);
+        const waitingRoomDate = new Date(waitingRoomDto.date)
+        if(waitingRoomDate < date){
+            throw new HttpException("You cannot reserve the pass day", HttpStatus.BAD_REQUEST)
+        }
+        date.setDate(date.getDate()+7)
+        if(waitingRoomDate > date){
+            throw new HttpException("You cannot reserve the time in advance over 7 days", HttpStatus.BAD_REQUEST)
+        }
+
         const joinedReservations = await this.reservationModel.find({ list_member: { $in: [Types.ObjectId(id)] }, date: waitingRoomDto.date, sport_id: waitingRoomDto.sport_id })
         let quota: number = (await this.courtManagerService.findSportByID(waitingRoomDto.sport_id.toString())).quota
         for (const joinedReservation of joinedReservations) {
