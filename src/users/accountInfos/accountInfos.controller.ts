@@ -11,7 +11,7 @@ export class AccountInfosController {
     
     @Get()
     async getAccountInfo(@Req() req) {
-        return await this.userService.findById(req.user.userId, '-password');
+        return await this.userService.findAndUpdateBan(req.user.userId);
     }
     
     @Put()

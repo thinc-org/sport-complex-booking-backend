@@ -14,6 +14,7 @@ import { DisableCourtsModule } from './courts/disable-courts/disable-courts.modu
 import { ScheduleModule } from '@nestjs/schedule';
 import { StaffManagerModule } from './staffs/staff-manager/staff-manager.module';
 import { CourtManagerModule } from './court-manager/court-manager.module';
+import { listAllUserModule } from './staffs/list-all-user/list-all-user.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CourtManagerModule } from './court-manager/court-manager.module';
     UsersModule,
     AuthModule,
     StaffsModule,
+    listAllUserModule,
     FSModule,
     AccountInfosModule,
     ReservationModule,
