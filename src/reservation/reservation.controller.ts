@@ -29,7 +29,7 @@ export class ReservationController {
         await this.reservationService.createWaitingRoom(waitingRoomDto,req.user.userId)
         return res.status(201).json({
             statusCode: 201,
-            message: 'waiting room is already created',
+            message: 'Waiting room created',
         })
     }
 
