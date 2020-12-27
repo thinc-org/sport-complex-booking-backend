@@ -13,18 +13,18 @@ export class CourtManagerController {
 //might get deleted, no error handling
 @Post('setting')
 async postSetting(@Req() req) : Promise<Setting>{
-      return await this.courtManagerService.write_setting();
+      return await this.courtManagerService.writeSetting();
 }
 
 @UseGuards(JwtAuthGuard)
 @Put('setting')
 async updateSetting( @Body() new_setting: Setting, @Req() req) : Promise<Setting>{
-      return await this.courtManagerService.update_setting(new_setting);
+      return await this.courtManagerService.updateSetting(new_setting);
 }
 
 @Get('setting')
 async getSetting(@Req() req):Promise<Setting>{
-      return await this.courtManagerService.get_setting();
+      return await this.courtManagerService.getSetting();
 }
 
 //Get sport by thai name (regex)
@@ -39,13 +39,13 @@ async getSportList(@Body() input: {start:number, end:number, search_filter: stri
 //can be use for courts displaying 
 @Get('/:id')
 async getSport(@Param('id') id: string , @Req() req) : Promise<Sport>{
-      return await this.courtManagerService.find_Sport_byID(id);
+      return await this.courtManagerService.findSportByID(id);
 }
 
 //create new document for each sport using body as sport
 @Post('/')    
 async createSport(@Body() sport_data: Sport, @Req() req): Promise<Sport>{
-      return await this.courtManagerService.create_Sport(sport_data);
+      return await this.courtManagerService.createSport(sport_data);
 }
 
 //for updating sport_name_th, sport_name_en, quotas, required_users
@@ -53,13 +53,13 @@ async createSport(@Body() sport_data: Sport, @Req() req): Promise<Sport>{
 async updateSport(@Param('id') id: string,@Body() sport_data: {sport_name_th: string, sport_name_en: string, 
       required_user: number, quota: number}, @Req() req): Promise<Sport>{
 
-      return await this.courtManagerService.update_Sport(id, sport_data);
+      return await this.courtManagerService.updateSport(id, sport_data);
 }
 
 //delete sport by sport's _id 
 @Delete(':id')
 async deleteSport(@Param('id') id: string, @Req() req): Promise<Sport>{
-      return await this.courtManagerService.delete_Sport(id);
+      return await this.courtManagerService.deleteSport(id);
 }
 
 //Param is sportType ex. Basketball (in english)
@@ -68,7 +68,7 @@ async changeCourtSetting( @Body() new_court: {"sport_id": string, "new_setting":
       if(!req.user.isStaff){ 
             throw new HttpException('Staff or Admin only', HttpStatus.UNAUTHORIZED);
       }
-     return await this.courtManagerService.update_CourtbyID(new_court.sport_id, new_court.new_setting);
+     return await this.courtManagerService.updateCourtbyID(new_court.sport_id, new_court.new_setting);
 }
 
 }
