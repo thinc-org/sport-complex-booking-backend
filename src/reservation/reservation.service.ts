@@ -85,7 +85,7 @@ export class ReservationService {
         date.setUTCHours(0, 0, 0, 0);
         const waitingRoomDate = new Date(waitingRoomDto.date)
         if(waitingRoomDate < date){
-            throw new HttpException("You cannot reserve the pass day", HttpStatus.BAD_REQUEST)
+            throw new HttpException("You cannot reserve the past date", HttpStatus.BAD_REQUEST)
         }
         date.setDate(date.getDate()+7)
         if(waitingRoomDate > date){
@@ -193,7 +193,7 @@ export class ReservationService {
         date.setUTCHours(0, 0, 0, 0);
         const waitingRoomDate = new Date(waitingRoomDto.date)
         if(waitingRoomDate < date){
-            throw new HttpException("You cannot reserve the pass day", HttpStatus.BAD_REQUEST)
+            throw new HttpException("You cannot reserve the past date", HttpStatus.BAD_REQUEST)
         }
         date.setDate(date.getDate()+7)
         if(waitingRoomDate > date){
