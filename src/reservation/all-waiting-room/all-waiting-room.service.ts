@@ -69,7 +69,7 @@ export class AllWaitingRoomService {
     let queryArray=[];
     for(const distime of disableCourt.disable_time)
     {
-      queryArray.push({time_slot:{$elemMatch:{$in:distime.time_slot}},day:distime.day});
+      queryArray.push({time_slot:{$elemMatch:{$in:distime.time_slot}},day_of_week:distime.day});
     }
     const waitingRoom=await this.waitingRoomModel.find({date:{$gte:disableCourt.starting_date,$lt:disableCourt.expired_date},$or:queryArray});
     return waitingRoom;
