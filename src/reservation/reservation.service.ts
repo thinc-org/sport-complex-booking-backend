@@ -25,7 +25,7 @@ export class ReservationService {
     async checkReservation(){
         const date = new Date()
         date.setHours(date.getHours()+7)
-        const time = date.getUTCHours()*60 + date.getMinutes()/60
+        const time = date.getUTCHours() + date.getMinutes()/60
         date.setUTCHours(0, 0, 0, 0);
         const reservations = await this.reservationModel.find({date: date})
         for(const reservation of reservations){
@@ -42,8 +42,8 @@ export class ReservationService {
                         bannedDate.setDate(bannedDate.getDate() + bannedDay)
                         user.expired_penalize_date = bannedDate
                         user.save()
-                        await reservation.remove()
                     }
+                    await reservation.remove()
                 }
             }
         }
@@ -82,6 +82,9 @@ export class ReservationService {
 
     async checkTimeSlot(waitingRoomDto: WaitingRoomDto): Promise<number[]>{
         const date = new Date()
+        date.setHours(date.getHours()+7)
+        const currentTime = date.getUTCHours() + date.getMinutes()/60 + date.getSeconds()/3600
+        const currentTimeSlot = Math.ceil((currentTime*2))
         date.setUTCHours(0, 0, 0, 0);
         const waitingRoomDate = new Date(waitingRoomDto.date)
         if(waitingRoomDate < date){
@@ -91,11 +94,17 @@ export class ReservationService {
         if(waitingRoomDate > date){
             throw new HttpException("You cannot reserve the time in advance over 7 days", HttpStatus.BAD_REQUEST)
         }
+        date.setDate(date.getDate()-7)
         const sport = await this.courtManagerService.findSportByID(waitingRoomDto.sport_id.toString())
         const court = sport.list_court.find(court => court.court_num == waitingRoomDto.court_number)
-        const open_time = court.open_time
+        let open_time:number = court.open_time
         const close_time = court.close_time
         const availableTime = new Set<number>()
+        if(waitingRoomDate.getTime() == date.getTime()){
+            if(currentTimeSlot+1>open_time){
+                open_time = currentTimeSlot+1
+            }
+        }
         for (let i = open_time; i <= close_time;i++){
             availableTime.add(i)
         }
