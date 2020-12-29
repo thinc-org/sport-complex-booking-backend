@@ -13,7 +13,7 @@ import { StaffSchema } from '../schemas/staff.schema';
 ],
       controllers: [StaffManagerController],
       providers: [StaffManagerService],
-      exports: [ ]
+      exports: [StaffManagerService]
 })
 
 export class StaffManagerModule {}

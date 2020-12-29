@@ -82,7 +82,11 @@ export class listAllUserService {
         return user
     }
     async getUserById(id: string): Promise<User> {
-        return await this.userModel.findById(id);
+        const user = await this.userModel.findById(id);
+        if(!user){
+            throw new BadRequestException("No user with this ID found.")
+        }
+        return user;
     }
 
     async findUserByEmail(email: string): Promise<User> {
