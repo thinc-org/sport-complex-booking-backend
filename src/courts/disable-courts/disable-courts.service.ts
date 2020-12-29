@@ -48,7 +48,7 @@ export class DisableCourtsService {
         if (data.lean) query.select('-disable_time');
 
         // populate sport_id field
-        //await query.populate('sport_id');
+        await query.populate('sport_id');
 
         const results = await query.sort('starting_date expired_date');
 
@@ -71,7 +71,7 @@ export class DisableCourtsService {
     }
 
     async getDisableCourt(id: string): Promise<DisableCourt> {
-        const disableCourt = await this.disableCourtModel.findById(id);
+        const disableCourt = await this.disableCourtModel.findById(id).populate('sport_id');
         if (disableCourt == null)
             throw new HttpException("Cannot find DisableCourt with id: " + id, HttpStatus.NOT_FOUND);
         return disableCourt;
@@ -145,7 +145,8 @@ export class DisableCourtsService {
         const timeArr: Array<number> = [];
         results.forEach(disableCourt => {
             disableCourt.disable_time.forEach(disableTime => {
-                timeArr.push(...disableTime.time_slot);
+                if(disableTime.day === day)
+                    timeArr.push(...disableTime.time_slot);
             })
         });
         return timeArr;
