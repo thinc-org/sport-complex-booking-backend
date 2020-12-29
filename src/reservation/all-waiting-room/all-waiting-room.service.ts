@@ -17,41 +17,39 @@ export class AllWaitingRoomService {
     return waitingRoom;
   }
 
-  async getWaitingRoomSearchResult(sportId:string,courtNumber:number,date:Date,timeSlot:number[],start:number,end:number) : Promise<[Number,WaitingRoom[]]> {
+  async getWaitingRoomSearchResult(body) : Promise<[Number,WaitingRoom[]]> {
 
-    let waitingRoom= this.waitingRoomModel.find();
-
-    if(sportId !==undefined)
+    let reservation= this.waitingRoomModel.find();
+    if(body.sportId)
     {
-      waitingRoom=waitingRoom.find({"sport_id":sportId});
-      if(courtNumber !==undefined) waitingRoom=waitingRoom.find({"court_number":courtNumber});
+      reservation=reservation.find({"sport_id":body.sportId});
+      if(body.courtNumber)
+        reservation=reservation.find({"court_number":body.courtNumber});
     }
 
-    if(date!==undefined)
+    if(body.date)
     { 
-      date=new Date(date);
-      let nextDate=new Date(date);
-      nextDate.setDate(date.getDate()+1);
-      waitingRoom=waitingRoom.find({"date":{$gte:date,$lt:nextDate}});
-   }
-
-    if(timeSlot!==undefined)
-      waitingRoom=waitingRoom.find({"time_slot":{$elemMatch:{$in:timeSlot}}});
+       body.date=new Date(body.date);
+       let nextDate=new Date(body.date);
+       nextDate.setDate(body.date.getDate()+1);
+       reservation=reservation.find({"date":{$gte:body.date,$lt:nextDate}});
+    }
     
-    let result:WaitingRoom[]=await waitingRoom;
+    if(body.timeSlot)
+      reservation=reservation.find({"time_slot":{$elemMatch:{$in:body.timeSlot}}});
+
+    let result:WaitingRoom[]=await reservation;
     const length=result.length;
-    
-    if(start !== undefined){
-
-      start=Number(start);
-      if(end === undefined)
-          result = result.slice(start);
+    if(body.start){
+      
+      body.start=Number(body.start);
+      if(!body.end)
+          result = result.slice(body.start);
       else {
-          end=Number(end);
-          result = result.slice(start,end);
+          body.end=Number(body.end);
+          result = result.slice(body.start,body.end);
       }
     }
-    
     return [length,result];
   
   }
