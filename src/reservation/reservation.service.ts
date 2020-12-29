@@ -100,7 +100,7 @@ export class ReservationService {
         let open_time:number = court.open_time
         const close_time = court.close_time
         const availableTime = new Set<number>()
-        if(waitingRoomDate.getTime() == date.getTime()){
+        if(waitingRoomDate.getTime() === date.getTime()){
             if(currentTimeSlot+1>open_time){
                 open_time = currentTimeSlot+1
             }
@@ -141,6 +141,11 @@ export class ReservationService {
         //to eliminate duplicate time slot
         const timeSlot = new Set<number>(waitingRoomDto.time_slot)
         waitingRoomDto.time_slot = Array.from(timeSlot)
+
+        //to make sure that time slot is consecutive
+        if(Math.max.apply(Math,waitingRoomDto.time_slot)-Math.min.apply(Math,waitingRoomDto.time_slot)+1 != waitingRoomDto.time_slot.length){
+            throw new HttpException("Your time slots have to be consecutive", HttpStatus.BAD_REQUEST)
+        }
         
         const availableTime = await this.checkTimeSlot(waitingRoomDto)
         if(await this.checkQuota(waitingRoomDto,id) < waitingRoomDto.time_slot.length){
