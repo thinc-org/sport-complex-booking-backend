@@ -34,6 +34,7 @@ import { listAllUserModule } from './staffs/list-all-user/list-all-user.module';
     listAllUserModule,
     FSModule,
     AccountInfosModule,
+    CourtManagerModule,
     ReservationModule,
     DisableCourtsModule,
     ScheduleModule.forRoot(),
