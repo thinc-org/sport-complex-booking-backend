@@ -39,12 +39,11 @@ async getSetting(@Req() req):Promise<Setting>{
 @Get('/')      
 async getSportList(@Body() input: {start:number, end:number, search_filter: string} ,@Req() req) : 
       Promise<{allSport_length: number,sport_list: Sport[]}>{
-      let user;
       if(req.user.isStaff === false){
-            user = this.listAllUserService.getUserById(req.user.userId);
+            this.listAllUserService.getUserById(req.user.userId);
       }
       if(req.user.isStaff === true){
-            user = this.StaffManagerService.getStaffData(req.user.userId);
+            this.StaffManagerService.getStaffData(req.user.userId);
       }
       return await this.courtManagerService.sportRegexQuery(input.start, input.end, input.search_filter);
 }
