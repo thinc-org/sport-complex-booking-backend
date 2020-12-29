@@ -5,6 +5,7 @@ import { CourtSchema, SportSchema} from './schemas/sportCourt.schema';
 import { SettingSchema } from './schemas/setting.schema';
 import {CourtManagerController} from './court-manager.controller';
 import { CourtManagerService } from './court-manager.service';
+import { StaffsModule } from 'src/staffs/staffs.module';
 
 @Module({ 
       imports: [
@@ -12,6 +13,7 @@ import { CourtManagerService } from './court-manager.service';
             MongooseModule.forFeature([{name: 'Courts', schema: CourtSchema}]),
             MongooseModule.forFeature([{name: 'Sport', schema: SportSchema, collection: 'List_Sport'}]),
             MongooseModule.forFeature([{name: 'Setting', schema: SettingSchema, collection: 'Setting'}]),
+            StaffsModule
 ],
       controllers: [CourtManagerController],
       providers: [CourtManagerService],
