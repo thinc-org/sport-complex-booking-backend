@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Query, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/jwt.guard';
+import { JwtAuthGuard, StaffGuard } from 'src/auth/jwt.guard';
 import { CreateDisableCourtDTO, EditDisableCourtDTO, QueryDisableCourtDTO, QueryResult } from './disable-courts.dto';
 import { DisableCourtsService } from './disable-courts.service';
 import { DisableCourt } from './interfaces/disable-courts.interface';
@@ -9,10 +9,9 @@ import { DisableCourt } from './interfaces/disable-courts.interface';
 export class DisableCourtsController {
     constructor(private readonly disableCourtsService: DisableCourtsService) { }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(StaffGuard)
     @Post('')
     async createDisableCourt(@Req() req, @Body() body: CreateDisableCourtDTO): Promise<DisableCourt> {
-        if (!req.user.isStaff) throw new HttpException("Not a Staff", HttpStatus.UNAUTHORIZED);
         return await this.disableCourtsService.createDisableCourt(body);
     }
 
@@ -31,24 +30,21 @@ export class DisableCourtsController {
         return await this.disableCourtsService.getDisableCourt(id);
     }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(StaffGuard)
     @Delete('')
     async deleteAllDisableCourt(@Req() req): Promise<void> {
-        if (!req.user.isStaff) throw new HttpException("Not a Staff", HttpStatus.UNAUTHORIZED);
         await this.disableCourtsService.deleteAllDisableCourt();
     }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(StaffGuard)
     @Delete(':id')
     async deleteDisableCourt(@Req() req, @Param('id') id: string): Promise<void> {
-        if (!req.user.isStaff) throw new HttpException("Not a Staff", HttpStatus.UNAUTHORIZED);
         await this.disableCourtsService.deleteDisableCourt(id);
     }
 
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(StaffGuard)
     @Put(':id')
     async editDisableCourt(@Req() req, @Param('id') id: string, @Body() body: EditDisableCourtDTO): Promise<DisableCourt> {
-        if (!req.user.isStaff) throw new HttpException("Not a Staff", HttpStatus.UNAUTHORIZED);
         return await this.disableCourtsService.editDisableCourt(id, body);
     }
 }

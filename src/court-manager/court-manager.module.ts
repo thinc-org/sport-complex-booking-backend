@@ -20,6 +20,7 @@ import { listAllUserModule } from './../staffs/list-all-user/list-all-user.modul
             MongooseModule.forFeature([{name: 'Courts', schema: CourtSchema}]),
             MongooseModule.forFeature([{name: 'Sport', schema: SportSchema, collection: 'List_Sport'}]),
             MongooseModule.forFeature([{name: 'Setting', schema: SettingSchema, collection: 'Setting'}]),
+            StaffsModule
 ],
       controllers: [CourtManagerController],
       providers: [CourtManagerService],
