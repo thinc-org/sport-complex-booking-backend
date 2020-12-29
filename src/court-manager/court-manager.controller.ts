@@ -35,17 +35,25 @@ async getSetting(@Req() req):Promise<Setting>{
 }
 
 //Get sport by thai name (regex)
-@UseGuards(JwtAuthGuard)
+@UseGuards(StaffGuard)
 @Get('/')      
 async getSportList(@Body() input: {start:number, end:number, search_filter: string} ,@Req() req) : 
       Promise<{allSport_length: number,sport_list: Sport[]}>{
+     
+      return await this.courtManagerService.sportRegexQuery(input.start, input.end, input.search_filter);
+}
+
+@UseGuards(JwtAuthGuard)
+@Get('/getSports')
+async getAllSportList(@Req() req) :Promise<Sport[]>{
+
       if(req.user.isStaff === false){
             this.listAllUserService.getUserById(req.user.userId);
       }
       if(req.user.isStaff === true){
             this.StaffManagerService.getStaffData(req.user.userId);
       }
-      return await this.courtManagerService.sportRegexQuery(input.start, input.end, input.search_filter);
+      return await this.courtManagerService.findAllSport();
 }
 
 //can be use for courts displaying 
@@ -82,9 +90,7 @@ async deleteSport(@Param('id') id: string, @Req() req): Promise<Sport>{
 @UseGuards(StaffGuard)
 @Put('court-setting/update')     
 async changeCourtSetting( @Body() new_court: {"sport_id": string, "new_setting": Court[]}, @Req() req) : Promise<Sport>{
-      if(!req.user.isStaff){ 
-            throw new HttpException('Staff or Admin only', HttpStatus.UNAUTHORIZED);
-      }
+
      return await this.courtManagerService.updateCourtbyID(new_court.sport_id, new_court.new_setting);
 }
 
