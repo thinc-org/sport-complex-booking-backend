@@ -100,10 +100,8 @@ export class ReservationService {
         let open_time:number = court.open_time
         const close_time = court.close_time
         const availableTime = new Set<number>()
-        if(waitingRoomDate.getTime() === date.getTime()){
-            if(currentTimeSlot+1>open_time){
-                open_time = currentTimeSlot+1
-            }
+        if(waitingRoomDate.getTime() === date.getTime() && currentTimeSlot+1>open_time){
+            open_time = currentTimeSlot+1
         }
         for (let i = open_time; i <= close_time;i++){
             availableTime.add(i)
