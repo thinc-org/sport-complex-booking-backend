@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus, BadRequestException } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, BadRequestException, Inject } from '@nestjs/common';
 import {Court, Sport} from './interfaces/sportCourt.interface';
 import {Setting} from './interfaces/setting.interface';
 import { Model, isValidObjectId } from 'mongoose';
@@ -9,7 +9,7 @@ export class CourtManagerService {
       constructor(
             @InjectModel('Sport') private Sport: Model<Sport>,
             @InjectModel('Courts') private Court : Model<Court>,
-            @InjectModel('Setting') private Setting: Model<Setting>
+            @InjectModel('Setting') private Setting: Model<Setting>,
       ){}
 
 //might get deleted, no error handling
