@@ -143,7 +143,7 @@ export class ReservationService {
         waitingRoomDto.time_slot = Array.from(timeSlot)
 
         //to make sure that time slot is consecutive
-        if(Math.max.apply(Math,waitingRoomDto.time_slot)-Math.min.apply(Math,waitingRoomDto.time_slot)+1 != waitingRoomDto.time_slot.length){
+        if(Math.max.apply(Math,waitingRoomDto.time_slot)-Math.min.apply(Math,waitingRoomDto.time_slot)+1 !== waitingRoomDto.time_slot.length){
             throw new HttpException("Your time slots have to be consecutive", HttpStatus.BAD_REQUEST)
         }
         
