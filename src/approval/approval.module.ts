@@ -12,6 +12,7 @@ import { StaffsModule } from 'src/staffs/staffs.module';
         StaffsModule
     ],
     providers:[ApprovalService],
-    controllers: [ApprovalController]
+    controllers: [ApprovalController],
+    exports: [ApprovalModule]
 })
 export class ApprovalModule {}

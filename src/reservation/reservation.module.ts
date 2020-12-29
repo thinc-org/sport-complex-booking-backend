@@ -6,19 +6,24 @@ import { ReservationController } from './reservation.controller';
 
 import { ReservationSchema, WaitingRoomSchema } from "./schema/reservation.schema";
 import { UsersModule } from 'src/users/users.module';
-import { DisableCourtsModule } from 'src/courts/disable-courts/disable-courts.module';
-import { CourtManagerModule } from 'src/court-manager/court-manager.module';
+
+import { MywaitingroomModule } from "./mywaitingroom/mywaitingroom.module";
+import { MyReservationModule } from "./myreservation/myreservation.module";
+import { CourtManagerModule } from "./../court-manager/court-manager.module";
+import { DisableCourtsModule } from "./../courts/disable-courts/disable-courts.module";
 
 @Module({
-  imports : [MongooseModule.forFeature(
-    [{ name: 'WaitingRoom', schema: WaitingRoomSchema, collection: 'list_waiting_room'}]),
-    MongooseModule.forFeature(
-      [{ name: 'Reservation', schema: ReservationSchema, collection: 'list_reservation'}]),
+  imports : [
+    MongooseModule.forFeature([{ name: 'WaitingRoom', schema: WaitingRoomSchema, collection: 'list_waiting_room'}]),
+    MongooseModule.forFeature([{ name: 'Reservation', schema: ReservationSchema, collection: 'list_reservation'}]),
+    MyReservationModule,
     UsersModule,
+    MywaitingroomModule,
     DisableCourtsModule,
-    CourtManagerModule
-    ],
+    CourtManagerModule,
+    MyReservationModule
+  ],
   providers: [ReservationService],
-  controllers: [ReservationController]
+  controllers: [ReservationController],
 })
 export class ReservationModule {}
