@@ -1,30 +1,37 @@
 import { Controller, Get, Post,Query ,Patch, Put, Delete, Body, Param, BadRequestException, Res, UseGuards, Req } from '@nestjs/common';
-import { JwtAuthGuard, StaffGuard } from 'src/auth/jwt.guard'
+import { StaffGuard } from 'src/auth/jwt.guard'
 import { AuthService } from 'src/auth/auth.service';
 import { CreateOtherUserDto, CreateSatitUserDto } from 'src/staffs/dto/add-user.dto';
 import { User } from 'src/users/interfaces/user.interface';
 import { listAllUserService } from './list-all-user.service';
-import { promises } from 'dns';
-
+import { Types, isValidObjectId } from 'mongoose';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 @UseGuards(StaffGuard)
 @Controller('list-all-user')
 export class listAllUserController {
     constructor(private readonly addUserService: listAllUserService, private authService: AuthService) {}
 
-    @Get('/findById/:id')
-    async getUser(@Param('id') id : string, @Req() req) : Promise<User>{
+    idValidityChecker( id : Types.ObjectId ){
+        if (!isValidObjectId(id)) {
+            throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Get('/id/:id')
+    async getUser(@Param('id') id : Types.ObjectId ) : Promise<User>{
+        this.idValidityChecker(id);
         const user = await this.addUserService.getUserById(id);
         return user
     }
 
-    @Get('/getUser')
-    async filterUser(@Req() req,@Query() param) : Promise<[number,User[]]> {
-        return this.addUserService.getUsers(param.name,param.penalize,param.begin,param.end,param.account);
+    @Get('/filter')
+    async filterUser(@Query() qparam) : Promise<[number,User[]]> {
+        return this.addUserService.filterUser(qparam);
     }
 
     @Post('/SatitUser')
-    async addSatitUser(@Body() createUserDto: CreateSatitUserDto, @Res() res, @Req() req){
+    async addSatitUser(@Body() createUserDto: CreateSatitUserDto, @Res() res){
         await this.addUserService.createSatitUser(createUserDto);
 
         return res.status(201).json({
@@ -34,7 +41,7 @@ export class listAllUserController {
     }
 
     @Post('/OtherUser')
-    async addOtherUser(@Body() createUserDto: CreateOtherUserDto, @Res() res, @Req() req){
+    async addOtherUser(@Body() createUserDto: CreateOtherUserDto, @Res() res){
         await this.addUserService.createOtherUser(createUserDto);
 
         return res.status(201).json({
@@ -43,8 +50,9 @@ export class listAllUserController {
         });
     }
 
-    @Delete('/User/:id')
-    async deleteUser(@Param('id') id, @Res() res, @Req() req){
+    @Delete('/:id')
+    async deleteUser(@Param('id') id, @Res() res ){
+        this.idValidityChecker(id);
         await this.addUserService.deleteUser(id);
         return res.status(201).json({
             statusCode: 201,
@@ -53,18 +61,21 @@ export class listAllUserController {
     }
 
     @Patch('/unban/:id')
-    async unbanById(@Param() param, @Req() req) : Promise<User>{
-        return this.addUserService.unbanById(param.id);
+    async unbanById(@Param() param ) : Promise<User>{
+        this.idValidityChecker(param.id);
+        return this.addUserService.editById(param.id, { is_penalize : false , expired_penalize_date : null});
     }
 
-    @Patch('/:id')
-    async editById(@Param() param,@Body() body, @Req() req) : Promise<User>{
+    @Put('/:id')
+    async editById(@Param() param,@Body() body ) : Promise<User>{
+        this.idValidityChecker(param.id);
         return this.addUserService.editById(param.id,body);
     }
 
-    @Patch('/changePW/:id/:newPassWord') 
-    async chanegPassWord(@Param() param, @Req() req): Promise<User>{
-        return this.addUserService.changePassWord(param.id,param.newPassWord);
+    @Patch('/password/:id') 
+    async changePassWord(@Param() param ,@Body() body ): Promise<User>{
+        this.idValidityChecker(param.id);
+        return this.addUserService.changePassWord(param.id,body);
     }
 }
 
