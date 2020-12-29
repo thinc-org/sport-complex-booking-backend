@@ -1,8 +1,7 @@
 import { StaffManagerService } from './../staffs/staff-manager/staff-manager.service';
-import { UserGuard, AdminGuard } from './../auth/jwt.guard';
+import { UserGuard } from './../auth/jwt.guard';
 import { JwtAuthGuard, StaffGuard } from 'src/auth/jwt.guard';
-import { Body, Controller, Get, Post, Delete, Put, Patch, Param, UseGuards, Req, HttpException,
-HttpStatus } from '@nestjs/common';
+import { Body, Controller, Get, Post, Delete, Put, Param, UseGuards, Req } from '@nestjs/common';
 import {CourtManagerService} from './court-manager.service';
 import { Sport, Court } from './interfaces/sportCourt.interface';
 import {Setting} from './interfaces/setting.interface';
