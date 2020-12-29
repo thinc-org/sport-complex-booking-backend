@@ -1,5 +1,9 @@
 import { StaffManagerService } from './../staffs/staff-manager/staff-manager.service';
+<<<<<<< HEAD
 import { UserGuard } from './../auth/jwt.guard';
+=======
+import { UserGuard, AdminGuard } from './../auth/jwt.guard';
+>>>>>>> fix function getSportList to be use with create waiting room page
 import { JwtAuthGuard, StaffGuard } from 'src/auth/jwt.guard';
 import { Body, Controller, Get, Post, Delete, Put, Param, UseGuards, Req } from '@nestjs/common';
 import {CourtManagerService} from './court-manager.service';
