@@ -9,7 +9,7 @@ export class AllWaitingRoomController {
 
     @Post()
     getSearchResult(@Body() body){
-        return this.allWaitingRoomService.getWaitingRoomSearchResult(body.sport_id ,body.court_number ,body.date ,body.time_slot ,body.start ,body.end);
+        return this.allWaitingRoomService.getWaitingRoomSearchResult(body);
     }
   
     @Get("/:id")
@@ -17,7 +17,7 @@ export class AllWaitingRoomController {
         return this.allWaitingRoomService.getWaitingRoom(id);
     }
 
-    @Delete("/delete/:id")
+    @Delete("/:id")
     delete(@Param('id') id:string){
         return this.allWaitingRoomService.deleteWaitingRoom(id);
     }

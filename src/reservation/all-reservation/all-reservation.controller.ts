@@ -9,7 +9,7 @@ export class AllReservationController {
    
   @Post()
   getSearchResult(@Body() body){
-    return this.allReservationService.getReservationSearchResult(body.sport_id ,body.court_number ,body.date ,body.time_slot ,body.start ,body.end);
+    return this.allReservationService.getReservationSearchResult(body);
   }
   
   @Get("/:id")
@@ -17,7 +17,7 @@ export class AllReservationController {
     return this.allReservationService.getReservation(id);
   }
 
-  @Delete("/delete/:id")
+  @Delete("/:id")
   delete(@Param('id') id:string){
     return this.allReservationService.deleteReservation(id);
   }
