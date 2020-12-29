@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus, BadRequestException } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, BadRequestException, Inject } from '@nestjs/common';
 import {Court, Sport} from './interfaces/sportCourt.interface';
 import {Setting} from './interfaces/setting.interface';
 import { Model, isValidObjectId } from 'mongoose';
@@ -9,7 +9,7 @@ export class CourtManagerService {
       constructor(
             @InjectModel('Sport') private Sport: Model<Sport>,
             @InjectModel('Courts') private Court : Model<Court>,
-            @InjectModel('Setting') private Setting: Model<Setting>
+            @InjectModel('Setting') private Setting: Model<Setting>,
       ){}
 
 //might get deleted, no error handling
@@ -77,30 +77,37 @@ async deleteSport(sportID: string): Promise<Sport>{
 }
 
 async sportRegexQuery(start: number, end: number, search_filter: string) : Promise<{allSport_length: number,sport_list: Sport[]}>{
-      if(start<0 || end<start){
+      if(start<0 || end<start){   
             throw new HttpException("Invalid start or end number.", HttpStatus.BAD_REQUEST);
       }
-      if(search_filter === ''){     //search_filter just need to be ''
-            const list_doc = await this.Sport.find({})
-            const allSport_length = list_doc.length;
-            return { allSport_length: allSport_length, sport_list: list_doc} ;
-      }
 
-      const list_doc = await this.Sport.find({sport_name_th: new RegExp(search_filter,'i')});
-
+      const list_doc = await this.Sport.find({sport_name_th: new RegExp(search_filter,'i')});   //to get all, enter sport_list: ""
+      const allSport_length = list_doc.length;  //every sports in a query (not yet sliced)
+      
       if(end>= list_doc.length){
             end = list_doc.length;
       }
-      const allSport_length = list_doc.length;  //every sports in a query (not yet sliced)
-      
       return {allSport_length: allSport_length, sport_list: list_doc.slice(start, end)};
 }
 
 //update a court by court number and its data 
 async updateCourtbyID(sportID: string, newSetting: Court[]) : Promise<Sport>{
+      //check court time slot (1-48)
+      for(let i = 0; i<newSetting.length ; i++){
+            if(newSetting[i].open_time < 0 || newSetting[i].close_time > 48){
+                  throw new HttpException("Time slot is between 1 and 48.", HttpStatus.BAD_REQUEST);
+            }
+            if(newSetting[i].open_time >= newSetting[i].close_time){
+                  throw new HttpException("Time slot is between 1 and 48.", HttpStatus.BAD_REQUEST);
+            }
+      }
       const doc = await this.findSportByID(sportID);
       doc.list_court = newSetting;
       return await doc.save();
+}
+
+async findAllSport() : Promise<Sport[]>{
+      return await this.Sport.find({});
 }
 
 }
