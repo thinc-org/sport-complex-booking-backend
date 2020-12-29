@@ -42,9 +42,8 @@ export class StaffManagerService {
             return updated_staff;
       }
 
-      //start at 0
       async staffRegexQuery(start: number, end: number, search_filter: string ,type_filter: string) : Promise<{allStaff_length: number,staff_list: Staff[]}>{
-            if(start<0 || end<start){
+            if(start<0 || end<start){ //start at 0
                   throw new HttpException("Invalid start or end number.", HttpStatus.BAD_REQUEST);
             }
 
