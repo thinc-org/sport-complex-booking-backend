@@ -46,12 +46,12 @@ async getSportList(@Body() input: {start:number, end:number, search_filter: stri
 @UseGuards(JwtAuthGuard)
 @Get('/getSports')
 async getAllSportList(@Req() req) :Promise<Sport[]>{
-
-      if(req.user.isStaff === false){
-            this.listAllUserService.getUserById(req.user.userId);
+      //check if user or staff exists + error handling
+      if(req.user.isStaff === false){     
+            this.listAllUserService.getUserById(req.user.userId); //err handled in the function
       }
       if(req.user.isStaff === true){
-            this.StaffManagerService.getStaffData(req.user.userId);
+            this.StaffManagerService.getStaffData(req.user.userId); //err handled in the function
       }
       return await this.courtManagerService.findAllSport();
 }
