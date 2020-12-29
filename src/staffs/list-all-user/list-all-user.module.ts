@@ -12,6 +12,7 @@ import { StaffsModule } from '../staffs.module';
     StaffsModule
   ],
   providers: [listAllUserService],
-  controllers: [listAllUserController]
+  controllers: [listAllUserController],
+  exports: [listAllUserService]
 })
 export class listAllUserModule {}

@@ -1,3 +1,6 @@
+import { UsersModule } from './../users/users.module';
+import { StaffManagerModule } from './../staffs/staff-manager/staff-manager.module';
+import { listAllUserModule } from './../staffs/list-all-user/list-all-user.module';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
@@ -13,7 +16,10 @@ import { StaffsModule } from 'src/staffs/staffs.module';
             MongooseModule.forFeature([{name: 'Courts', schema: CourtSchema}]),
             MongooseModule.forFeature([{name: 'Sport', schema: SportSchema, collection: 'List_Sport'}]),
             MongooseModule.forFeature([{name: 'Setting', schema: SettingSchema, collection: 'Setting'}]),
-            StaffsModule
+            StaffsModule,
+            UsersModule,
+            listAllUserModule,
+            StaffManagerModule
 ],
       controllers: [CourtManagerController],
       providers: [CourtManagerService],
