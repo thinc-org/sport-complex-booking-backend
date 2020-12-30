@@ -17,10 +17,10 @@ export class MywaitingroomController {
         }
     }
 
-    @Get('/userid/:id')
-    async getWaitingRoomByUserId(@Param() param) : Promise<WaitingRoom>{
-        this.idValidityChecker(param.id);
-        return this.mywaitingroomService.getWaitingRoomByUserId(param.id);
+    @Get('')
+    async getWaitingRoomByUserId(@Req() req) : Promise<WaitingRoom>{
+        this.idValidityChecker(req.user.userId);
+        return this.mywaitingroomService.getWaitingRoomByUserId(req.user.userId);
     }
 
     @Get('/expire/:id')

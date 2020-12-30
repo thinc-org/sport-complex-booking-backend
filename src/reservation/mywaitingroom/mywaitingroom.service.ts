@@ -3,7 +3,6 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from 'mongoose';
 
 import { WaitingRoom, Reservation } from "./../interfaces/reservation.interface";
-import { CreateReservationDto } from "./dto/mywaitingroom.dto";
 import { User } from "./../../users/interfaces/user.interface";
 
 @Injectable()
@@ -11,7 +10,6 @@ export class MywaitingroomService {
     constructor(
         @InjectModel('WaitingRoom') private waitingRoomModel : Model<WaitingRoom>,
         @InjectModel('User') private userModel :  Model<User>,
-        @InjectModel('Reservation') private reservationModel : Model<Reservation>
     ){}
 
     async createWaitingRoom( waitingRoom : WaitingRoom ) : Promise<WaitingRoom> {
@@ -82,12 +80,14 @@ export class MywaitingroomService {
 
     async getWaitingRoomByUserId( userId : Types.ObjectId) : Promise<WaitingRoom>{
 
-        let tempWaitingRoom : WaitingRoom = await this.waitingRoomModel.find({list_member : userId})[0];
+        let tempWaitingRoom : WaitingRoom[] = await this.waitingRoomModel.find({list_member : userId})
+                                                                        .populate('sport_id','required_user sport_name_th sport_name_en')
+                                                                        .populate('list_member' ,'name_en surname_en name_th surname_th');
 
         if(tempWaitingRoom === null){
             throw new HttpException("Invalid MyWaitingRoom", HttpStatus.NOT_FOUND);
         }
 
-        return tempWaitingRoom;
+        return tempWaitingRoom[0];
     }
 }

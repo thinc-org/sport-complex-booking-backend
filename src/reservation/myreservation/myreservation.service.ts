@@ -27,6 +27,7 @@ export class MyReservationService {
     async getAllMyReservation( user_id : Types.ObjectId) : Promise<Reservation[]>{
         const temp_myreservations : Reservation[] = await this.reservationModel.find({list_member : user_id}).sort({sport_id : 1 , date : 1 , time_slot : -1, is_check : 1})
                                                                                 .populate('sport_id','sport_name_th sport_name_en')
+                                                                                .populate('list_member' ,'name_en surname_en name_th surname_th')
                                                                                 .select('sport_id court_number date day_of_week time_slot is_check')
         return temp_myreservations;
     }
