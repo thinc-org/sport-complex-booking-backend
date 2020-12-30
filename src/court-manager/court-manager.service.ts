@@ -81,28 +81,28 @@ async sportRegexQuery(start: number, end: number, search_filter: string) : Promi
             throw new HttpException("Invalid start or end number.", HttpStatus.BAD_REQUEST);
       }
 
-      const list_doc = await this.Sport.find({sport_name_th: new RegExp(search_filter,'i')});   //to get all, enter sport_list: ""
-      const allSport_length = list_doc.length;  //every sports in a query (not yet sliced)
+      const listDoc = await this.Sport.find({sport_name_th: new RegExp(search_filter,'i')});   //to get all, enter sport_list: ""
+      const allSportLength = listDoc.length;  //every sports in a query (not yet sliced)
       
-      if(end>= list_doc.length){
-            end = list_doc.length;
+      if(end>= listDoc.length){
+            end = listDoc.length;
       }
-      return {allSport_length: allSport_length, sport_list: list_doc.slice(start, end)};
+      return {allSport_length: allSportLength, sport_list: listDoc.slice(start, end)};
 }
 
 //update a court by court number and its data 
-async updateCourtbyID(sportID: string, newSetting: Court[]) : Promise<Sport>{
+async updateCourtbyID(sportID: string, newSettings: Court[]) : Promise<Sport>{
       //check court time slot (1-48)
-      for(let i = 0; i<newSetting.length ; i++){
-            if(newSetting[i].open_time < 0 || newSetting[i].close_time > 48){
-                  throw new HttpException("Time slot is between 1 and 48.", HttpStatus.BAD_REQUEST);
-            }
-            if(newSetting[i].open_time >= newSetting[i].close_time){
-                  throw new HttpException("Time slot is between 1 and 48.", HttpStatus.BAD_REQUEST);
-            }
+     newSettings.forEach((eachSetting) => {
+      if(eachSetting.open_time < 1 || eachSetting.close_time > 48){
+            throw new HttpException("Time slot is between 1 and 48.", HttpStatus.BAD_REQUEST);
       }
+      if(eachSetting.open_time >= eachSetting.close_time){
+            throw new HttpException("Time slot is between 1 and 48.", HttpStatus.BAD_REQUEST);
+      }   
+      });
       const doc = await this.findSportByID(sportID);
-      doc.list_court = newSetting;
+      doc.list_court = newSettings;
       return await doc.save();
 }
 
