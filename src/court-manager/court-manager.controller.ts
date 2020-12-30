@@ -11,7 +11,7 @@ import { listAllUserService } from './../staffs/list-all-user/list-all-user.serv
 export class CourtManagerController {
       constructor(private readonly courtManagerService: CourtManagerService,
             private readonly listAllUserService: listAllUserService, 
-            private readonly StaffManagerService: StaffManagerService
+            private readonly staffManagerService: StaffManagerService
       ){}
 
 //might get deleted, no error handling
@@ -49,8 +49,8 @@ async getAllSportList(@Req() req) :Promise<Sport[]>{
       if(req.user.isStaff === false){     
             this.listAllUserService.getUserById(req.user.userId); //err handled in the function
       }
-      if(req.user.isStaff === true){
-            this.StaffManagerService.getStaffData(req.user.userId); //err handled in the function
+      else{
+            this.staffManagerService.getStaffData(req.user.userId); //err handled in the function
       }
       return await this.courtManagerService.findAllSport();
 }
