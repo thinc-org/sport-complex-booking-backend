@@ -80,14 +80,14 @@ export class MywaitingroomService {
 
     async getWaitingRoomByUserId( userId : Types.ObjectId) : Promise<WaitingRoom>{
 
-        let tempWaitingRoom : WaitingRoom[] = await this.waitingRoomModel.find({list_member : userId})
+        const waitingRoom : WaitingRoom = await this.waitingRoomModel.findOne({list_member : userId})
                                                                         .populate('sport_id','required_user sport_name_th sport_name_en')
                                                                         .populate('list_member' ,'name_en surname_en name_th surname_th');
 
-        if(tempWaitingRoom === null){
+        if(waitingRoom === null){
             throw new HttpException("Invalid MyWaitingRoom", HttpStatus.NOT_FOUND);
         }
 
-        return tempWaitingRoom[0];
+        return waitingRoom;
     }
 }
