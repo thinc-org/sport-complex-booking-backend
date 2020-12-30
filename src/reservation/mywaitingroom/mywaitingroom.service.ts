@@ -80,9 +80,13 @@ export class MywaitingroomService {
         return tempWaitingRoom;
     }
 
-    async getWaitingRoomById( userId : Types.ObjectId) : Promise<WaitingRoom>{
+    async getWaitingRoomByUserId( userId : Types.ObjectId) : Promise<WaitingRoom>{
 
         let tempWaitingRoom : WaitingRoom = await this.waitingRoomModel.find({list_member : userId})[0];
+
+        if(tempWaitingRoom === null){
+            throw new HttpException("Invalid MyWaitingRoom", HttpStatus.NOT_FOUND);
+        }
 
         return tempWaitingRoom;
     }

@@ -43,12 +43,9 @@ export class MyReservationController {
 
     @UseGuards(StaffGuard)
     @Patch('/:id')
-    async checkReservation(@Param() param, @Body() body) : Promise<Reservation>{
-        if( body.hasOwnProperty('is_check') ){
-            this.idValidityChecker(param.id);
-            return this.myResrvationService.checkReservation(param.id);
-        }
-        
+    async checkReservation(@Param() param) : Promise<Reservation>{
+        this.idValidityChecker(param.id);
+        return this.myResrvationService.checkReservation(param.id);
     }
 
 }
