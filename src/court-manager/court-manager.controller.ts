@@ -43,7 +43,7 @@ async getSportList(@Body() input: {start:number, end:number, search_filter: stri
 }
 
 @UseGuards(JwtAuthGuard)
-@Get('/getSports')
+@Get('/sports')
 async getAllSportList(@Req() req) :Promise<Sport[]>{
       //check if user or staff exists + error handling
       if(req.user.isStaff === false){     
