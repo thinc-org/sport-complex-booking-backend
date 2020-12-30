@@ -23,7 +23,6 @@ async updateStaffBoolean(@Param('id') id: string ,@Body() input:{is_admin: boole
 }
 
 //regex staff name (thai language) search 
-// @UseGuards(JwtAuthGuard)
 @Get('/admin-and-staff')     
 async getStaffsList(@Body() input: {start: number, end: number, search_filter: string, type_filter: string} ,@Req() req): Promise<{allStaff_length: number,staff_list: Staff[]}>{
       //if no filter, input filter as "filter": "" , type_filter = all (for admins and staffs), = admin (for admins), = staff (for staffs)
@@ -32,7 +31,6 @@ async getStaffsList(@Body() input: {start: number, end: number, search_filter: s
 }
 
 //add staff to db (returns added staff)
-// @UseGuards(JwtAuthGuard)
 @Post('/')
 async addStaff(@Body() new_staff: Staff, @Req() req) : Promise<Staff>{
 
@@ -40,7 +38,6 @@ async addStaff(@Body() new_staff: Staff, @Req() req) : Promise<Staff>{
 }
 
 //delete staff from db using _id in param, returns deleted document
-// @UseGuards(JwtAuthGuard)
 @Delete('/:id')
 async deleteStaff(@Param('id') id: string, @Req() req) : Promise<Staff>{
 
