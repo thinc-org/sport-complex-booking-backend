@@ -194,7 +194,7 @@ export class listAllUserService {
         return deleteResponse
     }
 
-    async editById(id : Types.ObjectId , update ): Promise<User>{
+    async editById(id : Types.ObjectId , update , forExistProperty : boolean): Promise<User>{
 
         let user : User = await this.userModel.findById(id);
 
@@ -205,14 +205,19 @@ export class listAllUserService {
         if( user === null ){
             throw new HttpException("Invalid User", HttpStatus.NOT_FOUND);
         }
-
-        for(let i in update){
-            /*
-            if( !user.hasOwnProperty(i.toString()) ){
-                throw new HttpException("The update is invalid.", HttpStatus.CONFLICT);
+        if(forExistProperty)
+        {
+            for(let i in update){
+                if( !user.hasOwnProperty(i.toString()) ){
+                    throw new HttpException("The update is invalid.", HttpStatus.CONFLICT);
+                }
+                user[i] = update[i];
             }
-            */
-            user[i] = update[i];
+        }
+        else{
+            for(let i in update){
+                user[i] = update[i];
+            }
         }
 
         user.save();
