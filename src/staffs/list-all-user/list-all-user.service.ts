@@ -205,19 +205,12 @@ export class listAllUserService {
         if( user === null ){
             throw new HttpException("Invalid User", HttpStatus.NOT_FOUND);
         }
-        if(forExistProperty)
-        {
-            for(let i in update){
-                if( !user.hasOwnProperty(i.toString()) ){
-                    throw new HttpException("The update is invalid.", HttpStatus.CONFLICT);
-                }
-                user[i] = update[i];
+
+        for(const i in update){
+            if( forExistProperty && !user.hasOwnProperty(i.toString()) ){
+                throw new HttpException("The update is invalid.", HttpStatus.CONFLICT);
             }
-        }
-        else{
-            for(let i in update){
-                user[i] = update[i];
-            }
+            user[i] = update[i];
         }
 
         user.save();
