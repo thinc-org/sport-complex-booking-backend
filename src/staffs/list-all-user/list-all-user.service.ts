@@ -199,7 +199,7 @@ export class listAllUserService {
         let user : User = await this.userModel.findById(id);
 
         if( update.hasOwnProperty('password') ){
-            throw new HttpException("Editing password isnt allowed.", HttpStatus.UNAUTHORIZED);
+            throw new HttpException("Editing password isnt allowed.", HttpStatus.BAD_REQUEST);
         }
 
         if( user === null ){
