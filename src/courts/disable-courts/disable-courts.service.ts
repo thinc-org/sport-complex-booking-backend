@@ -1,12 +1,19 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { AllReservationService } from 'src/reservation/all-reservation/all-reservation.service';
+import { AllWaitingRoomService } from 'src/reservation/all-waiting-room/all-waiting-room.service';
+import { Reservation, WaitingRoom } from 'src/reservation/interfaces/reservation.interface';
 import { CreateDisableCourtDTO, CreateDisableTimeDTO, EditDisableCourtDTO, QueryDisableCourtDTO, QueryResult } from './disable-courts.dto';
 import { DisableCourt } from './interfaces/disable-courts.interface';
 
 @Injectable()
 export class DisableCourtsService {
-    constructor(@InjectModel('DisableCourt') private readonly disableCourtModel: Model<DisableCourt>) { }
+    constructor(
+        @InjectModel('DisableCourt') private readonly disableCourtModel: Model<DisableCourt>, 
+        private readonly allReservationServcie: AllReservationService,
+        private readonly allWaitingRoomService: AllWaitingRoomService
+    ) { }
     async createDisableCourt(data: CreateDisableCourtDTO): Promise<DisableCourt> {
 
         if (!this.verifyStartAndEndDate(data.starting_date, data.expired_date))
@@ -18,12 +25,23 @@ export class DisableCourtsService {
 
         const overlaps = await this.findOverlap(disableCourt);
         if (overlaps.length != 0) {
-            throw new HttpException({ statusCode: HttpStatus.CONFLICT, message: 'There are some overlapping times', overlaps }, HttpStatus.CONFLICT);
+            throw new HttpException({
+                statusCode: HttpStatus.CONFLICT,
+                message: 'There are some overlapping times',
+                reason: 0,
+                overlaps
+            }, HttpStatus.CONFLICT);
         }
 
-        const overlapReservations = await this.findOverlapReservation(disableCourt);
-        if (overlapReservations.length != 0) {
-            throw new HttpException({ statusCode: HttpStatus.CONFLICT, message: 'There are some overlapping reservations', overlapReservations }, HttpStatus.CONFLICT);
+        const [overlapReservations, overlapWaitingRooms] = await this.findOverlapReservation(disableCourt);
+        if (overlapReservations.length != 0 || overlapWaitingRooms.length != 0) {
+            throw new HttpException({ 
+                statusCode: HttpStatus.CONFLICT, 
+                message: 'There are some overlapping reservations/waiting rooms', 
+                reason: 1,
+                overlapReservations, 
+                overlapWaitingRooms 
+            }, HttpStatus.CONFLICT);
         }
 
         return await disableCourt.save();
@@ -104,13 +122,14 @@ export class DisableCourtsService {
             }, HttpStatus.CONFLICT);
         }
 
-        const overlapReservations = await this.findOverlapReservation(disableCourt);
-        if (overlapReservations.length != 0) {
-            throw new HttpException({
-                statusCode: HttpStatus.CONFLICT,
-                message: 'There are some overlapping reservations',
+        const [overlapReservations, overlapWaitingRooms] = await this.findOverlapReservation(disableCourt);
+        if (overlapReservations.length != 0 || overlapWaitingRooms.length != 0) {
+            throw new HttpException({ 
+                statusCode: HttpStatus.CONFLICT, 
+                message: 'There are some overlapping reservations/waiting rooms', 
                 reason: 1,
-                overlapReservations
+                overlapReservations, 
+                overlapWaitingRooms 
             }, HttpStatus.CONFLICT);
         }
 
@@ -156,9 +175,13 @@ export class DisableCourtsService {
         private utility methods
     */
 
-    private async findOverlapReservation(disableCour: DisableCourt) {
-        // waiting for implementation in Reservation Module
-        return [];
+    private async findOverlapReservation(disableCourt: DisableCourt): Promise<[Array<Reservation>, Array<WaitingRoom>]> {
+        const found: [Array<Reservation>, Array<WaitingRoom>] = [
+            await this.allReservationServcie.findOverlapReservation(disableCourt),
+            await this.allWaitingRoomService.findOverlapWaitingroom(disableCourt)
+        ]
+        console.log(found);
+        return found;
     }
 
     private async findOverlap(disableCourt: DisableCourt): Promise<Array<string>> {

@@ -7,6 +7,7 @@ import { StaffsModule } from 'src/staffs/staffs.module';
 @Module({
   imports:[MongooseModule.forFeature([{ name: 'Reservation', schema: ReservationSchema, collection: 'list_reservation' }]),StaffsModule],
   providers: [AllReservationService],
-  controllers: [AllReservationController]
+  controllers: [AllReservationController],
+  exports: [AllReservationService]
 })
 export class AllReservationModule {}
