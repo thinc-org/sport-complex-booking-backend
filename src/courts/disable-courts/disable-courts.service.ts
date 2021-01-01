@@ -176,12 +176,10 @@ export class DisableCourtsService {
     */
 
     private async findOverlapReservation(disableCourt: DisableCourt): Promise<[Array<Reservation>, Array<WaitingRoom>]> {
-        const found: [Array<Reservation>, Array<WaitingRoom>] = [
+        return  [
             await this.allReservationServcie.findOverlapReservation(disableCourt),
             await this.allWaitingRoomService.findOverlapWaitingroom(disableCourt)
         ]
-        console.log(found);
-        return found;
     }
 
     private async findOverlap(disableCourt: DisableCourt): Promise<Array<string>> {
