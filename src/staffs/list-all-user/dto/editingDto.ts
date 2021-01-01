@@ -34,3 +34,7 @@ export interface EditingDto {
     house_registration_number?: Types.ObjectId
     relationship_verification_document?: Types.ObjectId
 }
+
+export interface ChangingPasswordDto {
+    password : string
+}

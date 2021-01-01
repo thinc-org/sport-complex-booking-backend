@@ -6,7 +6,7 @@ import { User } from 'src/users/interfaces/user.interface';
 import { listAllUserService } from './list-all-user.service';
 import { Types, isValidObjectId } from 'mongoose';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { EditingDto } from "./dto/editingDto";
+import { EditingDto, ChangingPasswordDto } from "./dto/editingDto";
 
 @UseGuards(StaffGuard)
 @Controller('list-all-user')
@@ -83,7 +83,7 @@ export class listAllUserController {
     }
 
     @Patch('/password/:id') 
-    async changePassWord(@Param() param ,@Body() body ): Promise<User>{
+    async changePassWord(@Param() param ,@Body() body : ChangingPasswordDto): Promise<User>{
         this.idValidityChecker(param.id);
         return this.addUserService.changePassWord(param.id,body);
     }

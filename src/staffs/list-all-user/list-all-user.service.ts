@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { SatitCuPersonelUser, OtherUser, User ,Account, CuStudentUser} from 'src/users/interfaces/user.interface';
 import { UsersService } from "./../../users/users.service";
-import { EditingDto } from "./dto/editingDto";
+import { EditingDto , ChangingPasswordDto } from "./dto/editingDto";
 
 
 @Injectable()
@@ -219,7 +219,7 @@ export class listAllUserService {
 
     }
 
-    async changePassWord( id : Types.ObjectId , body ) : Promise<User>{
+    async changePassWord( id : Types.ObjectId , body : ChangingPasswordDto ) : Promise<User>{
 
         let tempUser : User = await this.getUserById(id);
 
