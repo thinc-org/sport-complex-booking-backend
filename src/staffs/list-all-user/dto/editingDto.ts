@@ -24,7 +24,6 @@ export interface EditingDto {
     contact_person?: Contact_person
     medical_condition?: string
     membership_type?: string
-    password?: string 
     verification_status?: Verification
     rejected_info?: string[]
     account_expiration_date?: Date
