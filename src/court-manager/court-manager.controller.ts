@@ -34,12 +34,12 @@ async getSetting(@Req() req):Promise<Setting>{
 }
 
 //Get sport by thai name (regex)
+//if no filter, use $ as param for filter
 @UseGuards(StaffGuard)
-@Get('/')      
-async getSportList(@Body() input: {start:number, end:number, search_filter: string} ,@Req() req) : 
+@Get('/:start/:end/:filter')      
+async getSportList(@Param('start') start: number, @Param('end') end:number, @Param('filter') filter: string ,@Req() req) : 
       Promise<{allSport_length: number,sport_list: Sport[]}>{
-     
-      return await this.courtManagerService.sportRegexQuery(input.start, input.end, input.search_filter);
+      return await this.courtManagerService.sportRegexQuery(start, end, filter);
 }
 
 @UseGuards(JwtAuthGuard)

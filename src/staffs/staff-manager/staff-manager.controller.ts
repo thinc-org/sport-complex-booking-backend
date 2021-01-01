@@ -1,5 +1,5 @@
 import { AdminGuard, JwtAuthGuard } from './../../auth/jwt.guard';
-import { Controller, Get, UseGuards, Param, Req, Put, Body, Post, Delete } from '@nestjs/common';
+import { Controller, Get, UseGuards, Param, Req, Put, Body, Post, Delete, Query } from '@nestjs/common';
 import {Staff} from '../interfaces/staff.interface';
 import {StaffManagerService} from './staff-manager.service';
 
@@ -21,13 +21,13 @@ async updateStaffBoolean(@Param('id') id: string ,@Body() input:{is_admin: boole
 
       return this.staffManagerService.updateStaffData(id, input.is_admin);
 }
-
 //regex staff name (thai language) search 
-@Get('/admin-and-staff')     
-async getStaffsList(@Body() input: {start: number, end: number, search_filter: string, type_filter: string} ,@Req() req): Promise<{allStaff_length: number,staff_list: Staff[]}>{
-      //if no filter, input filter as "filter": "" , type_filter = all (for admins and staffs), = admin (for admins), = staff (for staffs)
-
-      return await this.staffManagerService.staffRegexQuery(input.start, input.end, input.search_filter, input.type_filter); 
+//if no filter, input filter as "filter"= $ , type_filter = all (for admins and staffs), = admin (for admins), = staff (for staffs)
+@Get('/admin-and-staff/:start/:end/:filter/:type')     
+async getStaffsList(@Param('start') start: number, @Param('end') end: number, @Param('filter') filter: string, 
+      @Param('type') type: string ,@Req() req): Promise<{allStaff_length: number,staff_list: Staff[]}>{
+      
+      return await this.staffManagerService.staffRegexQuery(start, end, filter, type); 
 }
 
 //add staff to db (returns added staff)
