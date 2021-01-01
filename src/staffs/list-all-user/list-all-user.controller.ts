@@ -6,6 +6,7 @@ import { User } from 'src/users/interfaces/user.interface';
 import { listAllUserService } from './list-all-user.service';
 import { Types, isValidObjectId } from 'mongoose';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { EditingDto } from "./dto/editingDto";
 
 @UseGuards(StaffGuard)
 @Controller('list-all-user')
@@ -63,19 +64,21 @@ export class listAllUserController {
     @Patch('/unban/:id')
     async unbanById(@Param() param ) : Promise<User>{
         this.idValidityChecker(param.id);
-        return this.addUserService.editById(param.id, { is_penalize : false , expired_penalize_date : null},true);
+        return this.addUserService.editById(param.id, { is_penalize : false , expired_penalize_date : null },true);
     }
 
     @Put('/:id') // forExistProperty : boolean
-    async editById(@Param() param,@Body() body ) : Promise<User>{
+    async editById(@Param() param,@Body() body : EditingDto ) : Promise<User>{
         this.idValidityChecker(param.id);
         if( body.hasOwnProperty('forExistProperty') ){
 
+            const forExistProperty : boolean = body['forExistProperty'];
+
             delete body['forExistProperty'];
 
-            return this.addUserService.editById(param.id,body,body.forExistProperty);
+            return this.addUserService.editById(param.id,body,forExistProperty);
         }
-        
+
         return this.addUserService.editById(param.id,body,true);
     }
 

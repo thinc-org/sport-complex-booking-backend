@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { isValidObjectId, Model, Types } from 'mongoose';
+import {  Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { SatitCuPersonelUser, OtherUser, User ,Account, CuStudentUser} from 'src/users/interfaces/user.interface';
 import { UsersService } from "./../../users/users.service";
-import { stringify } from 'querystring';
+import { EditingDto } from "./dto/editingDto";
 
 
 @Injectable()
@@ -194,7 +194,7 @@ export class listAllUserService {
         return deleteResponse
     }
 
-    async editById(id : Types.ObjectId , update , forExistProperty : boolean): Promise<User>{
+    async editById(id : Types.ObjectId , update : EditingDto, forExistProperty : boolean): Promise<User>{
 
         let user : User = await this.userModel.findById(id);
 
