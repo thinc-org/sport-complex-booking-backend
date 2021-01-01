@@ -96,6 +96,11 @@ export class listAllUserService {
         if(!has_end){
             end = users.length;
         }
+        else {
+            if( end > users.length){
+                end = users.length;
+            }
+        }
 
         for(let i = begin ; i < end ; i++){
             this.updatePenalizationState(users[i],current);
@@ -191,13 +196,28 @@ export class listAllUserService {
 
     async editById(id : Types.ObjectId , update ): Promise<User>{
 
-        let tempUser : User = await this.userModel.findByIdAndUpdate(id, update);
+        let user : User = await this.userModel.findById(id);
 
-        if( tempUser === null ){
+        if( update.hasOwnProperty('password') ){
+            throw new HttpException("Editing password isnt allowed.", HttpStatus.UNAUTHORIZED);
+        }
+
+        if( user === null ){
             throw new HttpException("Invalid User", HttpStatus.NOT_FOUND);
         }
 
-        return tempUser;
+        for(let i in update){
+            /*
+            if( !user.hasOwnProperty(i.toString()) ){
+                throw new HttpException("The update is invalid.", HttpStatus.CONFLICT);
+            }
+            */
+            user[i] = update[i];
+        }
+
+        user.save();
+
+        return user;
 
     }
 
