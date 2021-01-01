@@ -76,12 +76,12 @@ async deleteSport(sportID: string): Promise<Sport>{
       return deleted_sport;
 }
 
-async sportRegexQuery(start: number, end: number, search_filter: string) : Promise<{allSport_length: number,sport_list: Sport[]}>{
+async sportRegexQuery(start: number, end: number, filter: string) : Promise<{allSport_length: number,sport_list: Sport[]}>{
       if(start<0 || end<start){   
             throw new HttpException("Invalid start or end number.", HttpStatus.BAD_REQUEST);
       }
 
-      const listDoc = await this.Sport.find({sport_name_th: new RegExp(search_filter,'i')});   //to get all, enter sport_list: ""
+      const listDoc = await this.Sport.find({sport_name_th: new RegExp(filter,'i')});   //to get all, enter sport_list: ""
       const allSportLength = listDoc.length;  //every sports in a query (not yet sliced)
       
       if(end>= listDoc.length){
