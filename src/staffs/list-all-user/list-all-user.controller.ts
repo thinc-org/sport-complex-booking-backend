@@ -63,13 +63,13 @@ export class listAllUserController {
     @Patch('/unban/:id')
     async unbanById(@Param() param ) : Promise<User>{
         this.idValidityChecker(param.id);
-        return this.addUserService.editById(param.id, { is_penalize : false , expired_penalize_date : null});
+        return this.addUserService.editById(param.id, { is_penalize : false , expired_penalize_date : null},true);
     }
 
-    @Put('/:id')
+    @Put('/:id/:forExistProperty') // forExistProperty : boolean
     async editById(@Param() param,@Body() body ) : Promise<User>{
         this.idValidityChecker(param.id);
-        return this.addUserService.editById(param.id,body);
+        return this.addUserService.editById(param.id,body,param.forExistProperty);
     }
 
     @Patch('/password/:id') 
