@@ -24,11 +24,10 @@ async updateStaffBoolean(@Param('id') id: string ,@Body() input:{is_admin: boole
 //regex staff name (thai language) search 
 //if no filter, input filter as "filter"= $ , type_filter = all (for admins and staffs), = admin (for admins), = staff (for staffs)
 
-@Get('/admin-and-staff/:start/:end/:filter/:type')     
-async getStaffsList(@Param('start') start: number, @Param('end') end: number, @Param('filter') filter: string, 
-      @Param('type') type: string ,@Req() req): Promise<StaffList>{
+@Get('admin-and-staff/search')     //   /admin-and-staff/search?start=<START>&end=<END>&filter=<FILTER>&type=<TYPE>
+async getStaffsList(@Query() query: searchQuery,@Req() req): Promise<StaffList>{
       
-      return await this.staffManagerService.staffRegexQuery(start, end, filter, type); 
+      return await this.staffManagerService.staffRegexQuery(query.start, query.end, query.filter, query.type); 
 }
 
 //add staff to db (returns added staff)
