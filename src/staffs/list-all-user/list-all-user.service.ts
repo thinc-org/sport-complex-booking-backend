@@ -194,7 +194,7 @@ export class listAllUserService {
         return deleteResponse
     }
 
-    async editById(id : Types.ObjectId , update : EditingDto, forExistProperty : boolean): Promise<User>{
+    async editById(id : Types.ObjectId , update : Partial<OtherUser>): Promise<User>{
 
         let user : User = await this.userModel.findById(id);
 
@@ -207,9 +207,6 @@ export class listAllUserService {
         }
 
         for(const i in update){
-            if( forExistProperty && !user.hasOwnProperty(i.toString()) ){
-                throw new HttpException("The update is invalid.", HttpStatus.CONFLICT);
-            }
             user[i] = update[i];
         }
 
