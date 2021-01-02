@@ -68,7 +68,7 @@ export class listAllUserController {
     }
 
     @Put('/:id') // forExistProperty : boolean
-    async editById(@Param() param,@Body() body : Partial<OtherUser> ) : Promise<User>{
+    async editById(@Param() param,@Body() body : EditingDto ) : Promise<User>{
         this.idValidityChecker(param.id);
         return this.addUserService.editById(param.id,body);
     }

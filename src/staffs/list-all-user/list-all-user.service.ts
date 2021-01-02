@@ -194,7 +194,7 @@ export class listAllUserService {
         return deleteResponse
     }
 
-    async editById(id : Types.ObjectId , update : Partial<OtherUser>): Promise<User>{
+    async editById(id : Types.ObjectId , update : EditingDto): Promise<User>{
 
         let user : User = await this.userModel.findById(id);
 
