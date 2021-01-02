@@ -1,13 +1,13 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import {Staff} from '../interfaces/staff.interface';
+import {Staff, StaffList} from '../interfaces/staff.interface';
 import { Model, isValidObjectId } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class StaffManagerService {
       constructor(
-            @InjectModel('Staff') private Staff: Model<Staff>,
+            @InjectModel('Staff') private Staff: Model<Staff>,    
       ){}
      
       async addStaff(new_staff: Staff): Promise<Staff>{
@@ -43,29 +43,31 @@ export class StaffManagerService {
       }
 
       //start at 0
-      async staffRegexQuery(start: number, end: number, search_filter: string ,type_filter: string) : Promise<{allStaff_length: number,staff_list: Staff[]}>{
+      async staffRegexQuery(start: number, end: number, search_filter: string ,type_filter: string) : Promise<StaffList>{
             if(start<0 || end<start){
                   throw new HttpException("Invalid start or end number.", HttpStatus.BAD_REQUEST);
             }
 
-            let list_doc: Staff[];
+            let listDoc: Staff[];
 
             if(type_filter.toLowerCase() === 'all'){
-                  list_doc = await this.Staff.find({name: new RegExp(search_filter,'i')});  
+                  listDoc = await this.Staff.find({name: new RegExp(search_filter,'i')});  
             }else if(type_filter.toLowerCase() === 'staff'){
-                  list_doc = await this.Staff.find({name: new RegExp(search_filter,'i')}).where('is_admin').equals(false);  
+                  listDoc = await this.Staff.find({name: new RegExp(search_filter,'i')}).where('is_admin').equals(false);  
             }
             else if(type_filter.toLowerCase() === 'admin'){
-                  list_doc = await this.Staff.find({name: new RegExp(search_filter,'i')}).where('is_admin').equals(true);  
+                  listDoc = await this.Staff.find({name: new RegExp(search_filter,'i')}).where('is_admin').equals(true);  
             }
 
-            if(end>= list_doc.length){
-                  end = list_doc.length;
+            if(end>= listDoc.length){
+                  end = listDoc.length;
             }
-            const allStaff_length = list_doc.length;  //every staff in a query (not yet sliced)
 
-            
-            return {allStaff_length: allStaff_length, staff_list: list_doc.slice(start, end)};
+            const stafflist = {
+                  allStaff_length: listDoc.length,  //every staff in a query (not yet sliced)
+                  staff_list: listDoc.slice(start, end)
+            }
+            return stafflist;
       }
 
       async deleteStaffData(id: string) : Promise<Staff>{
