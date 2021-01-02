@@ -115,16 +115,16 @@ export class listAllUserService {
     }
     async getUserById(id: Types.ObjectId ): Promise<User> {
 
-        let tempUser : User = await this.userModel.findById(id);
+        let user : User = await this.userModel.findById(id);
         let current : Date = new Date();
 
-        this.updatePenalizationState(tempUser,current);
-
-        if( tempUser === null ){
+        if( user === null ){
             throw new HttpException("Invalid User", HttpStatus.NOT_FOUND);
         }
 
-        return tempUser;
+        this.updatePenalizationState(user,current);
+
+        return user;
 
     }
 
@@ -196,7 +196,7 @@ export class listAllUserService {
 
     async editById(id : Types.ObjectId , update : EditingDto): Promise<User>{
 
-        let user : User = await this.userModel.findById(id);
+        const user : User = await this.userModel.findById(id);
 
         if( update.hasOwnProperty('password') ){
             throw new HttpException("Editing password isnt allowed.", HttpStatus.BAD_REQUEST);
@@ -206,9 +206,7 @@ export class listAllUserService {
             throw new HttpException("Invalid User", HttpStatus.NOT_FOUND);
         }
 
-        for(const i in update){
-            user[i] = update[i];
-        }
+        Object.assign(user,update);
 
         user.save();
 
