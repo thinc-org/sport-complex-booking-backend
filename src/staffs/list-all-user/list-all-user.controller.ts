@@ -1,4 +1,4 @@
-import { Controller, Get, Post,Query ,Patch, Put, Delete, Body, Param, BadRequestException, Res, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post,Query ,Patch, Put, Delete, Body, Param, BadRequestException, Res, UseGuards, UsePipes , ValidationPipe } from '@nestjs/common';
 import { StaffGuard } from 'src/auth/jwt.guard'
 import { AuthService } from 'src/auth/auth.service';
 import { CreateOtherUserDto, CreateSatitUserDto } from 'src/staffs/dto/add-user.dto';
@@ -67,13 +67,16 @@ export class listAllUserController {
         return this.addUserService.editById(param.id, { is_penalize : false , expired_penalize_date : null });
     }
 
-    @Put('/:id') // forExistProperty : boolean
+    @Put('/:id')
+    @UsePipes(new ValidationPipe({ whitelist : true}))
     async editById(@Param() param,@Body() body : EditingDto ) : Promise<User>{
+        console.log(body);
         this.idValidityChecker(param.id);
         return this.addUserService.editById(param.id,body);
     }
 
     @Patch('/password/:id') 
+    @UsePipes(new ValidationPipe({ whitelist : true}))
     async changePassWord(@Param() param ,@Body() body : ChangingPasswordDto): Promise<User>{
         this.idValidityChecker(param.id);
         return this.addUserService.changePassWord(param.id,body);
