@@ -1,6 +1,6 @@
 import { AdminGuard, JwtAuthGuard } from './../../auth/jwt.guard';
 import { Controller, Get, UseGuards, Param, Req, Put, Body, Post, Delete, Query } from '@nestjs/common';
-import {Staff} from '../interfaces/staff.interface';
+import {Staff, StaffList} from '../interfaces/staff.interface';
 import {StaffManagerService} from './staff-manager.service';
 
 @UseGuards(AdminGuard)
@@ -23,9 +23,11 @@ async updateStaffBoolean(@Param('id') id: string ,@Body() input:{is_admin: boole
 }
 //regex staff name (thai language) search 
 //if no filter, input filter as "filter"= $ , type_filter = all (for admins and staffs), = admin (for admins), = staff (for staffs)
+
+
 @Get('/admin-and-staff/:start/:end/:filter/:type')     
 async getStaffsList(@Param('start') start: number, @Param('end') end: number, @Param('filter') filter: string, 
-      @Param('type') type: string ,@Req() req): Promise<{allStaff_length: number,staff_list: Staff[]}>{
+      @Param('type') type: string ,@Req() req): Promise<StaffList>{
       
       return await this.staffManagerService.staffRegexQuery(start, end, filter, type); 
 }

@@ -6,3 +6,8 @@ export interface Staff extends mongoose.Document {
   password: string;
   is_admin: boolean;
 }
+
+export interface StaffList {
+  allStaff_length: number;
+  staff_list: Staff[]
+}
