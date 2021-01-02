@@ -2,7 +2,7 @@ import { Controller, Get, Post,Query ,Patch, Put, Delete, Body, Param, BadReques
 import { StaffGuard } from 'src/auth/jwt.guard'
 import { AuthService } from 'src/auth/auth.service';
 import { CreateOtherUserDto, CreateSatitUserDto } from 'src/staffs/dto/add-user.dto';
-import { User } from 'src/users/interfaces/user.interface';
+import { User, OtherUser } from 'src/users/interfaces/user.interface';
 import { listAllUserService } from './list-all-user.service';
 import { Types, isValidObjectId } from 'mongoose';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
@@ -64,22 +64,13 @@ export class listAllUserController {
     @Patch('/unban/:id')
     async unbanById(@Param() param ) : Promise<User>{
         this.idValidityChecker(param.id);
-        return this.addUserService.editById(param.id, { is_penalize : false , expired_penalize_date : null },true);
+        return this.addUserService.editById(param.id, { is_penalize : false , expired_penalize_date : null });
     }
 
     @Put('/:id') // forExistProperty : boolean
-    async editById(@Param() param,@Body() body : EditingDto ) : Promise<User>{
+    async editById(@Param() param,@Body() body : Partial<OtherUser> ) : Promise<User>{
         this.idValidityChecker(param.id);
-        if( body.hasOwnProperty('forExistProperty') ){
-
-            const forExistProperty : boolean = body['forExistProperty'];
-
-            delete body['forExistProperty'];
-
-            return this.addUserService.editById(param.id,body,forExistProperty);
-        }
-
-        return this.addUserService.editById(param.id,body,true);
+        return this.addUserService.editById(param.id,body);
     }
 
     @Patch('/password/:id') 
