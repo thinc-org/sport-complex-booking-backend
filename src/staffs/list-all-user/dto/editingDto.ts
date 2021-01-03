@@ -1,7 +1,7 @@
-import { Account, Verification } from "./../../../users/interfaces/user.interface";
+import { Verification } from "./../../../users/interfaces/user.interface";
 import { Types } from "mongoose";
 import { IsBoolean, IsString, IsEnum, IsDate, IsMongoId, IsOptional, Equals} from "class-validator";
-class Contact_person{
+class Contact_person {
     @IsOptional()
     @IsString()
     contact_person_prefix?: string
@@ -19,7 +19,12 @@ class Contact_person{
     contact_person_phone?: string
 }
 
-export class EditingDto { 
+export class ChangingPasswordDto {
+    @IsString()
+    password : string
+}
+
+export class UserEditingDto { 
     @IsOptional()
     @IsBoolean()
     is_thai_language?: boolean
@@ -50,9 +55,19 @@ export class EditingDto {
     @IsOptional()
     @IsDate()
     expired_penalize_date?: Date
+}
+
+export class CuStudentUserEditingDto extends UserEditingDto{
     @IsOptional()
     @IsBoolean()
     is_first_login?: boolean
+}
+
+export class SatitAndCuPersonelEditingDto extends UserEditingDto{
+
+}
+
+export class OtherUserEditingDto extends UserEditingDto{
     @IsOptional()
     @IsString()
     prefix?: string 
@@ -106,9 +121,4 @@ export class EditingDto {
     @IsOptional()
     @IsMongoId()
     relationship_verification_document?: Types.ObjectId
-}
-
-export class ChangingPasswordDto {
-    @IsString()
-    password : string
 }

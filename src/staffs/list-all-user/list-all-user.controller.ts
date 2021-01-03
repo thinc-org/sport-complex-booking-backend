@@ -2,11 +2,11 @@ import { Controller, Get, Post,Query ,Patch, Put, Delete, Body, Param, BadReques
 import { StaffGuard } from 'src/auth/jwt.guard'
 import { AuthService } from 'src/auth/auth.service';
 import { CreateOtherUserDto, CreateSatitUserDto } from 'src/staffs/dto/add-user.dto';
-import { User, OtherUser } from 'src/users/interfaces/user.interface';
+import { User, OtherUser, Account } from 'src/users/interfaces/user.interface';
 import { listAllUserService } from './list-all-user.service';
 import { Types, isValidObjectId } from 'mongoose';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { EditingDto, ChangingPasswordDto } from "./dto/editingDto";
+import { UserEditingDto, CuStudentUserEditingDto, SatitAndCuPersonelEditingDto, OtherUserEditingDto, ChangingPasswordDto } from "./dto/editingDto";
 
 @UseGuards(StaffGuard)
 @Controller('list-all-user')
@@ -67,12 +67,25 @@ export class listAllUserController {
         return this.addUserService.editById(param.id, { is_penalize : false , expired_penalize_date : null });
     }
 
-    @Put('/:id')
-    @UsePipes(new ValidationPipe({ whitelist : true}))
-    async editById(@Param() param,@Body() body : EditingDto ) : Promise<User>{
-        console.log(body);
+    @Put('/custudent/:id')
+    @UsePipes(new ValidationPipe({ whitelist : true }))
+    async editCuStudentById(@Param() param,@Body() body : CuStudentUserEditingDto ) : Promise<User>{
         this.idValidityChecker(param.id);
-        return this.addUserService.editById(param.id,body);
+        return this.addUserService.editById(param.id,body,Account.CuStudent);
+    }
+
+    @Put('/satit/:id')
+    @UsePipes(new ValidationPipe({ whitelist : true }))
+    async editSatitById(@Param() param,@Body() body : SatitAndCuPersonelEditingDto ) : Promise<User>{
+        this.idValidityChecker(param.id);
+        return this.addUserService.editById(param.id,body,Account.SatitAndCuPersonel);
+    }
+
+    @Put('/other/:id')
+    @UsePipes(new ValidationPipe({ whitelist : true }))
+    async editOtherById(@Param() param,@Body() body : OtherUserEditingDto ) : Promise<User>{
+        this.idValidityChecker(param.id);
+        return this.addUserService.editById(param.id,body,Account.Other);
     }
 
     @Patch('/password/:id') 
