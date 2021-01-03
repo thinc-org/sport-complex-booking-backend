@@ -10,7 +10,8 @@ export class AllWaitingRoomService {
 
   async getWaitingRoom(id:string) : Promise<WaitingRoom> {
   
-    const waitingRoom=await this.waitingRoomModel.findById(id).exec();
+    const waitingRoom=await this.waitingRoomModel.findById(id)
+    .populate('list_member','username personal_email phone').exec();
     
     if(!waitingRoom)
       throw new HttpException('Waiting room not found', HttpStatus.NOT_FOUND);
@@ -19,7 +20,8 @@ export class AllWaitingRoomService {
 
   async getWaitingRoomSearchResult(body) : Promise<[Number,WaitingRoom[]]> {
 
-    let reservation= this.waitingRoomModel.find();
+    let reservation= this.waitingRoomModel.find().sort({ date : 1 , time_slot : -1})
+        .populate('list_member','username personal_email phone');
     if(body.sportId)
     {
       reservation=reservation.find({"sport_id":body.sportId});
@@ -69,7 +71,9 @@ export class AllWaitingRoomService {
     {
       queryArray.push({time_slot:{$elemMatch:{$in:distime.time_slot}},day_of_week:distime.day});
     }
-    const waitingRoom=await this.waitingRoomModel.find({date:{$gte:disableCourt.starting_date,$lt:disableCourt.expired_date},$or:queryArray});
+    const waitingRoom=await this.waitingRoomModel.find({date:{$gte:disableCourt.starting_date,$lt:disableCourt.expired_date},$or:queryArray})
+                        .sort({ date : 1 , time_slot : -1})
+                        .populate('list_member','username personal_email phone');
     return waitingRoom;
   }
 }
