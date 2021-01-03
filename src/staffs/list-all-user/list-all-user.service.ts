@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { SatitCuPersonelUser, OtherUser, User ,Account, CuStudentUser} from 'src/users/interfaces/user.interface';
 import { UsersService } from "./../../users/users.service";
-import { EditingDto , ChangingPasswordDto } from "./dto/editingDto";
+import { UserEditingDto , ChangingPasswordDto } from "./dto/editingDto";
 
 
 @Injectable()
@@ -194,7 +194,7 @@ export class listAllUserService {
         return deleteResponse
     }
 
-    async editById(id : Types.ObjectId , update : EditingDto): Promise<User>{
+    async editById(id : Types.ObjectId , update : UserEditingDto , account_type? : Account ): Promise<User>{
 
         const user : User = await this.userModel.findById(id);
 
@@ -204,6 +204,10 @@ export class listAllUserService {
 
         if( user === null ){
             throw new HttpException("Invalid User", HttpStatus.NOT_FOUND);
+        }
+        
+        if( account_type && account_type !== user.account_type ){
+            throw new HttpException("User isn't "+ account_type, HttpStatus.BAD_REQUEST);
         }
 
         Object.assign(user,update);
