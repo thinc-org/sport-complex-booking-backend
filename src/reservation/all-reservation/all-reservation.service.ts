@@ -11,7 +11,8 @@ export class AllReservationService {
 
   async getReservation(id:string) : Promise<Reservation> {
   
-    const reservation=await this.reservationModel.findById(id).exec();
+    const reservation=await this.reservationModel.findById(id)
+                      .populate('list_member','username personal_email phone').exec();
     if(!reservation)
       throw new HttpException('Reservation not found', HttpStatus.NOT_FOUND);
     return reservation;
@@ -19,7 +20,8 @@ export class AllReservationService {
 
   async getReservationSearchResult(body) : Promise<[Number,Reservation[]]> {
 
-    let reservation= this.reservationModel.find();
+    let reservation= this.reservationModel.find().sort({ date : 1 , time_slot : -1})
+                      .populate('list_member','username personal_email phone');
     if(body.sportId)
     {
       reservation=reservation.find({"sport_id":body.sportId});
@@ -68,7 +70,9 @@ export class AllReservationService {
     {
       queryArray.push({time_slot:{$elemMatch:{$in:distime.time_slot}},day_of_week:distime.day});
     }
-    const reservation=await this.reservationModel.find({date:{$gte:disableCourt.starting_date,$lt:disableCourt.expired_date},$or:queryArray});
+    const reservation=await this.reservationModel.find({date:{$gte:disableCourt.starting_date,$lt:disableCourt.expired_date},$or:queryArray})
+                      .sort({ date : 1 , time_slot : -1})
+                      .populate('list_member','username personal_email phone');
     return reservation;
   }
 
