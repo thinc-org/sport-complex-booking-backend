@@ -34,4 +34,6 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 .env.development
-.env
+.env/.blackbox/pubring.gpg~
+/.blackbox/pubring.kbx~
+/.blackbox/secring.gpg
