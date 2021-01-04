@@ -245,7 +245,7 @@ export class listAllUserService {
     }
 
     updatePenalizationState( user : User , current : Date){
-        if( user.expired_penalize_date !== null){
+        if( user.is_penalize ){
             if(current > user.expired_penalize_date){
                 user.is_penalize = false;
                 user.expired_penalize_date = null;
