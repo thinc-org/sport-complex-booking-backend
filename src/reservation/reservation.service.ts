@@ -51,9 +51,6 @@ export class ReservationService {
 
     async checkValidity(id: string): Promise<boolean> {
         const user = await this.userModel.findById(id);
-        if (user == null) {
-            throw new HttpException("This Id does not exist", HttpStatus.BAD_REQUEST)
-        }
         if (user.account_type == Account.Other) {
             const otherUser = user as OtherUser
             const date = new Date();
@@ -61,13 +58,13 @@ export class ReservationService {
                 throw new HttpException("Your account has to verify first", HttpStatus.UNAUTHORIZED)
             }
             else if (otherUser.account_expiration_date < date) {
-                throw new HttpException("Your account has already expired, please contact staff", HttpStatus.UNAUTHORIZED)
+                throw new HttpException("Your account has already expired, please contact staff", HttpStatus.PAYMENT_REQUIRED)
             }
         }
         if (user.account_type == Account.CuStudent){
             const cuUser = user as CuStudentUser
             if(cuUser.is_first_login){
-                throw new HttpException("You have to fill your info first", HttpStatus.UNAUTHORIZED)
+                throw new HttpException("You have to fill your info first", HttpStatus.NOT_ACCEPTABLE)
             }
         }
         if (user.is_penalize) {
@@ -104,7 +101,7 @@ export class ReservationService {
         const sport = await this.courtManagerService.findSportByID(waitingRoomDto.sport_id.toString())
         const court = sport.list_court.find(court => court.court_num == waitingRoomDto.court_number)
         if(!court){
-            throw new HttpException("This court does not exist", HttpStatus.BAD_REQUEST)
+            throw new HttpException("This court does not exist", HttpStatus.GONE)
         }
         let open_time:number = court.open_time
         const close_time = court.close_time
@@ -156,7 +153,7 @@ export class ReservationService {
         
         const availableTime = await this.checkTimeSlot(waitingRoomDto)
         if(await this.checkQuota(waitingRoomDto,id) < waitingRoomDto.time_slot.length){
-            throw new HttpException("You do not have enough quotas", HttpStatus.UNAUTHORIZED)
+            throw new HttpException("You do not have enough quotas", HttpStatus.BAD_REQUEST)
         }
         for(const timeSlot of waitingRoomDto.time_slot){
             if(!availableTime.includes(timeSlot)){

@@ -38,7 +38,7 @@ async findSportByID(id: string) : Promise<Sport>{
       }
       const doc = await this.Sport.findById(id);
       if(!doc){
-            throw new BadRequestException("This Id does not exist.")
+            throw new HttpException("This Id does not exist.", HttpStatus.NOT_FOUND);
       }
       return doc;
 }
