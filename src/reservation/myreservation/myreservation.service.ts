@@ -34,7 +34,7 @@ export class MyReservationService {
 
     async getById( userId : Types.ObjectId , reservationId : Types.ObjectId ) : Promise<Reservation>{
 
-        var reservation : Reservation = await this.reservationModel.findById( reservationId )
+        const reservation : Reservation = await this.reservationModel.findById( reservationId )
             .populate('sport_id','sport_name_th sport_name_en')
             .populate('list_member' ,'name_en surname_en name_th surname_th');
 
@@ -42,7 +42,7 @@ export class MyReservationService {
             throw new HttpException("This reservation doesn't exist.", HttpStatus.NOT_FOUND);
         }
 
-        for(let user of reservation.toJSON().list_member ){
+        for(const user of reservation.toJSON().list_member ){
             if( user._id.toString() === userId.toString() ){
                 return reservation;
             }
@@ -69,15 +69,15 @@ export class MyReservationService {
         const diffDate = (date2.getTime()-date1.getTime())/(1000 * 3600 * 24);
 
         const setting : Setting = await this.courtManagerService.getSetting();
-        const late_cancelation_punishment : number = setting.late_cancelation_punishment,
-            late_cancelation_day : number = setting.late_cancelation_day;
+        const lateCancelationPunishment : number = setting.late_cancelation_punishment,
+            lateCancelationDay : number = setting.late_cancelation_day;
 
-        if(0 <= diffDate && diffDate <= late_cancelation_day){
-            for( let userid of reservation.list_member){
-                let new_expired_penalize_date = new Date();
-                new_expired_penalize_date.setDate(new_expired_penalize_date.getDate()+late_cancelation_punishment);
+        if(0 <= diffDate && diffDate <= lateCancelationDay){
+            for( const userid of reservation.list_member){
+                const newExpiredPenalizeDate = new Date();
+                newExpiredPenalizeDate.setDate(newExpiredPenalizeDate.getDate()+lateCancelationPunishment);
                 await this.userModel.findByIdAndUpdate(userid,{is_penalize : true ,
-                                                                expired_penalize_date : new_expired_penalize_date});
+                                                                expired_penalize_date : newExpiredPenalizeDate});
             }
         }
 
@@ -86,7 +86,7 @@ export class MyReservationService {
 
     async checkReservation( reservationId : Types.ObjectId ) : Promise<Reservation>{
 
-        let reservation : Reservation = await this.reservationModel.findById(reservationId);
+        const reservation : Reservation = await this.reservationModel.findById(reservationId);
 
         if ( reservation === null ){
             throw new HttpException("Invalid reservation.", HttpStatus.NOT_FOUND)
