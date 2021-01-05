@@ -5,8 +5,8 @@ import { UsersModule } from 'src/users/users.module';
 import { MyReservationController } from "./myreservation.controller";
 
 import { MyReservationService } from "./myreservation.service";
-import { CourtManagerService } from "./../../court-manager/court-manager.service";
 
+import { StaffsModule } from "./../../staffs/staffs.module";
 import { CourtManagerModule } from "./../../court-manager/court-manager.module";
 
 import { WaitingRoomSchema, ReservationSchema } from "./../schema/reservation.schema";
@@ -16,6 +16,7 @@ import { WaitingRoomSchema, ReservationSchema } from "./../schema/reservation.sc
         MongooseModule.forFeature([{ name: 'Reservation', schema: ReservationSchema, collection: 'list_reservation'}]),
         MongooseModule.forFeature([{ name: 'WaitingRoom', schema: WaitingRoomSchema, collection: 'list_waiting_room'}]),
         forwardRef(()=>UsersModule),
+        forwardRef(()=>StaffsModule),
         CourtManagerModule
     ],
     controllers : [MyReservationController],
