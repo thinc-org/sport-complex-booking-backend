@@ -70,7 +70,10 @@ export class UsersService {
         }
         const user = await this.userModel.findById(id).select(select);
         if(user == null){
-            throw new NotFoundException('User not found');
+            throw new HttpException({
+                'reason': 'NOT_FOUND',
+                'message': "User not found"
+            }, HttpStatus.NOT_FOUND)
         }
         return user;
     }
