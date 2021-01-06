@@ -2,7 +2,6 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, Types } from 'mongoose';
-import {  Cron } from '@nestjs/schedule';
 import { Cron } from '@nestjs/schedule';
 
 import { DisableCourtsService } from 'src/courts/disable-courts/disable-courts.service';
