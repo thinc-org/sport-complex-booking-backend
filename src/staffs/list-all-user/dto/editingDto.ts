@@ -1,6 +1,6 @@
 import { Verification } from "./../../../users/interfaces/user.interface";
 import { Types } from "mongoose";
-import { IsBoolean, IsString, IsEnum, IsDate, IsMongoId, IsOptional, Equals} from "class-validator";
+import { IsBoolean, IsString, IsEnum, IsMongoId, IsOptional, Equals} from "class-validator";
 class Contact_person {
     @IsOptional()
     @IsString()
@@ -53,7 +53,6 @@ export class UserEditingDto {
     @IsBoolean()
     is_penalize?: boolean
     @IsOptional()
-    @IsDate()
     expired_penalize_date?: Date
 }
 
@@ -72,7 +71,6 @@ export class OtherUserEditingDto extends UserEditingDto{
     @IsString()
     prefix?: string 
     @IsOptional()
-    @IsDate()
     birthday?: Date 
     @IsOptional()
     @IsString()
@@ -104,7 +102,6 @@ export class OtherUserEditingDto extends UserEditingDto{
     @IsString()
     rejected_info?: string[]
     @IsOptional()
-    @IsDate()
     account_expiration_date?: Date
     @IsOptional()
     @IsMongoId()
