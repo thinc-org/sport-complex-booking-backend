@@ -35,15 +35,15 @@ async getSetting() : Promise<Setting>{
 async findSportByID(id: string) : Promise<Sport>{
       if(!isValidObjectId(id)){
             throw new HttpException({
-                  'reason':'INVALID_ID',
-                  'message':"Invalid object id"
+                  reason:'INVALID_ID',
+                  message:"Invalid object id"
             }, HttpStatus.BAD_REQUEST);
       }
       const doc = await this.Sport.findById(id);
       if(!doc){
             throw new HttpException({
-                  'reason':'SPORT_NOT_FOUND',
-                  'message':"This sport does not exist"
+                  reason:'SPORT_NOT_FOUND',
+                  message:"This sport does not exist"
             }, HttpStatus.NOT_FOUND);
       }
       return doc;

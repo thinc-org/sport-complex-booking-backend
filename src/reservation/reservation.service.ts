@@ -56,23 +56,23 @@ export class ReservationService {
             const date = new Date();
             if (otherUser.verification_status != Verification.Verified) {
                 throw new HttpException({
-                    'reason': 'NOT_VERIFIED',
-                    'message': "Your account has to verify first"
-                }, HttpStatus.UNAUTHORIZED)
+                    reason: 'NOT_VERIFIED',
+                    message: "Your account has to verify first"
+                }, HttpStatus.FORBIDDEN)
             }
             else if (otherUser.account_expiration_date < date) {
                 throw new HttpException({
-                    'reason': 'ACCOUNT_EXPIRED',
-                    'message': "Your account has already expired, please contact staff"
-                }, HttpStatus.UNAUTHORIZED)
+                    reason: 'ACCOUNT_EXPIRED',
+                    message: "Your account has already expired, please contact staff"
+                }, HttpStatus.FORBIDDEN)
             }
         }
         if (user.account_type == Account.CuStudent) {
             const cuUser = user as CuStudentUser
             if (cuUser.is_first_login) {
                 throw new HttpException({
-                    'reason': 'INFO_NOT_FILLED',
-                    'message': "You have to fill your info first"
+                    reason: 'INFO_NOT_FILLED',
+                    message: "You have to fill your info first"
                 }, HttpStatus.UNAUTHORIZED)
             }
         }
@@ -83,16 +83,16 @@ export class ReservationService {
                 user.save()
             } else {
                 throw new HttpException({
-                    'reason': "FORBIDDEN",
-                    'message': "Your account has been banned, please contact staff"
+                    reason: "BANNED",
+                    message: "Your account has been banned, please contact staff"
                 }, HttpStatus.FORBIDDEN)
             }
         }
         const haveWaitingRoom = await this.waitingRoomModel.findOne({ list_member: { $in: [Types.ObjectId(id)] } })
         if (haveWaitingRoom) {
             throw new HttpException({
-                'reason': 'CONFLICT',
-                'message': "You already have waiting room"
+                reason: 'DUPLICATE_ROOM',
+                message: "You already have waiting room"
             }, HttpStatus.CONFLICT)
         }
         return true
@@ -108,16 +108,16 @@ export class ReservationService {
         if (waitingRoomDate < date) {
             throw new HttpException(
                 {
-                    'reason': 'INVALID_DATE',
-                    'message': "You cannot reserve the past date"
+                    reason: 'INVALID_DATE',
+                    message: "You cannot reserve the past date"
                 }, HttpStatus.BAD_REQUEST)
         }
         date.setDate(date.getDate() + 7)
         if (waitingRoomDate > date) {
             throw new HttpException(
                 {
-                    'reason': 'INVALID_DATE',
-                    'message': "You cannot reserve the time in advance over 7 days"
+                    reason: 'INVALID_DATE',
+                    message: "You cannot reserve the time in advance over 7 days"
                 }, HttpStatus.BAD_REQUEST)
         }
         date.setDate(date.getDate() - 7)
@@ -126,8 +126,8 @@ export class ReservationService {
         if (!court) {
             throw new HttpException(
                 {
-                    'reason': 'COURT_NOT_FOUND',
-                    'message': "This court does not exist"
+                    reason: 'COURT_NOT_FOUND',
+                    message: "This court does not exist"
                 }, HttpStatus.NOT_FOUND)
         }
         let open_time: number = court.open_time
@@ -176,23 +176,23 @@ export class ReservationService {
         //to make sure that time slot is consecutive
         if (Math.max.apply(Math, waitingRoomDto.time_slot) - Math.min.apply(Math, waitingRoomDto.time_slot) + 1 !== waitingRoomDto.time_slot.length) {
             throw new HttpException({
-                'reason': 'BAD_REQUEST',
-                'message': "Your time slots have to be consecutive"
+                reason: 'TIME_NOT_CONSECUTIVE',
+                message: "Your time slots have to be consecutive"
             }, HttpStatus.BAD_REQUEST)
         }
 
         const availableTime = await this.checkTimeSlot(waitingRoomDto)
         if (await this.checkQuota(waitingRoomDto, id) < waitingRoomDto.time_slot.length) {
             throw new HttpException({
-                'reason': 'BAD_REQUEST',
-                'message': "You do not have enough quotas"
-            }, HttpStatus.BAD_REQUEST)
+                reason: 'NOT_ENOUGH_QUOTA',
+                message: "You do not have enough quotas"
+            }, HttpStatus.UNAUTHORIZED)
         }
         for (const timeSlot of waitingRoomDto.time_slot) {
             if (!availableTime.includes(timeSlot)) {
                 throw new HttpException({
-                    'reason': 'UNAVAILABLE',
-                    'message': "Your chosen time is unavailable"
+                    reason: 'SLOT_UNAVAILABLE',
+                    message: "Your chosen time is unavailable"
                 }, HttpStatus.BAD_REQUEST)
             }
         }
@@ -219,14 +219,14 @@ export class ReservationService {
         const waitingroom = await this.waitingRoomModel.findOne({ access_code: accessCode })
         if (!waitingroom) {
             throw new HttpException({
-                'reason': 'BAD_REQUEST',
-                'message': "The code is wrong"
+                reason: 'WRONG_CODE',
+                message: "The code is wrong"
             }, HttpStatus.BAD_REQUEST)
         }
         if (await this.checkQuota(waitingroom, id) < waitingroom.time_slot.length) {
             throw new HttpException({
-                'reason': 'UNAUTHORIZED',
-                'message': "You do not have enough quotas"
+                reason: 'NOT_ENOUGH_QUOTA',
+                message: "You do not have enough quotas"
             }, HttpStatus.UNAUTHORIZED)
         }
         waitingroom.list_member.push(Types.ObjectId(id))
@@ -254,15 +254,15 @@ export class ReservationService {
         const waitingRoomDate = new Date(waitingRoomDto.date)
         if (waitingRoomDate < date) {
             throw new HttpException({
-                'reason': 'INVALID_DATE',
-                'message': "You cannot reserve the past date"
+                reason: 'INVALID_DATE',
+                message: "You cannot reserve the past date"
             }, HttpStatus.BAD_REQUEST)
         }
         date.setDate(date.getDate() + 7)
         if (waitingRoomDate > date) {
             throw new HttpException({
-                'reason': 'INVALID_DATE',
-                'message': "You cannot reserve the time in advance over 7 days"
+                reason: 'INVALID_DATE',
+                message: "You cannot reserve the time in advance over 7 days"
             }, HttpStatus.BAD_REQUEST)
         }
 
