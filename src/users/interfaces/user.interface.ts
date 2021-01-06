@@ -35,7 +35,7 @@ export interface User extends mongoose.Document {
     phone: string
     is_penalize: boolean
     expired_penalize_date: Date
-    validateAndEditAccountInfo?: (updt: any, all: boolean) => User
+    validateAndEditAccountInfo?: (updt: any, all: boolean) => Promise<User>
     editAccountInfo?: (updt: EditUserInfoDTO) => User
     setPassword?: (hashedPassword: string) => void
     getPassword?: () => string
