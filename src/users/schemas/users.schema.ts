@@ -68,6 +68,7 @@ class UserSchemaClass extends mongoose.Schema {
 }
 
 export const UserSchema = new UserSchemaClass();
+UserSchema.index({personal_email: 1}, {unique: true});
 
 class CuStudentSchemaClass extends UserSchemaClass {
     constructor() {
