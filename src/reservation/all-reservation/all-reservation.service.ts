@@ -70,7 +70,9 @@ export class AllReservationService {
     {
       queryArray.push({time_slot:{$elemMatch:{$in:distime.time_slot}},day_of_week:distime.day});
     }
-    const reservation=await this.reservationModel.find({date:{$gte:disableCourt.starting_date,$lt:disableCourt.expired_date},$or:queryArray})
+
+    const reservation=await this.reservationModel.find({ 'sport_id' : disableCourt.sport_id , 'court_num' : disableCourt.court_num,
+                      'date' : { $gte : disableCourt.starting_date, $lt : disableCourt.expired_date}, $or : queryArray})
                       .sort({ date : 1 , time_slot : -1})
                       .populate('list_member','username personal_email phone');
     return reservation;
