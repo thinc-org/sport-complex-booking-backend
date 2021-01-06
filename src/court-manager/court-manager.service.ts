@@ -15,6 +15,8 @@ export class CourtManagerService {
 //might get deleted, no error handling
 async writeSetting() : Promise<Setting>{
       const setting= {
+            // fix it's id to prevent creating multiple documents
+            "_id": "000000000000000000000000",
             "waiting_room_duration": 15,
             "late_cancelation_punishment": 30,
             "absence_punishment": 30,
@@ -32,7 +34,12 @@ async updateSetting( new_setting: Setting) : Promise<Setting>{
 }
 
 async getSetting() : Promise<Setting>{
-      return await this.Setting.findOne({});
+      const setting = await this.Setting.findOne({});
+      if (setting) {
+            return setting;
+      } else {
+            return await this.writeSetting();
+      }
 }
 
 async findSportByID(id: string) : Promise<Sport>{
