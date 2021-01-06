@@ -18,7 +18,7 @@ export class UsersService {
 
     async validateAndEditAccountInfo(userId: string, updt, full: boolean) {
         const user = await this.findById(userId);
-        user.validateAndEditAccountInfo(updt, full);
+        await user.validateAndEditAccountInfo(updt, full);
         return await user.save();
     }
 
