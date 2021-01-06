@@ -3,6 +3,7 @@ import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nes
 import { InjectModel } from '@nestjs/mongoose';
 import { isValidObjectId, Model, Types } from 'mongoose';
 import {  Cron } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 
 import { DisableCourtsService } from 'src/courts/disable-courts/disable-courts.service';
 import { Account, CuStudentUser, OtherUser, User, Verification } from 'src/users/interfaces/user.interface';
@@ -22,19 +23,19 @@ export class ReservationService {
     ) { }
 
     @Cron('0 */30 * * * *')
-    async checkReservation(){
+    async checkReservation() {
         const date = new Date()
-        date.setHours(date.getHours()+7)
-        const time = date.getUTCHours() + date.getMinutes()/60
+        date.setHours(date.getHours() + 7)
+        const time = date.getUTCHours() + date.getMinutes() / 60
         date.setUTCHours(0, 0, 0, 0);
-        const reservations = await this.reservationModel.find({date: date})
-        for(const reservation of reservations){
-            const max = Math.max.apply(Math,reservation.time_slot)
-            if(time>=max/2){
-                if(reservation.is_check){
+        const reservations = await this.reservationModel.find({ date: date })
+        for (const reservation of reservations) {
+            const max = Math.max.apply(Math, reservation.time_slot)
+            if (time >= max / 2) {
+                if (reservation.is_check) {
                     await reservation.remove()
-                }else{
-                    for(const member of reservation.list_member){
+                } else {
+                    for (const member of reservation.list_member) {
                         const user = await this.userModel.findById(member)
                         user.is_penalize = true
                         const bannedDate = new Date()
@@ -55,61 +56,88 @@ export class ReservationService {
             const otherUser = user as OtherUser
             const date = new Date();
             if (otherUser.verification_status != Verification.Verified) {
-                throw new HttpException("Your account has to verify first", HttpStatus.UNAUTHORIZED)
+                throw new HttpException({
+                    'reason': 'NOT_VERIFIED',
+                    'message': "Your account has to verify first"
+                }, HttpStatus.UNAUTHORIZED)
             }
             else if (otherUser.account_expiration_date < date) {
-                throw new HttpException("Your account has already expired, please contact staff", HttpStatus.PAYMENT_REQUIRED)
+                throw new HttpException({
+                    'reason': 'ACCOUNT_EXPIRED',
+                    'message': "Your account has already expired, please contact staff"
+                }, HttpStatus.UNAUTHORIZED)
             }
         }
-        if (user.account_type == Account.CuStudent){
+        if (user.account_type == Account.CuStudent) {
             const cuUser = user as CuStudentUser
-            if(cuUser.is_first_login){
-                throw new HttpException("You have to fill your info first", HttpStatus.NOT_ACCEPTABLE)
+            if (cuUser.is_first_login) {
+                throw new HttpException({
+                    'reason': 'INFO_NOT_FILLED',
+                    'message': "You have to fill your info first"
+                }, HttpStatus.UNAUTHORIZED)
             }
         }
         if (user.is_penalize) {
             const date = new Date();
-            if(user.expired_penalize_date < date){
+            if (user.expired_penalize_date < date) {
                 user.is_penalize = false
                 user.save()
-            }else{
-                throw new HttpException("Your account has been banned, please contact staff", HttpStatus.FORBIDDEN)
+            } else {
+                throw new HttpException({
+                    'reason': "FORBIDDEN",
+                    'message': "Your account has been banned, please contact staff"
+                }, HttpStatus.FORBIDDEN)
             }
         }
         const haveWaitingRoom = await this.waitingRoomModel.findOne({ list_member: { $in: [Types.ObjectId(id)] } })
         if (haveWaitingRoom) {
-            throw new HttpException("You already have waiting room", HttpStatus.CONFLICT)
+            throw new HttpException({
+                'reason': 'CONFLICT',
+                'message': "You already have waiting room"
+            }, HttpStatus.CONFLICT)
         }
         return true
     }
 
-    async checkTimeSlot(waitingRoomDto: WaitingRoomDto): Promise<number[]>{
+    async checkTimeSlot(waitingRoomDto: WaitingRoomDto): Promise<number[]> {
         const date = new Date()
-        date.setHours(date.getHours()+7)
-        const currentTime = date.getUTCHours() + date.getMinutes()/60 + date.getSeconds()/3600
-        const currentTimeSlot = Math.ceil((currentTime*2))
+        date.setHours(date.getHours() + 7)
+        const currentTime = date.getUTCHours() + date.getMinutes() / 60 + date.getSeconds() / 3600
+        const currentTimeSlot = Math.ceil((currentTime * 2))
         date.setUTCHours(0, 0, 0, 0);
         const waitingRoomDate = new Date(waitingRoomDto.date)
-        if(waitingRoomDate < date){
-            throw new HttpException("You cannot reserve the past date", HttpStatus.BAD_REQUEST)
+        if (waitingRoomDate < date) {
+            throw new HttpException(
+                {
+                    'reason': 'INVALID_DATE',
+                    'message': "You cannot reserve the past date"
+                }, HttpStatus.BAD_REQUEST)
         }
-        date.setDate(date.getDate()+7)
-        if(waitingRoomDate > date){
-            throw new HttpException("You cannot reserve the time in advance over 7 days", HttpStatus.BAD_REQUEST)
+        date.setDate(date.getDate() + 7)
+        if (waitingRoomDate > date) {
+            throw new HttpException(
+                {
+                    'reason': 'INVALID_DATE',
+                    'message': "You cannot reserve the time in advance over 7 days"
+                }, HttpStatus.BAD_REQUEST)
         }
-        date.setDate(date.getDate()-7)
+        date.setDate(date.getDate() - 7)
         const sport = await this.courtManagerService.findSportByID(waitingRoomDto.sport_id.toString())
         const court = sport.list_court.find(court => court.court_num == waitingRoomDto.court_number)
-        if(!court){
-            throw new HttpException("This court does not exist", HttpStatus.GONE)
+        if (!court) {
+            throw new HttpException(
+                {
+                    'reason': 'COURT_NOT_FOUND',
+                    'message': "This court does not exist"
+                }, HttpStatus.NOT_FOUND)
         }
-        let open_time:number = court.open_time
+        let open_time: number = court.open_time
         const close_time = court.close_time
         const availableTime = new Set<number>()
-        if(waitingRoomDate.getTime() === date.getTime() && currentTimeSlot+1>open_time){
-            open_time = currentTimeSlot+1
+        if (waitingRoomDate.getTime() === date.getTime() && currentTimeSlot + 1 > open_time) {
+            open_time = currentTimeSlot + 1
         }
-        for (let i = open_time; i <= close_time;i++){
+        for (let i = open_time; i <= close_time; i++) {
             availableTime.add(i)
         }
         const reservations = await this.reservationModel.find({ court_number: waitingRoomDto.court_number, date: waitingRoomDto.date, sport_id: waitingRoomDto.sport_id })
@@ -124,8 +152,8 @@ export class ReservationService {
                 availableTime.delete(timeSlot)
             }
         }
-        const disable_times = await this.disableCourtService.findClosedTimes(waitingRoomDto.sport_id.toString(),waitingRoomDto.court_number,new Date(waitingRoomDto.date))
-        for (const disable_time of disable_times){
+        const disable_times = await this.disableCourtService.findClosedTimes(waitingRoomDto.sport_id.toString(), waitingRoomDto.court_number, new Date(waitingRoomDto.date))
+        for (const disable_time of disable_times) {
             availableTime.delete(disable_time)
         }
         return Array.from(availableTime)
@@ -147,17 +175,26 @@ export class ReservationService {
         waitingRoomDto.time_slot = Array.from(timeSlot)
 
         //to make sure that time slot is consecutive
-        if(Math.max.apply(Math,waitingRoomDto.time_slot)-Math.min.apply(Math,waitingRoomDto.time_slot)+1 !== waitingRoomDto.time_slot.length){
-            throw new HttpException("Your time slots have to be consecutive", HttpStatus.BAD_REQUEST)
+        if (Math.max.apply(Math, waitingRoomDto.time_slot) - Math.min.apply(Math, waitingRoomDto.time_slot) + 1 !== waitingRoomDto.time_slot.length) {
+            throw new HttpException({
+                'reason': 'BAD_REQUEST',
+                'message': "Your time slots have to be consecutive"
+            }, HttpStatus.BAD_REQUEST)
         }
-        
+
         const availableTime = await this.checkTimeSlot(waitingRoomDto)
-        if(await this.checkQuota(waitingRoomDto,id) < waitingRoomDto.time_slot.length){
-            throw new HttpException("You do not have enough quotas", HttpStatus.BAD_REQUEST)
+        if (await this.checkQuota(waitingRoomDto, id) < waitingRoomDto.time_slot.length) {
+            throw new HttpException({
+                'reason': 'BAD_REQUEST',
+                'message': "You do not have enough quotas"
+            }, HttpStatus.BAD_REQUEST)
         }
-        for(const timeSlot of waitingRoomDto.time_slot){
-            if(!availableTime.includes(timeSlot)){
-                throw new HttpException("Your chosen time is unavailable", HttpStatus.UNAUTHORIZED)
+        for (const timeSlot of waitingRoomDto.time_slot) {
+            if (!availableTime.includes(timeSlot)) {
+                throw new HttpException({
+                    'reason': 'UNAVAILABLE',
+                    'message': "Your chosen time is unavailable"
+                }, HttpStatus.BAD_REQUEST)
             }
         }
         const waitingroom = new this.waitingRoomModel(waitingRoomDto)
@@ -182,10 +219,16 @@ export class ReservationService {
     async joinWaitingRoom(accessCode: string, id: string): Promise<boolean> {
         const waitingroom = await this.waitingRoomModel.findOne({ access_code: accessCode })
         if (!waitingroom) {
-            throw new HttpException("The code is wrong", HttpStatus.BAD_REQUEST)
+            throw new HttpException({
+                'reason': 'BAD_REQUEST',
+                'message': "The code is wrong"
+            }, HttpStatus.BAD_REQUEST)
         }
-        if(await this.checkQuota(waitingroom,id) < waitingroom.time_slot.length){
-            throw new HttpException("You do not have enough quotas", HttpStatus.UNAUTHORIZED)
+        if (await this.checkQuota(waitingroom, id) < waitingroom.time_slot.length) {
+            throw new HttpException({
+                'reason': 'UNAUTHORIZED',
+                'message': "You do not have enough quotas"
+            }, HttpStatus.UNAUTHORIZED)
         }
         waitingroom.list_member.push(Types.ObjectId(id))
         const required_member = (await this.courtManagerService.findSportByID(waitingroom.sport_id.toString())).required_user
@@ -210,12 +253,18 @@ export class ReservationService {
         const date = new Date()
         date.setUTCHours(0, 0, 0, 0);
         const waitingRoomDate = new Date(waitingRoomDto.date)
-        if(waitingRoomDate < date){
-            throw new HttpException("You cannot reserve the past date", HttpStatus.BAD_REQUEST)
+        if (waitingRoomDate < date) {
+            throw new HttpException({
+                'reason': 'INVALID_DATE',
+                'message': "You cannot reserve the past date"
+            }, HttpStatus.BAD_REQUEST)
         }
-        date.setDate(date.getDate()+7)
-        if(waitingRoomDate > date){
-            throw new HttpException("You cannot reserve the time in advance over 7 days", HttpStatus.BAD_REQUEST)
+        date.setDate(date.getDate() + 7)
+        if (waitingRoomDate > date) {
+            throw new HttpException({
+                'reason': 'INVALID_DATE',
+                'message': "You cannot reserve the time in advance over 7 days"
+            }, HttpStatus.BAD_REQUEST)
         }
 
         let quota: number = (await this.courtManagerService.findSportByID(waitingRoomDto.sport_id.toString())).quota
