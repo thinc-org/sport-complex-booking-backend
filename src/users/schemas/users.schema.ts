@@ -78,6 +78,13 @@ class CuStudentSchemaClass extends UserSchemaClass {
         this.methods.getPassword = function() {
             throw new HttpException('Custudent does not have password',HttpStatus.FORBIDDEN);
         }
+        
+        const oldEditMethod: Function = this.methods.editAccountInfo;
+
+        this.methods.editAccountInfo = function(updt: EditUserInfoDTO) {
+            oldEditMethod.call(this, updt);
+            this.is_first_login = false;
+        }
     }
 }
 
@@ -86,13 +93,6 @@ export const CuStudentSchema = new CuStudentSchemaClass();
 class SatitCuPersonelSchemaClass extends UserSchemaClass {
     constructor() {
         super({password: String});
-
-        const oldEditMethod: Function = this.methods.editAccountInfo;
-
-        this.methods.editAccountInfo = function(updt: EditUserInfoDTO) {
-            oldEditMethod.call(this, updt);
-            this.is_first_login = false;
-        }
     }
 }
 
