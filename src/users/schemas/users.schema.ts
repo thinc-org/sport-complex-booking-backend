@@ -26,7 +26,7 @@ class UserSchemaClass extends mongoose.Schema {
 
         this.statics.editAccountInfoDTO = EditUserInfoDTO;
 
-        this.methods.editAccountInfo = async function(updt: EditUserInfoDTO) {
+        this.methods.editAccountInfo = function(updt: EditUserInfoDTO) {
             this.is_thai_language = updt.is_thai_language ?? this.is_thai_language;
             this.personal_email = updt.personal_email ?? this.personal_email;
             this.phone = updt.phone ?? this.phone;
@@ -86,6 +86,13 @@ export const CuStudentSchema = new CuStudentSchemaClass();
 class SatitCuPersonelSchemaClass extends UserSchemaClass {
     constructor() {
         super({password: String});
+
+        const oldEditMethod: Function = this.methods.editAccountInfo;
+
+        this.methods.editAccountInfo = function(updt: EditUserInfoDTO) {
+            oldEditMethod.call(this, updt);
+            this.is_first_login = false;
+        }
     }
 }
 
@@ -125,11 +132,11 @@ class OtherSchemaClass extends UserSchemaClass {
 
         const oldEditMethod: Function = this.methods.editAccountInfo;
 
-        this.methods.editAccountInfo = async function(updt: editOtherAccountInfoDTO) {
+        this.methods.editAccountInfo = function(updt: editOtherAccountInfoDTO) {
             if (this.verification_status == Verification.Submitted || this.verification_status == Verification.Verified) {
                 throw new HttpException('Please contact admin to modify account data', HttpStatus.FORBIDDEN)
             }
-            await oldEditMethod.call(this,updt);
+            oldEditMethod.call(this,updt);
             OtherSchemaClass.assignNotNull(this, updt, {verification_status: Verification.Submitted,rejected_info:[]});
         }
     }
