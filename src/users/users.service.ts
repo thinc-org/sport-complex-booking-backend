@@ -17,15 +17,13 @@ export class UsersService {
     ) { }
 
     async validateAndEditAccountInfo(userId: string, updt, full: boolean) {
-        if(updt.personal_email != null) {
-            const found = await this.userModel.find({personal_email: updt.personal_email});
-            for (const user of found) {
-                if(user._id != userId) throw new HttpException('Email is already used', HttpStatus.CONFLICT);
-            }
-        }
         const user = await this.findById(userId);
         await user.validateAndEditAccountInfo(updt, full);
-        return await user.save();
+        try {
+            return await user.save();
+        } catch (err) {
+            if(err.code === 11000) throw new HttpException('Email is already used', HttpStatus.CONFLICT);
+        }
     }
 
     async changePassword(userId: string,oldPassword: string, newPassword: string) {
