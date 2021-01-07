@@ -37,7 +37,7 @@ class UserSchemaClass extends mongoose.Schema {
             const info = plainToClass(Model.editAccountInfoDTO, updt, { excludeExtraneousValues: true });
             try {
                 await validateOrReject(info, {groups:[all ? 'all' : 'optional'], validationError: { target: false }});
-                this.editAccountInfo(updt);
+                this.editAccountInfo(info);
             }catch(err) {
                 throw new HttpException(err, HttpStatus.BAD_REQUEST);
             }

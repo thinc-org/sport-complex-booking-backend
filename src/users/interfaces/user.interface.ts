@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose'
-import { EditUserInfoDTO } from '../accountInfos/accountInfos.dto';
+import { editOtherAccountInfoDTO, EditUserInfoDTO } from '../accountInfos/accountInfos.dto';
 
 
 export enum Account {
@@ -35,7 +35,7 @@ export interface User extends mongoose.Document {
     phone: string
     is_penalize: boolean
     expired_penalize_date: Date
-    validateAndEditAccountInfo?: (updt: any, all: boolean) => Promise<User>
+    validateAndEditAccountInfo?: (updt: EditUserInfoDTO , all: boolean) => Promise<User>
     editAccountInfo?: (updt: EditUserInfoDTO) => User
     setPassword?: (hashedPassword: string) => void
     getPassword?: () => string
@@ -109,4 +109,5 @@ export interface OtherUser extends User {
     national_id_photo: mongoose.Types.ObjectId //also passport photo
     house_registration_number: mongoose.Types.ObjectId//with reference person
     relationship_verification_document: mongoose.Types.ObjectId
+    validateAndEditAccountInfo?: (updt: editOtherAccountInfoDTO , all: boolean) => Promise<User>
 }
