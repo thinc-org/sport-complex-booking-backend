@@ -1,11 +1,16 @@
 import { StaffManagerService } from './../staffs/staff-manager/staff-manager.service';
-import { UserGuard } from './../auth/jwt.guard';
 import { JwtAuthGuard, StaffGuard } from 'src/auth/jwt.guard';
-import { Body, Controller, Get, Post, Delete, Put, Param, UseGuards, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Delete, Put, Param, UseGuards, Req, Query } from '@nestjs/common';
 import {CourtManagerService} from './court-manager.service';
 import { Sport, Court } from './interfaces/sportCourt.interface';
 import {Setting} from './interfaces/setting.interface';
 import { listAllUserService } from './../staffs/list-all-user/list-all-user.service';
+
+interface searchQuery{
+      start:number,
+      end: number,
+      filter: string
+}
 
 @Controller('court-manager')
 export class CourtManagerController {
@@ -35,11 +40,13 @@ async getSetting(@Req() req):Promise<Setting>{
 
 //Get sport by thai name (regex)
 //if no filter, use $ as param for filter
+
 @UseGuards(StaffGuard)
-@Get('/:start/:end/:filter')      
-async getSportList(@Param('start') start: number, @Param('end') end:number, @Param('filter') filter: string ,@Req() req) : 
+@Get('/search')   //    /search?start=<START>&end=<END>&filter=<FILTER>
+async getSportList(@Query() query:searchQuery ,@Req() req) : 
       Promise<{allSport_length: number,sport_list: Sport[]}>{
-      return await this.courtManagerService.sportRegexQuery(start, end, filter);
+      console.log(query)
+      return await this.courtManagerService.sportRegexQuery(query.start, query.end, query.filter);
 }
 
 @UseGuards(JwtAuthGuard)

@@ -1,7 +1,14 @@
-import { AdminGuard, JwtAuthGuard } from './../../auth/jwt.guard';
+import { AdminGuard } from './../../auth/jwt.guard';
 import { Controller, Get, UseGuards, Param, Req, Put, Body, Post, Delete, Query } from '@nestjs/common';
 import {Staff, StaffList} from '../interfaces/staff.interface';
 import {StaffManagerService} from './staff-manager.service';
+
+interface searchQuery{
+      start:number,
+      end: number,
+      filter: string,
+      type: string
+}
 
 @UseGuards(AdminGuard)
 @Controller('staff-manager')
