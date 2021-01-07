@@ -127,7 +127,7 @@ export class UsersService {
         return user;
       }
 
-      //not using any will return as observable, don't know how to 
+    //not using any will return as observable, don't know how to 
     async create_fromSso(ssoReturn: SsoContent): Promise<CuStudentUser> {
         const newAccount = new this.cuStudentModel(
             {
@@ -147,8 +147,13 @@ export class UsersService {
         return acc;
     }
     
-    //for change email, languange, phone number (send all 3 variable for each change)
-    async changeData(input:{is_thai_language: boolean, personal_email: string, phone:string},id:string) {    
+    //for change email, language, phone number (send all 3 variable for each change)
+    async changeData(input:{is_thai_language: boolean, personal_email: string, phone:string},id:string) {   
+         //check if db has personal_email yet
+        const isUserEmailExist = await this.userModel.findOne({personal_email: input.personal_email});
+        console.log(isUserEmailExist)
+        if(isUserEmailExist && input.personal_email!=="")
+            throw new BadRequestException("This email is already exists. Please use another email.");
         const acc = await this.findCUById(id);
         acc.is_thai_language = input.is_thai_language;
         acc.personal_email = input.personal_email;

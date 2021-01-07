@@ -51,10 +51,17 @@ async findSportByID(id: string) : Promise<Sport>{
 
 //create sport by Sport (schema)      
 async createSport(court_data: Sport) : Promise<Sport>{
-      const doc = await this.Sport.findOne({sport_name_th: court_data.sport_name_th});     
-      if(doc){
+      if(court_data.required_user <= 0)
+            throw new BadRequestException("Required user must be more than zero.");
+      if(court_data.quota < 0)
+            throw new BadRequestException("Quota must be a non-negative number.");
+
+      const docTh = await this.Sport.findOne({sport_name_th: court_data.sport_name_th});
+      const docEn = await this.Sport.findOne({sport_name_en: court_data.sport_name_en});
+      
+      if(docTh || docEn)
             throw new BadRequestException("This Sport already exist.");
-      }
+
       const setTime = new this.Sport(court_data);
       return setTime.save()      
 }
