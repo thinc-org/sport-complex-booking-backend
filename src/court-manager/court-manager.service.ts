@@ -56,10 +56,12 @@ async createSport(court_data: Sport) : Promise<Sport>{
       if(court_data.quota < 0)
             throw new BadRequestException("Quota must be a non-negative number.");
 
-      const docTh = await this.Sport.findOne({sport_name_th: court_data.sport_name_th});
-      const docEn = await this.Sport.findOne({sport_name_en: court_data.sport_name_en});
+      const doc = await this.Sport.findOne({ $or: [
+            {sport_name_th: court_data.sport_name_th},
+            {sport_name_en: court_data.sport_name_en},
+      ]})
       
-      if(docTh || docEn)
+      if(doc)
             throw new BadRequestException("This Sport already exist.");
 
       const setTime = new this.Sport(court_data);
