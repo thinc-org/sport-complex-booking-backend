@@ -65,7 +65,6 @@ export class UsersController {
     async changeDBInfo  //recieve username (for query), is_thai_language, personal_email, phone
     (@Body() input:{is_thai_language: boolean, personal_email: string, phone:string}, @Req() req): Promise<CuStudentUser>{
         const acc = this.userService.changeData(input,req.user.userId);
-        console.log(await acc)
         return acc;
     }
 }
