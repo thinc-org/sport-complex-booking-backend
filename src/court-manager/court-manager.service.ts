@@ -25,6 +25,9 @@ async writeSetting() : Promise<Setting>{
 }
 
 async updateSetting( new_setting: Setting) : Promise<Setting>{
+      if((new_setting.waiting_room_duration || new_setting.late_cancelation_day
+            || new_setting.absence_punishment || new_setting.late_cancelation_day) <=0)
+            throw new HttpException("Waiting room duration must be more than 0.", HttpStatus.BAD_REQUEST);
       return await this.Setting.findOneAndUpdate({}, new_setting, {new:true});
 }
 
