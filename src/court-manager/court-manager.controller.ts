@@ -32,9 +32,15 @@ async updateSetting( @Body() new_setting: Setting, @Req() req) : Promise<Setting
       return await this.courtManagerService.updateSetting(new_setting);
 }
 
-@UseGuards(StaffGuard)
+@UseGuards(JwtAuthGuard)
 @Get('setting')
 async getSetting(@Req() req):Promise<Setting>{
+      if(req.user.isStaff === false){     
+            this.listAllUserService.getUserById(req.user.userId); //err handled in the function
+      }
+      else{
+            this.staffManagerService.getStaffData(req.user.userId); //err handled in the function
+      }
       return await this.courtManagerService.getSetting();
 }
 
