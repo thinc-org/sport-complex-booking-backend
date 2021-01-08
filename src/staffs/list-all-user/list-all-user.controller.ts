@@ -32,6 +32,7 @@ export class listAllUserController {
     }
 
     @Post('/SatitUser')
+    @UsePipes(new ValidationPipe({ transform: true }))
     async addSatitUser(@Body() createUserDto: CreateSatitUserDto, @Res() res){
         await this.addUserService.createSatitUser(createUserDto);
 
@@ -42,6 +43,7 @@ export class listAllUserController {
     }
 
     @Post('/OtherUser')
+    @UsePipes(new ValidationPipe({ transform: true }))
     async addOtherUser(@Body() createUserDto: CreateOtherUserDto, @Res() res){
         await this.addUserService.createOtherUser(createUserDto);
 

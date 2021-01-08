@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { SatitCuPersonelUser, OtherUser, User ,Account, CuStudentUser} from 'src/users/interfaces/user.interface';
 import { UsersService } from "./../../users/users.service";
 import { UserEditingDto , ChangingPasswordDto } from "./dto/editingDto";
+import { CreateOtherUserDto, CreateSatitUserDto } from '../dto/add-user.dto';
 
 
 @Injectable()
@@ -133,15 +134,7 @@ export class listAllUserService {
         return user
     }
 
-    private checkUsername(username: string){
-        return !(/^\d+$/.test(username));
-    }
-
-    async createSatitUser(user: SatitCuPersonelUser) {
-
-        if(!this.checkUsername(user.username)){
-            throw new HttpException('Please include at least one letter in username', HttpStatus.BAD_REQUEST);
-        }
+    async createSatitUser(user: CreateSatitUserDto) {
 
         //if username already exist
         const isUsernameExist = await this.findUserByUsername(user.username);
@@ -155,19 +148,15 @@ export class listAllUserService {
         }
 
         //hash pasword
-        user.password = await this.hashPassword(user.password);
-        user.is_penalize = false;
-        user.expired_penalize_date = null;
         const newUser = new this.satitStudentModel(user);
+        newUser.password = await this.hashPassword(user.password);
+        newUser.is_penalize = false;
+        newUser.expired_penalize_date = null;
         //create user
         await newUser.save();
     }
 
-    async createOtherUser(user: OtherUser) {
-
-        if(!this.checkUsername(user.username)){
-            throw new HttpException('Please include at least one letter in username', HttpStatus.BAD_REQUEST);
-        }
+    async createOtherUser(user: CreateOtherUserDto) {
 
         //if username already exist
         const isUsernameExist = await this.findUserByUsername(user.username);
@@ -176,11 +165,11 @@ export class listAllUserService {
         }
 
         //hash pasword
-        user.is_thai_language = true;
-        user.password = await this.hashPassword(user.password);
-        user.is_penalize = false;
-        user.expired_penalize_date = null;
         const newUser = new this.otherUserModel(user);
+        newUser.is_thai_language = true;
+        newUser.password = await this.hashPassword(user.password);
+        newUser.is_penalize = false;
+        newUser.expired_penalize_date = null;
         //create staff
         await newUser.save();
     }
