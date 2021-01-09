@@ -86,14 +86,14 @@ export class MyReservationService {
 
     async checkReservation( reservationId : Types.ObjectId ) : Promise<Reservation>{
 
-        const reservation : Reservation = await this.reservationModel.findById(reservationId);
+        const reservation : Reservation = await this.reservationModel.findByIdAndUpdate(reservationId, { is_check : true } )
+                                                                    .populate('sport_id','sport_name_th sport_name_en')
+                                                                    .select('is_check sport_id');
 
         if ( reservation === null ){
             throw new HttpException("Invalid reservation.", HttpStatus.NOT_FOUND)
         }
 
-        reservation.is_check = true;
-        reservation.save();
         return reservation;
     }
 
