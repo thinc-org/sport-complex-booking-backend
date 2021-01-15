@@ -166,4 +166,10 @@ export class UsersService {
         acc.save()
         return acc;
     }
+
+    async changeLanguage(is_thai_language:boolean,id:string){
+        const user = await this.findById(id)
+        user.is_thai_language = is_thai_language
+        return await user.save();
+    }
 }
