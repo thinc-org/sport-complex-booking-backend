@@ -61,8 +61,8 @@ async findSportByID(id: string) : Promise<Sport>{
 
 //create sport by Sport (schema)      
 async createSport(court_data: Sport) : Promise<Sport>{
-      if(court_data.required_user <= 0)
-            throw new BadRequestException("Required user must be more than zero.");
+      if(court_data.required_user < 2)
+            throw new BadRequestException("Required user must be at least 2.");
       if(court_data.quota < 0)
             throw new BadRequestException("Quota must be a non-negative number.");
 
@@ -81,7 +81,12 @@ async createSport(court_data: Sport) : Promise<Sport>{
 //update only sport setting, not court's setting
 async updateSport(sportID: string, newSportSetting: {sport_name_th: string, sport_name_en: string, 
       required_user: number, quota: number}) : Promise<Sport>{
-            
+      
+      if(newSportSetting.required_user < 2)
+            throw new BadRequestException("Required user must be at least 2.");
+      if(newSportSetting.quota < 0)
+            throw new BadRequestException("Quota must be a non-negative number.");
+      
       const Sport = await this.findSportByID(sportID);
       Sport.required_user = newSportSetting.required_user;
       Sport.quota = newSportSetting.quota;
