@@ -2,11 +2,12 @@ import { CuStudentUser } from 'src/users/interfaces/user.interface';
 import { Body, Controller, Get, Param, Post, Put, Query, Res, 
          HttpService, HttpException, UseGuards, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from 'src/auth/jwt.guard'
+import { JwtAuthGuard, UserGuard } from 'src/auth/jwt.guard'
 import { AuthService } from 'src/auth/auth.service';
 import { LoginUserDto } from './dto/login-user.dto';
 import { map, catchError } from 'rxjs/operators';
 import { ConfigService } from '@nestjs/config';
+import { ChangeLanguageDto } from './dto/change-language.dto';
 
 @Controller('users')
 export class UsersController {
@@ -66,5 +67,15 @@ export class UsersController {
     (@Body() input:{is_thai_language: boolean, personal_email: string, phone:string}, @Req() req): Promise<CuStudentUser>{
         const acc = this.userService.changeData(input,req.user.userId);
         return acc;
+    }
+
+    @UseGuards(UserGuard)
+    @Put('changeLanguage')
+    async changeLanguage(@Req() req,@Body() changeLanguageDto:ChangeLanguageDto,@Res() res){
+        await this.userService.changeLanguage(changeLanguageDto.is_thai_language,req.user.userId)
+        return res.status(201).json({
+            statusCode: 201,
+            message: 'Change language already',
+        })
     }
 }
