@@ -1,15 +1,15 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Query, Req, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
-import { JwtAuthGuard, StaffGuard } from 'src/auth/jwt.guard';
+import { JwtAuthGuard, StaffGuard, UserGuard } from 'src/auth/jwt.guard';
 import { CreateDisableCourtDTO, EditDisableCourtDTO, QueryDisableCourtDTO, QueryResult } from './disable-courts.dto';
 import { DisableCourtsService } from './disable-courts.service';
 import { DisableCourt } from './interfaces/disable-courts.interface';
 
 @UsePipes(new ValidationPipe({ transform: true }))
+@UseGuards(StaffGuard)
 @Controller('courts/disable-courts')
 export class DisableCourtsController {
     constructor(private readonly disableCourtsService: DisableCourtsService) { }
 
-    @UseGuards(StaffGuard)
     @Post('')
     async createDisableCourt(@Req() req, @Body() body: CreateDisableCourtDTO): Promise<DisableCourt> {
         return await this.disableCourtsService.createDisableCourt(body);
@@ -30,19 +30,16 @@ export class DisableCourtsController {
         return await this.disableCourtsService.getDisableCourt(id);
     }
 
-    @UseGuards(StaffGuard)
     @Delete('')
     async deleteAllDisableCourt(@Req() req): Promise<void> {
         await this.disableCourtsService.deleteAllDisableCourt();
     }
 
-    @UseGuards(StaffGuard)
     @Delete(':id')
     async deleteDisableCourt(@Req() req, @Param('id') id: string): Promise<void> {
         await this.disableCourtsService.deleteDisableCourt(id);
     }
 
-    @UseGuards(StaffGuard)
     @Put(':id')
     async editDisableCourt(@Req() req, @Param('id') id: string, @Body() body: EditDisableCourtDTO): Promise<DisableCourt> {
         return await this.disableCourtsService.editDisableCourt(id, body);
