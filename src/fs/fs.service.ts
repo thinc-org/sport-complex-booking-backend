@@ -1,33 +1,32 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { createWriteStream, existsSync, unlinkSync } from 'fs';
-import { Model } from 'mongoose';
-import { extname } from 'path';
-import { AuthService } from 'src/auth/auth.service';
-import { Account } from 'src/users/interfaces/user.interface';
-import { UsersService } from 'src/users/users.service';
-import { FileInfo, FileInfoDocument } from './fileInfo.schema';
-const path = require('path');
-
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common"
+import { InjectModel } from "@nestjs/mongoose"
+import { createWriteStream, existsSync, unlinkSync } from "fs"
+import { Model } from "mongoose"
+import { extname } from "path"
+import { AuthService } from "src/auth/auth.service"
+import { Account } from "src/users/interfaces/user.interface"
+import { UsersService } from "src/users/users.service"
+import { FileInfo, FileInfoDocument } from "./fileInfo.schema"
+const path = require("path")
 
 @Injectable()
 export class FSService {
   constructor(
-    @InjectModel(FileInfo.name) private fileInfoModel: Model<FileInfoDocument>, 
-    private userService: UsersService, 
+    @InjectModel(FileInfo.name) private fileInfoModel: Model<FileInfoDocument>,
+    private userService: UsersService,
     private authService: AuthService
-  ) { }
+  ) {}
 
   async getFileInfo(fileId: string) {
-    const fileInfo = await this.fileInfoModel.findById(fileId);
-    
+    const fileInfo = await this.fileInfoModel.findById(fileId)
+
     if (fileInfo == null) {
-      throw new HttpException('cannot find this file: ' + fileId, HttpStatus.NOT_FOUND)
+      throw new HttpException("cannot find this file: " + fileId, HttpStatus.NOT_FOUND)
     }
 
     if (!existsSync(fileInfo.full_path)) {
       await fileInfo.remove()
-      throw new HttpException('This file is deleted: ' + fileId, HttpStatus.INTERNAL_SERVER_ERROR)
+      throw new HttpException("This file is deleted: " + fileId, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     return fileInfo
@@ -36,25 +35,23 @@ export class FSService {
   async saveFiles(rootPath: string, owner: string, files: any) {
     let result: any
     result = {}
-    
-    const user = await this.userService.findById(owner);
-    
+
+    const user = await this.userService.findById(owner)
+
     if (user == null) {
-      throw new HttpException('cannot find user: ' + owner, HttpStatus.NOT_FOUND)
+      throw new HttpException("cannot find user: " + owner, HttpStatus.NOT_FOUND)
     }
-    
+
     for (const field of Object.keys(files)) {
-      
-      const file = ((files[field] == null) ? null : files[field][0])
+      const file = files[field] == null ? null : files[field][0]
       if (file == null) continue
 
       const fileInfo = await this.saveFile(rootPath, owner, file, field)
       result[field] = fileInfo._id
       this.deleteFile(user[field])
       user[field] = fileInfo._id
-
     }
-    
+
     await user.save()
     return result
   }
@@ -76,34 +73,33 @@ export class FSService {
 
     const fileInfo = await this.getFileInfo(fileId)
     const fullPath = fileInfo.full_path
-    const owner = await this.userService.findById(fileInfo.owner);
+    const owner = await this.userService.findById(fileInfo.owner)
 
     owner[fileInfo.file_type] = null
-    try{
-      unlinkSync(fullPath);
-    }catch(err) {
-      console.log('Cannot delete file: ' + fileId);
-      throw new HttpException('Cannot delete file', HttpStatus.INTERNAL_SERVER_ERROR);
+    try {
+      unlinkSync(fullPath)
+    } catch (err) {
+      console.log("Cannot delete file: " + fileId)
+      throw new HttpException("Cannot delete file", HttpStatus.INTERNAL_SERVER_ERROR)
     }
     await owner.save()
     await fileInfo.remove()
   }
 
   generateViewFileToken(fileId: string): string {
-    return this.authService.generateCustomJWT({ fileId }, {expiresIn: '2m'})
+    return this.authService.generateCustomJWT({ fileId }, { expiresIn: "2m" })
   }
 
   extractFileId(token: string): string {
     try {
       return this.authService.verifyJWT(token).fileId
     } catch (err) {
-      throw new HttpException('Invalid Token', HttpStatus.BAD_REQUEST)
+      throw new HttpException("Invalid Token", HttpStatus.BAD_REQUEST)
     }
   }
 
   async verifyUserEligibility(userId: string) {
-    const user = await this.userService.findById(userId);
-    return user != null && user.account_type == Account.Other;
+    const user = await this.userService.findById(userId)
+    return user != null && user.account_type == Account.Other
   }
-  
 }

@@ -1,246 +1,227 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import {  Model, Types } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
-import * as bcrypt from 'bcrypt';
-import { SatitCuPersonelUser, OtherUser, User ,Account, CuStudentUser} from 'src/users/interfaces/user.interface';
-import { UsersService } from "./../../users/users.service";
-import { UserEditingDto , ChangingPasswordDto } from "./dto/editingDto";
-import { CreateOtherUserDto, CreateSatitUserDto } from '../dto/add-user.dto';
-
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common"
+import { Model, Types } from "mongoose"
+import { InjectModel } from "@nestjs/mongoose"
+import * as bcrypt from "bcrypt"
+import { SatitCuPersonelUser, OtherUser, User, Account, CuStudentUser } from "src/users/interfaces/user.interface"
+import { UsersService } from "./../../users/users.service"
+import { UserEditingDto, ChangingPasswordDto } from "./dto/editingDto"
+import { CreateOtherUserDto, CreateSatitUserDto } from "../dto/add-user.dto"
 
 @Injectable()
 export class listAllUserService {
-    constructor(
-        @InjectModel('SatitCuPersonel') private satitStudentModel: Model<SatitCuPersonelUser>,
-        @InjectModel('Other') private otherUserModel: Model<OtherUser>,
-        @InjectModel('CuStudent') private cuStudentModel: Model<CuStudentUser>,
-        @InjectModel('User') private userModel: Model<User>,
-        private readonly usersService : UsersService
-        ) 
-        { }
+  constructor(
+    @InjectModel("SatitCuPersonel") private satitStudentModel: Model<SatitCuPersonelUser>,
+    @InjectModel("Other") private otherUserModel: Model<OtherUser>,
+    @InjectModel("CuStudent") private cuStudentModel: Model<CuStudentUser>,
+    @InjectModel("User") private userModel: Model<User>,
+    private readonly usersService: UsersService
+  ) {}
 
+  async hashPassword(password: string): Promise<string> {
+    return await bcrypt.hash(password, Number(process.env.HASH_SALT))
+  }
 
-    async hashPassword(password: string): Promise<string> {
-        return await bcrypt.hash(password, Number(process.env.HASH_SALT));
+  isThaiLang(keyword: string) {
+    for (let idx = 0; idx < keyword.length; idx++) {
+      if (!("A" <= keyword.charAt(idx) && keyword.charAt(idx) <= "z")) {
+        return true
+      }
+    }
+    return false
+  }
+
+  isEngLang(keyword: string) {
+    for (let idx = 0; idx < keyword.length; idx++) {
+      if ("A" <= keyword.charAt(idx) && keyword.charAt(idx) <= "z") {
+        return true
+      }
+    }
+    return false
+  }
+
+  //This method has a role to filter from the properties that front-end require but some property of the requirement isn't the property of User.
+  //So the property extraction is neccessary.
+  async filterUser(qparam): Promise<[number, User[]]> {
+    let begin: number = 0,
+      end: number,
+      is_thai_language: boolean = false,
+      has_end: boolean = false
+
+    //Begin and end are the slicing numbers of the array.
+    if (qparam.hasOwnProperty("begin")) {
+      begin = qparam.begin
+      delete qparam["begin"]
     }
 
-    isThaiLang(keyword: string) {
-        for (let idx = 0; idx < keyword.length; idx++) {
-            if (!("A" <= keyword.charAt(idx) && keyword.charAt(idx) <= "z")) {
-                return true;
-            }
-        }
-        return false;
+    if (qparam.hasOwnProperty("end")) {
+      end = qparam.end
+      has_end = true
+      delete qparam["end"]
     }
 
-    isEngLang(keyword: string) {
-        for (let idx = 0; idx < keyword.length; idx++) {
-            if ("A" <= keyword.charAt(idx) && keyword.charAt(idx) <= "z") {
-                return true;
-            }
-        }
-        return false;
+    let seletedProperty: string = "username is_penalize name_th surname_th name_en surname_en"
+    //.name isn't the property of uesr. So .name is changed to .name_th or .name_en
+    if (qparam.hasOwnProperty("name")) {
+      is_thai_language = this.isThaiLang(qparam.name)
+
+      if (is_thai_language) {
+        qparam.name_th = { $regex: ".*" + qparam.name + ".*", $options: "i" }
+      } else {
+        qparam.name_en = { $regex: ".*" + qparam.name + ".*", $options: "i" }
+      }
     }
 
-    //This method has a role to filter from the properties that front-end require but some property of the requirement isn't the property of User.
-    //So the property extraction is neccessary.
-    async filterUser(qparam): Promise<[number,User[]]> {
+    if (qparam.hasOwnProperty("surname")) {
+      is_thai_language = this.isThaiLang(qparam.surname)
 
-        let begin : number = 0 , end : number , is_thai_language : boolean = false , has_end : boolean = false;
-
-        //Begin and end are the slicing numbers of the array.
-        if(qparam.hasOwnProperty('begin')){
-            begin = qparam.begin;
-            delete qparam['begin'];
-        }
-
-        if(qparam.hasOwnProperty('end')){
-            end = qparam.end;
-            has_end = true;
-            delete qparam['end'];
-        }
-
-        let seletedProperty : string = 'username is_penalize name_th surname_th name_en surname_en';
-        //.name isn't the property of uesr. So .name is changed to .name_th or .name_en
-        if(qparam.hasOwnProperty('name')){
-            is_thai_language = this.isThaiLang(qparam.name);
-
-            if(is_thai_language){
-                qparam.name_th = { $regex: ".*" + qparam.name + ".*", $options: 'i' };
-            }
-            else{
-                qparam.name_en = { $regex: ".*" + qparam.name + ".*", $options: 'i' };
-            }
-
-        }
-
-        if(qparam.hasOwnProperty('surname')){
-            is_thai_language = this.isThaiLang(qparam.surname);
-            
-            if(is_thai_language){
-                qparam.surname_th = { $regex: ".*" + qparam.surname + ".*", $options: 'i' };
-            }
-
-            else {
-                qparam.surname_en = { $regex: ".*" + qparam.surname + ".*", $options: 'i' };
-            }
-
-        }
-
-        delete qparam['name'];
-        delete qparam['surname'];
-
-        //All property 
-        let users : User[] = await this.usersService.find(qparam,seletedProperty);
-        let current : Date = new Date();
-
-        if(!has_end){
-            end = users.length;
-        }
-        else {
-            if( end > users.length){
-                end = users.length;
-            }
-        }
-
-        for(let i = begin ; i < end ; i++){
-            this.updatePenalizationState(users[i],current);
-        }
-
-        return [ users.length , users.slice(begin,end) ];
+      if (is_thai_language) {
+        qparam.surname_th = { $regex: ".*" + qparam.surname + ".*", $options: "i" }
+      } else {
+        qparam.surname_en = { $regex: ".*" + qparam.surname + ".*", $options: "i" }
+      }
     }
 
-    async findUserByUsername(username: string): Promise<User> {
-        const user = await this.userModel.findOne({ username: username });
-        return user
-    }
-    async getUserById(id: Types.ObjectId ): Promise<User> {
+    delete qparam["name"]
+    delete qparam["surname"]
 
-        let user : User = await this.userModel.findById(id);
-        let current : Date = new Date();
+    //All property
+    let users: User[] = await this.usersService.find(qparam, seletedProperty)
+    let current: Date = new Date()
 
-        if( user === null ){
-            throw new HttpException("Invalid User", HttpStatus.NOT_FOUND);
-        }
-
-        this.updatePenalizationState(user,current);
-
-        return user;
-
+    if (!has_end) {
+      end = users.length
+    } else {
+      if (end > users.length) {
+        end = users.length
+      }
     }
 
-    async findUserByEmail(email: string): Promise<User> {
-        const user = await this.userModel.findOne({ personal_email: email });
-        return user
+    for (let i = begin; i < end; i++) {
+      this.updatePenalizationState(users[i], current)
     }
 
-    async createSatitUser(user: CreateSatitUserDto) {
+    return [users.length, users.slice(begin, end)]
+  }
 
-        //if username already exist
-        const isUsernameExist = await this.findUserByUsername(user.username);
-        if (isUsernameExist) {
-            throw new HttpException('Username already exist', HttpStatus.BAD_REQUEST);
-        }
+  async findUserByUsername(username: string): Promise<User> {
+    const user = await this.userModel.findOne({ username: username })
+    return user
+  }
+  async getUserById(id: Types.ObjectId): Promise<User> {
+    let user: User = await this.userModel.findById(id)
+    let current: Date = new Date()
 
-        const isEmailExist = await this.findUserByEmail(user.personal_email);
-        if (isEmailExist) {
-            throw new HttpException('This Email is already used', HttpStatus.BAD_REQUEST);
-        }
-
-        //hash pasword
-        const newUser = new this.satitStudentModel(user);
-        newUser.password = await this.hashPassword(user.password);
-        newUser.is_penalize = false;
-        newUser.expired_penalize_date = null;
-        //create user
-        await newUser.save();
+    if (user === null) {
+      throw new HttpException("Invalid User", HttpStatus.NOT_FOUND)
     }
 
-    async createOtherUser(user: CreateOtherUserDto) {
+    this.updatePenalizationState(user, current)
 
-        //if username already exist
-        const isUsernameExist = await this.findUserByUsername(user.username);
-        if (isUsernameExist) {
-            throw new HttpException('Username already exist', HttpStatus.BAD_REQUEST);
-        }
+    return user
+  }
 
-        //hash pasword
-        const newUser = new this.otherUserModel(user);
-        newUser.is_thai_language = true;
-        newUser.password = await this.hashPassword(user.password);
-        newUser.is_penalize = false;
-        newUser.expired_penalize_date = null;
-        //create staff
-        await newUser.save();
+  async findUserByEmail(email: string): Promise<User> {
+    const user = await this.userModel.findOne({ personal_email: email })
+    return user
+  }
+
+  async createSatitUser(user: CreateSatitUserDto) {
+    //if username already exist
+    const isUsernameExist = await this.findUserByUsername(user.username)
+    if (isUsernameExist) {
+      throw new HttpException("Username already exist", HttpStatus.BAD_REQUEST)
     }
 
-    async deleteUser(id : Types.ObjectId) : Promise<User> {
-
-        const deleteResponse = await this.userModel.findByIdAndRemove(id);
-        if (!deleteResponse) {
-            throw new HttpException("User not found", HttpStatus.NOT_FOUND)
-        }
-        return deleteResponse
+    const isEmailExist = await this.findUserByEmail(user.personal_email)
+    if (isEmailExist) {
+      throw new HttpException("This Email is already used", HttpStatus.BAD_REQUEST)
     }
 
-    async editById(id : Types.ObjectId , update : UserEditingDto , account_type? : Account ): Promise<User>{
+    //hash pasword
+    const newUser = new this.satitStudentModel(user)
+    newUser.password = await this.hashPassword(user.password)
+    newUser.is_penalize = false
+    newUser.expired_penalize_date = null
+    //create user
+    await newUser.save()
+  }
 
-        const user : User = await this.userModel.findById(id);
-
-        if( update.hasOwnProperty('password') ){
-            throw new HttpException("Editing password isnt allowed.", HttpStatus.BAD_REQUEST);
-        }
-
-        if( user === null ){
-            throw new HttpException("Invalid User", HttpStatus.NOT_FOUND);
-        }
-        
-        if( account_type && account_type !== user.account_type ){
-            throw new HttpException("User isn't "+ account_type, HttpStatus.BAD_REQUEST);
-        }
-
-        Object.assign(user,update);
-
-        user.save();
-
-        return user;
-
+  async createOtherUser(user: CreateOtherUserDto) {
+    //if username already exist
+    const isUsernameExist = await this.findUserByUsername(user.username)
+    if (isUsernameExist) {
+      throw new HttpException("Username already exist", HttpStatus.BAD_REQUEST)
     }
 
-    async changePassWord( id : Types.ObjectId , body : ChangingPasswordDto ) : Promise<User>{
+    //hash pasword
+    const newUser = new this.otherUserModel(user)
+    newUser.is_thai_language = true
+    newUser.password = await this.hashPassword(user.password)
+    newUser.is_penalize = false
+    newUser.expired_penalize_date = null
+    //create staff
+    await newUser.save()
+  }
 
-        let tempUser : User = await this.getUserById(id);
+  async deleteUser(id: Types.ObjectId): Promise<User> {
+    const deleteResponse = await this.userModel.findByIdAndRemove(id)
+    if (!deleteResponse) {
+      throw new HttpException("User not found", HttpStatus.NOT_FOUND)
+    }
+    return deleteResponse
+  }
 
-        if( !body.hasOwnProperty('password') ){
-            throw new HttpException("The body doesn't exist a password.", HttpStatus.CONFLICT)
-        }
+  async editById(id: Types.ObjectId, update: UserEditingDto, account_type?: Account): Promise<User> {
+    const user: User = await this.userModel.findById(id)
 
-        const type = tempUser.account_type;
-        const newHashPassWord : string = await this.hashPassword(body['password']) ;
-
-        if(type === Account.SatitAndCuPersonel){
-            (tempUser as SatitCuPersonelUser).password = newHashPassWord;
-        }
-        else if(type === Account.Other){
-            (tempUser as OtherUser).password = newHashPassWord;
-        }
-        else{
-            throw new HttpException("This user can't change passowrd.", HttpStatus.BAD_REQUEST)
-        }
-
-        tempUser.save();
-        return tempUser
-        
+    if (update.hasOwnProperty("password")) {
+      throw new HttpException("Editing password isnt allowed.", HttpStatus.BAD_REQUEST)
     }
 
-    updatePenalizationState( user : User , current : Date){
-        if( user.is_penalize ){
-            if(current > user.expired_penalize_date){
-                user.is_penalize = false;
-                user.expired_penalize_date = null;
-                user.save();
-            }
-        }
+    if (user === null) {
+      throw new HttpException("Invalid User", HttpStatus.NOT_FOUND)
     }
-    
+
+    if (account_type && account_type !== user.account_type) {
+      throw new HttpException("User isn't " + account_type, HttpStatus.BAD_REQUEST)
+    }
+
+    Object.assign(user, update)
+
+    user.save()
+
+    return user
+  }
+
+  async changePassWord(id: Types.ObjectId, body: ChangingPasswordDto): Promise<User> {
+    let tempUser: User = await this.getUserById(id)
+
+    if (!body.hasOwnProperty("password")) {
+      throw new HttpException("The body doesn't exist a password.", HttpStatus.CONFLICT)
+    }
+
+    const type = tempUser.account_type
+    const newHashPassWord: string = await this.hashPassword(body["password"])
+
+    if (type === Account.SatitAndCuPersonel) {
+      ;(tempUser as SatitCuPersonelUser).password = newHashPassWord
+    } else if (type === Account.Other) {
+      ;(tempUser as OtherUser).password = newHashPassWord
+    } else {
+      throw new HttpException("This user can't change passowrd.", HttpStatus.BAD_REQUEST)
+    }
+
+    tempUser.save()
+    return tempUser
+  }
+
+  updatePenalizationState(user: User, current: Date) {
+    if (user.is_penalize) {
+      if (current > user.expired_penalize_date) {
+        user.is_penalize = false
+        user.expired_penalize_date = null
+        user.save()
+      }
+    }
+  }
 }

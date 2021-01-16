@@ -1,5 +1,5 @@
-import * as mongoose from 'mongoose';
+import * as mongoose from "mongoose"
 
 export class JoinWaitingRoomDto extends mongoose.Document {
-    access_code: string
+  access_code: string
 }

@@ -1,21 +1,20 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Staff } from './interfaces/staff.interface';
-import { isValidObjectId, Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
-import * as bcrypt from 'bcrypt';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from "@nestjs/common"
+import { Staff } from "./interfaces/staff.interface"
+import { isValidObjectId, Model } from "mongoose"
+import { InjectModel } from "@nestjs/mongoose"
+import * as bcrypt from "bcrypt"
 
 @Injectable()
 export class StaffsService {
-  constructor(
-    @InjectModel('Staff') private readonly staffModel: Model<Staff>) { }
+  constructor(@InjectModel("Staff") private readonly staffModel: Model<Staff>) {}
 
   async findByUsername(username: string): Promise<Staff> {
-    const staff = await this.staffModel.findOne({ username: username });
+    const staff = await this.staffModel.findOne({ username: username })
     return staff
   }
 
   async hashPassword(password: string): Promise<string> {
-    return await bcrypt.hash(password, Number(process.env.HASH_SALT));
+    return await bcrypt.hash(password, Number(process.env.HASH_SALT))
   }
 
   async addFirstAdmin() {
@@ -24,49 +23,47 @@ export class StaffsService {
       surname: "pass is admin",
       username: "admin",
       password: await this.hashPassword("admin"),
-      is_admin: true
+      is_admin: true,
     }
-    const isUsernameExist = await this.findByUsername(staff.username);
+    const isUsernameExist = await this.findByUsername(staff.username)
     if (isUsernameExist) {
-      throw new HttpException('First admin is already added', HttpStatus.BAD_REQUEST);
+      throw new HttpException("First admin is already added", HttpStatus.BAD_REQUEST)
     }
-    const newStaff = new this.staffModel(staff);
+    const newStaff = new this.staffModel(staff)
     return await newStaff.save()
   }
 
   async login(staff: Staff): Promise<Staff> {
     //if username is not exist
-    const isUsernameExist = await this.findByUsername(staff.username);
+    const isUsernameExist = await this.findByUsername(staff.username)
     if (!isUsernameExist) {
-      throw new BadRequestException('Username or Password is wrong');
+      throw new BadRequestException("Username or Password is wrong")
     }
-    const isPasswordMatching = await bcrypt.compare(staff.password, isUsernameExist.password);
+    const isPasswordMatching = await bcrypt.compare(staff.password, isUsernameExist.password)
     if (!isPasswordMatching) {
-      throw new BadRequestException('Username or Password is wrong');
+      throw new BadRequestException("Username or Password is wrong")
     }
-    return isUsernameExist;
+    return isUsernameExist
   }
 
   async findById(id: string): Promise<Staff> {
-    if(!isValidObjectId(id)) throw new HttpException('Not a valid Object id', HttpStatus.BAD_REQUEST);
-    const staff = await this.staffModel.findById(id);
-    if(staff == null) throw new HttpException('Staff not found', HttpStatus.BAD_REQUEST);
-    return staff;
+    if (!isValidObjectId(id)) throw new HttpException("Not a valid Object id", HttpStatus.BAD_REQUEST)
+    const staff = await this.staffModel.findById(id)
+    if (staff == null) throw new HttpException("Staff not found", HttpStatus.BAD_REQUEST)
+    return staff
   }
 
   async getStaffProfile(id: string): Promise<Staff> {
-
     if (!isValidObjectId(id)) {
       throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
     }
 
-    const staff = await this.staffModel.findById(id);
+    const staff = await this.staffModel.findById(id)
 
     if (!staff) {
       throw new HttpException("User not found", HttpStatus.NOT_FOUND)
     }
-    
+
     return staff
   }
-
 }
