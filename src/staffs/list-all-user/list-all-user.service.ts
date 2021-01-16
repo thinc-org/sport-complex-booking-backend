@@ -8,7 +8,7 @@ import { UserEditingDto, ChangingPasswordDto } from "./dto/editingDto"
 import { CreateOtherUserDto, CreateSatitUserDto } from "../dto/add-user.dto"
 
 @Injectable()
-export class listAllUserService {
+export class ListAllUserService {
   constructor(
     @InjectModel("SatitCuPersonel") private satitStudentModel: Model<SatitCuPersonelUser>,
     @InjectModel("Other") private otherUserModel: Model<OtherUser>,
@@ -42,10 +42,10 @@ export class listAllUserService {
   //This method has a role to filter from the properties that front-end require but some property of the requirement isn't the property of User.
   //So the property extraction is neccessary.
   async filterUser(qparam): Promise<[number, User[]]> {
-    let begin: number = 0,
+    let begin = 0,
       end: number,
-      is_thai_language: boolean = false,
-      has_end: boolean = false
+      is_thai_language = false,
+      has_end = false
 
     //Begin and end are the slicing numbers of the array.
     if (qparam.hasOwnProperty("begin")) {
@@ -59,7 +59,7 @@ export class listAllUserService {
       delete qparam["end"]
     }
 
-    let seletedProperty: string = "username is_penalize name_th surname_th name_en surname_en"
+    const seletedProperty = "username is_penalize name_th surname_th name_en surname_en"
     //.name isn't the property of uesr. So .name is changed to .name_th or .name_en
     if (qparam.hasOwnProperty("name")) {
       is_thai_language = this.isThaiLang(qparam.name)
@@ -85,8 +85,8 @@ export class listAllUserService {
     delete qparam["surname"]
 
     //All property
-    let users: User[] = await this.usersService.find(qparam, seletedProperty)
-    let current: Date = new Date()
+    const users: User[] = await this.usersService.find(qparam, seletedProperty)
+    const current: Date = new Date()
 
     if (!has_end) {
       end = users.length
@@ -108,8 +108,8 @@ export class listAllUserService {
     return user
   }
   async getUserById(id: Types.ObjectId): Promise<User> {
-    let user: User = await this.userModel.findById(id)
-    let current: Date = new Date()
+    const user: User = await this.userModel.findById(id)
+    const current: Date = new Date()
 
     if (user === null) {
       throw new HttpException("Invalid User", HttpStatus.NOT_FOUND)
@@ -194,7 +194,7 @@ export class listAllUserService {
   }
 
   async changePassWord(id: Types.ObjectId, body: ChangingPasswordDto): Promise<User> {
-    let tempUser: User = await this.getUserById(id)
+    const tempUser: User = await this.getUserById(id)
 
     if (!body.hasOwnProperty("password")) {
       throw new HttpException("The body doesn't exist a password.", HttpStatus.CONFLICT)

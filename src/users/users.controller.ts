@@ -1,5 +1,5 @@
 import { CuStudentUser } from "src/users/interfaces/user.interface"
-import { Body, Controller, Get, Param, Post, Put, Query, Res, HttpService, HttpException, UseGuards, Req } from "@nestjs/common"
+import { Body, Controller, Post, Put, Res, HttpService, HttpException, UseGuards, Req } from "@nestjs/common"
 import { UsersService } from "./users.service"
 import { JwtAuthGuard, UserGuard } from "src/auth/jwt.guard"
 import { AuthService } from "src/auth/auth.service"

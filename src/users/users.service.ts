@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, HttpStatus, HttpException, NotFoundException } from "@nestjs/common"
 import { Account, CuStudentUser, OtherUser, SatitCuPersonelUser, User } from "./interfaces/user.interface"
-import { Model, isValidObjectId, FilterQuery, Types } from "mongoose"
+import { Model, isValidObjectId, Types } from "mongoose"
 import * as bcrypt from "bcrypt"
 import { InjectModel } from "@nestjs/mongoose"
 import { SsoContent } from "./interfaces/sso.interface"

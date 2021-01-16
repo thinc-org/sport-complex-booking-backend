@@ -1,4 +1,4 @@
-import { Document, Mongoose, Types } from "mongoose"
+import { Document, Types } from "mongoose"
 
 export interface DisableTime {
   time_slot: Array<number>

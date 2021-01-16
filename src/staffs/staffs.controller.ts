@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, BadRequestException, Res, UseGuards, Req } from "@nestjs/common"
+import { Controller, Get, Post, Body, Res, UseGuards, Req } from "@nestjs/common"
 import { CreateStaffDto } from "./dto/create-staff.dto"
 import { StaffsService } from "./staffs.service"
 import { Staff } from "./interfaces/staff.interface"
-import { JwtAuthGuard, StaffGuard } from "src/auth/jwt.guard"
+import { StaffGuard } from "src/auth/jwt.guard"
 import { AuthService } from "src/auth/auth.service"
 
 @Controller("staffs")

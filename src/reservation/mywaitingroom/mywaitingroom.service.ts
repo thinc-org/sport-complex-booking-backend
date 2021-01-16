@@ -2,7 +2,7 @@ import { Injectable, HttpException, HttpStatus } from "@nestjs/common"
 import { InjectModel } from "@nestjs/mongoose"
 import { Model, Types } from "mongoose"
 
-import { WaitingRoom, Reservation } from "./../interfaces/reservation.interface"
+import { WaitingRoom } from "./../interfaces/reservation.interface"
 import { User } from "./../../users/interfaces/user.interface"
 
 @Injectable()
@@ -34,18 +34,18 @@ export class MywaitingroomService {
   }
 
   async cancelWaitingRoom(myWaitingRoomID: Types.ObjectId): Promise<WaitingRoom> {
-    let tempMyWaitingRoom: WaitingRoom = await this.waitingRoomModel.findByIdAndDelete(myWaitingRoomID)
+    const tempMyWaitingRoom: WaitingRoom = await this.waitingRoomModel.findByIdAndDelete(myWaitingRoomID)
     if (tempMyWaitingRoom === null) {
       throw new HttpException("This my waiting room doesn't exist.", HttpStatus.BAD_REQUEST)
     }
     return tempMyWaitingRoom
   }
 
-  async expiredChecker(myWaitingRoomID: Types.ObjectId): Promise<Boolean> {
+  async expiredChecker(myWaitingRoomID: Types.ObjectId): Promise<boolean> {
     const tempMyWaitingRoom: WaitingRoom = await this.waitingRoomModel.findByIdAndDelete(myWaitingRoomID)
     if (new Date() > tempMyWaitingRoom.expired_date) {
-      for (let userId of tempMyWaitingRoom.list_member) {
-        const temp = await this.userModel.findByIdAndUpdate(userId, { is_penalize: true })
+      for (const userId of tempMyWaitingRoom.list_member) {
+        await this.userModel.findByIdAndUpdate(userId, { is_penalize: true })
       }
       return true
     }
@@ -53,7 +53,7 @@ export class MywaitingroomService {
   }
 
   async excludeUser(myWaitingRoomID: Types.ObjectId, userId: Types.ObjectId): Promise<WaitingRoom> {
-    let tempWaitingRoom: WaitingRoom = await this.waitingRoomModel.findById(myWaitingRoomID)
+    const tempWaitingRoom: WaitingRoom = await this.waitingRoomModel.findById(myWaitingRoomID)
 
     if (tempWaitingRoom === null) {
       throw new HttpException("Invalid MyWaitingRoom", HttpStatus.NOT_FOUND)

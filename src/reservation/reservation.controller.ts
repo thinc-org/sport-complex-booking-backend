@@ -1,9 +1,8 @@
-import { Controller, Post, Body, UseGuards, Req, Res, Get } from "@nestjs/common"
+import { Controller, Post, Body, UseGuards, Req, Res } from "@nestjs/common"
 
 import { ReservationService } from "./reservation.service"
 
-import { Reservation, WaitingRoom } from "./interfaces/reservation.interface"
-import { JwtAuthGuard, UserGuard } from "src/auth/jwt.guard"
+import { UserGuard } from "src/auth/jwt.guard"
 import { WaitingRoomDto } from "./dto/waiting-room.dto"
 import { JoinWaitingRoomDto } from "./dto/join-waiting-room.dto"
 

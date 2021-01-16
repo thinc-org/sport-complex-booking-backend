@@ -4,7 +4,7 @@ import { Model } from "mongoose"
 import { AllReservationService } from "src/reservation/all-reservation/all-reservation.service"
 import { AllWaitingRoomService } from "src/reservation/all-waiting-room/all-waiting-room.service"
 import { Reservation, WaitingRoom } from "src/reservation/interfaces/reservation.interface"
-import { CreateDisableCourtDTO, CreateDisableTimeDTO, EditDisableCourtDTO, QueryDisableCourtDTO, QueryResult } from "./disable-courts.dto"
+import { CreateDisableCourtDTO, EditDisableCourtDTO, QueryDisableCourtDTO, QueryResult } from "./disable-courts.dto"
 import { DisableCourt } from "./interfaces/disable-courts.interface"
 
 @Injectable()
