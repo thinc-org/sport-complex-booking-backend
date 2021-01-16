@@ -1,6 +1,6 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable } from "@nestjs/common"
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common"
 import { InjectModel } from "@nestjs/mongoose"
-import { isValidObjectId, Model, Types } from "mongoose"
+import { Model, Types } from "mongoose"
 import { Cron } from "@nestjs/schedule"
 
 import { DisableCourtsService } from "src/courts/disable-courts/disable-courts.service"
@@ -27,7 +27,7 @@ export class ReservationService {
     date.setUTCHours(0, 0, 0, 0)
     const reservations = await this.reservationModel.find({ date: date })
     for (const reservation of reservations) {
-      const max = Math.max.apply(Math, reservation.time_slot)
+      const max = Math.max(...reservation.time_slot)
       if (time >= max / 2) {
         if (reservation.is_check) {
           await reservation.remove()
@@ -189,7 +189,7 @@ export class ReservationService {
   }
 
   makeid(length): string {
-    let result: string = ""
+    let result = ""
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
     const charactersLength = characters.length
     for (let i = 0; i < length; i++) {
@@ -204,7 +204,7 @@ export class ReservationService {
     waitingRoomDto.time_slot = Array.from(timeSlot)
 
     //to make sure that time slot is consecutive
-    if (Math.max.apply(Math, waitingRoomDto.time_slot) - Math.min.apply(Math, waitingRoomDto.time_slot) + 1 !== waitingRoomDto.time_slot.length) {
+    if (Math.max(...waitingRoomDto.time_slot) - Math.min(...waitingRoomDto.time_slot) + 1 !== waitingRoomDto.time_slot.length) {
       throw new HttpException(
         {
           reason: "TIME_NOT_CONSECUTIVE",

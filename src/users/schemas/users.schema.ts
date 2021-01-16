@@ -70,14 +70,14 @@ UserSchema.index({ personal_email: 1 }, { unique: true })
 class CuStudentSchemaClass extends UserSchemaClass {
   constructor() {
     super({ is_first_login: Boolean })
-    this.methods.setPassword = function(hashedPassword: string) {
+    this.methods.setPassword = function() {
       throw new HttpException("Custudent cannot change password", HttpStatus.FORBIDDEN)
     }
     this.methods.getPassword = function() {
       throw new HttpException("Custudent does not have password", HttpStatus.FORBIDDEN)
     }
 
-    const oldEditMethod: Function = this.methods.editAccountInfo
+    const oldEditMethod: (dto: any) => void = this.methods.editAccountInfo
 
     this.methods.editAccountInfo = function(updt: EditUserInfoDTO) {
       oldEditMethod.call(this, updt)
@@ -128,7 +128,7 @@ class OtherSchemaClass extends UserSchemaClass {
 
     this.statics.editAccountInfoDTO = editOtherAccountInfoDTO
 
-    const oldEditMethod: Function = this.methods.editAccountInfo
+    const oldEditMethod: (dto: any) => void = this.methods.editAccountInfo
 
     this.methods.editAccountInfo = function(updt: editOtherAccountInfoDTO) {
       if (this.verification_status == Verification.Submitted || this.verification_status == Verification.Verified) {

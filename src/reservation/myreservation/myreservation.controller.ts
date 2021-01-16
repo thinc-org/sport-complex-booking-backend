@@ -1,4 +1,4 @@
-import { Controller, UseGuards, Post, Get, Body, Param, Delete, Req, Patch } from "@nestjs/common"
+import { Controller, UseGuards, Get, Param, Delete, Req, Patch } from "@nestjs/common"
 
 import { Reservation } from "./../interfaces/reservation.interface"
 

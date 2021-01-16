@@ -1,20 +1,5 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpException,
-  HttpStatus,
-  Param,
-  Post,
-  Put,
-  Query,
-  Req,
-  UseGuards,
-  UsePipes,
-  ValidationPipe,
-} from "@nestjs/common"
-import { JwtAuthGuard, StaffGuard, UserGuard } from "src/auth/jwt.guard"
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common"
+import { StaffGuard } from "src/auth/jwt.guard"
 import { CreateDisableCourtDTO, EditDisableCourtDTO, QueryDisableCourtDTO, QueryResult } from "./disable-courts.dto"
 import { DisableCourtsService } from "./disable-courts.service"
 import { DisableCourt } from "./interfaces/disable-courts.interface"
@@ -26,7 +11,7 @@ export class DisableCourtsController {
   constructor(private readonly disableCourtsService: DisableCourtsService) {}
 
   @Post("")
-  async createDisableCourt(@Req() req, @Body() body: CreateDisableCourtDTO): Promise<DisableCourt> {
+  async createDisableCourt(@Body() body: CreateDisableCourtDTO): Promise<DisableCourt> {
     return await this.disableCourtsService.createDisableCourt(body)
   }
 
@@ -37,7 +22,6 @@ export class DisableCourtsController {
 
   @Get("closed_time")
   async getClosedTime(
-    @Req() req,
     @Query("sport_id") sport_id: string,
     @Query("court_num") court_num: number,
     @Query("date") dateString: string
@@ -46,22 +30,22 @@ export class DisableCourtsController {
   }
 
   @Get(":id")
-  async getDisableCourtById(@Req() req, @Param("id") id: string): Promise<DisableCourt> {
+  async getDisableCourtById(@Param("id") id: string): Promise<DisableCourt> {
     return await this.disableCourtsService.getDisableCourt(id)
   }
 
   @Delete("")
-  async deleteAllDisableCourt(@Req() req): Promise<void> {
+  async deleteAllDisableCourt(): Promise<void> {
     await this.disableCourtsService.deleteAllDisableCourt()
   }
 
   @Delete(":id")
-  async deleteDisableCourt(@Req() req, @Param("id") id: string): Promise<void> {
+  async deleteDisableCourt(@Param("id") id: string): Promise<void> {
     await this.disableCourtsService.deleteDisableCourt(id)
   }
 
   @Put(":id")
-  async editDisableCourt(@Req() req, @Param("id") id: string, @Body() body: EditDisableCourtDTO): Promise<DisableCourt> {
+  async editDisableCourt(@Param("id") id: string, @Body() body: EditDisableCourtDTO): Promise<DisableCourt> {
     return await this.disableCourtsService.editDisableCourt(id, body)
   }
 }

@@ -18,7 +18,7 @@ export class AllWaitingRoomService {
     return waitingRoom
   }
 
-  async getWaitingRoomSearchResult(body): Promise<[Number, WaitingRoom[]]> {
+  async getWaitingRoomSearchResult(body): Promise<[number, WaitingRoom[]]> {
     let reservation = this.waitingRoomModel
       .find()
       .sort({ date: 1, time_slot: -1 })
@@ -30,7 +30,7 @@ export class AllWaitingRoomService {
 
     if (body.date) {
       body.date = new Date(body.date)
-      let nextDate = new Date(body.date)
+      const nextDate = new Date(body.date)
       nextDate.setDate(body.date.getDate() + 1)
       reservation = reservation.find({ date: { $gte: body.date, $lt: nextDate } })
     }
@@ -57,7 +57,7 @@ export class AllWaitingRoomService {
   }
 
   async findOverlapWaitingroom(disableCourt: DisableCourt): Promise<WaitingRoom[]> {
-    let queryArray = []
+    const queryArray = []
     for (const distime of disableCourt.disable_time) {
       queryArray.push({ time_slot: { $elemMatch: { $in: distime.time_slot } }, day_of_week: distime.day })
     }

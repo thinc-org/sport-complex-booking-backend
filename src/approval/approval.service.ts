@@ -14,7 +14,7 @@ export class ApprovalService {
     return user
   }
 
-  async getSearchResult(name: string, start: number, end: number): Promise<[Number, User[]]> {
+  async getSearchResult(name: string, start: number, end: number): Promise<[number, User[]]> {
     let filter = this.userModel.find(
       { verification_status: Verification.Submitted },
       { _id: 1, name_en: 1, surname_en: 1, username: 1, name_th: 1, surname_th: 1 }

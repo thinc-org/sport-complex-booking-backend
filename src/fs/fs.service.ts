@@ -7,7 +7,7 @@ import { AuthService } from "src/auth/auth.service"
 import { Account } from "src/users/interfaces/user.interface"
 import { UsersService } from "src/users/users.service"
 import { FileInfo, FileInfoDocument } from "./fileInfo.schema"
-const path = require("path")
+import * as path from "path"
 
 @Injectable()
 export class FSService {
@@ -33,8 +33,7 @@ export class FSService {
   }
 
   async saveFiles(rootPath: string, owner: string, files: any) {
-    let result: any
-    result = {}
+    const result = {}
 
     const user = await this.userService.findById(owner)
 

@@ -1,6 +1,6 @@
-import { Controller, UseGuards, Post, Get, Body, Param, Delete, Req } from "@nestjs/common"
+import { Controller, UseGuards, Get, Param, Delete, Req } from "@nestjs/common"
 import { MywaitingroomService } from "./mywaitingroom.service"
-import { WaitingRoom, Reservation } from "./../interfaces/reservation.interface"
+import { WaitingRoom } from "./../interfaces/reservation.interface"
 import { isValidObjectId, Types } from "mongoose"
 import { HttpException, HttpStatus } from "@nestjs/common"
 import { UserGuard } from "src/auth/jwt.guard"
@@ -23,7 +23,7 @@ export class MywaitingroomController {
   }
 
   @Get("/expire/:id")
-  async expireWaitingRoom(@Param() param): Promise<Boolean> {
+  async expireWaitingRoom(@Param() param): Promise<boolean> {
     this.idValidityChecker(param.id)
     return this.mywaitingroomService.expiredChecker(param.id)
   }

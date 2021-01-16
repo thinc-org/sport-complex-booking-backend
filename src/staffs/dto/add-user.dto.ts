@@ -1,5 +1,4 @@
-import { IsEmail, isEmail } from "class-validator"
-import * as mongoose from "mongoose"
+import { IsEmail } from "class-validator"
 
 export enum Account {
   CuStudent = "CuStudent",

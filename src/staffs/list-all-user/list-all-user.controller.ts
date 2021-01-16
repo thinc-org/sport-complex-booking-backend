@@ -1,32 +1,17 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Query,
-  Patch,
-  Put,
-  Delete,
-  Body,
-  Param,
-  BadRequestException,
-  Res,
-  UseGuards,
-  UsePipes,
-  ValidationPipe,
-} from "@nestjs/common"
+import { Controller, Get, Post, Query, Patch, Put, Delete, Body, Param, Res, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common"
 import { StaffGuard } from "src/auth/jwt.guard"
 import { AuthService } from "src/auth/auth.service"
 import { CreateOtherUserDto, CreateSatitUserDto } from "src/staffs/dto/add-user.dto"
-import { User, OtherUser, Account } from "src/users/interfaces/user.interface"
-import { listAllUserService } from "./list-all-user.service"
+import { User, Account } from "src/users/interfaces/user.interface"
+import { ListAllUserService } from "./list-all-user.service"
 import { Types, isValidObjectId } from "mongoose"
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common"
-import { UserEditingDto, CuStudentUserEditingDto, SatitAndCuPersonelEditingDto, OtherUserEditingDto, ChangingPasswordDto } from "./dto/editingDto"
+import { HttpException, HttpStatus } from "@nestjs/common"
+import { CuStudentUserEditingDto, SatitAndCuPersonelEditingDto, OtherUserEditingDto, ChangingPasswordDto } from "./dto/editingDto"
 
 @UseGuards(StaffGuard)
 @Controller("list-all-user")
 export class listAllUserController {
-  constructor(private readonly addUserService: listAllUserService, private authService: AuthService) {}
+  constructor(private readonly addUserService: ListAllUserService, private authService: AuthService) {}
 
   idValidityChecker(id: Types.ObjectId) {
     if (!isValidObjectId(id)) {
