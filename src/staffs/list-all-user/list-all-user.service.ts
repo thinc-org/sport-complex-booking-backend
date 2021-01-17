@@ -22,21 +22,11 @@ export class ListAllUserService {
   }
 
   isThaiLang(keyword: string) {
-    for (let idx = 0; idx < keyword.length; idx++) {
-      if (!("A" <= keyword.charAt(idx) && keyword.charAt(idx) <= "z")) {
-        return true
-      }
-    }
-    return false
+    return !("A" <= keyword.charAt(0) && keyword.charAt(0) <= "z")
   }
 
   isEngLang(keyword: string) {
-    for (let idx = 0; idx < keyword.length; idx++) {
-      if ("A" <= keyword.charAt(idx) && keyword.charAt(idx) <= "z") {
-        return true
-      }
-    }
-    return false
+    return ("A" <= keyword.charAt(0) && keyword.charAt(0) <= "z")
   }
 
   //This method has a role to filter from the properties that front-end require but some property of the requirement isn't the property of User.
@@ -65,9 +55,9 @@ export class ListAllUserService {
       is_thai_language = this.isThaiLang(qparam.name)
 
       if (is_thai_language) {
-        qparam.name_th = { $regex: ".*" + qparam.name + ".*", $options: "i" }
+        qparam.name_th = { $regex: "^" + qparam.name + ".*", $options: "i" }
       } else {
-        qparam.name_en = { $regex: ".*" + qparam.name + ".*", $options: "i" }
+        qparam.name_en = { $regex: "^" + qparam.name + ".*", $options: "i" }
       }
     }
 
@@ -75,9 +65,9 @@ export class ListAllUserService {
       is_thai_language = this.isThaiLang(qparam.surname)
 
       if (is_thai_language) {
-        qparam.surname_th = { $regex: ".*" + qparam.surname + ".*", $options: "i" }
+        qparam.surname_th = { $regex: "^" + qparam.surname + ".*", $options: "i" }
       } else {
-        qparam.surname_en = { $regex: ".*" + qparam.surname + ".*", $options: "i" }
+        qparam.surname_en = { $regex: "^" + qparam.surname + ".*", $options: "i" }
       }
     }
 
