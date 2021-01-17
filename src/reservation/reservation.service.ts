@@ -283,6 +283,7 @@ export class ReservationService {
         date: waitingroom.date,
         time_slot: waitingroom.time_slot,
         list_member: waitingroom.list_member,
+        day_of_week: waitingroom.day_of_week,
         is_check: false,
       })
       await waitingroom.remove()
