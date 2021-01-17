@@ -13,7 +13,7 @@ export class DisableCourtsService {
     @InjectModel("DisableCourt") private readonly disableCourtModel: Model<DisableCourt>,
     private readonly allReservationService: AllReservationService,
     private readonly allWaitingRoomService: AllWaitingRoomService
-  ) {}
+  ) { }
   async createDisableCourt(data: CreateDisableCourtDTO): Promise<DisableCourt> {
     if (!this.verifyStartAndEndDate(data.starting_date, data.expired_date))
       throw new HttpException("starting_date cannot be after expired_date", HttpStatus.BAD_REQUEST)

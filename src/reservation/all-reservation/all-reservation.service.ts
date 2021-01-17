@@ -6,7 +6,7 @@ import { DisableCourt } from "src/courts/disable-courts/interfaces/disable-court
 
 @Injectable()
 export class AllReservationService {
-  constructor(@InjectModel("Reservation") private readonly reservationModel: Model<Reservation>) {}
+  constructor(@InjectModel("Reservation") private readonly reservationModel: Model<Reservation>) { }
 
   async getReservation(id: string): Promise<Reservation> {
     const reservation = await this.reservationModel
@@ -63,7 +63,7 @@ export class AllReservationService {
     const reservation = await this.reservationModel
       .find({
         sport_id: disableCourt.sport_id,
-        court_num: disableCourt.court_num,
+        court_number: disableCourt.court_num,
         date: { $gte: disableCourt.starting_date, $lt: disableCourt.expired_date },
         $or: queryArray,
       })
