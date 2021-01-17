@@ -6,7 +6,7 @@ import { DisableCourt } from "src/courts/disable-courts/interfaces/disable-court
 
 @Injectable()
 export class AllWaitingRoomService {
-  constructor(@InjectModel("WaitingRoom") private readonly waitingRoomModel: Model<WaitingRoom>) {}
+  constructor(@InjectModel("WaitingRoom") private readonly waitingRoomModel: Model<WaitingRoom>) { }
 
   async getWaitingRoom(id: string): Promise<WaitingRoom> {
     const waitingRoom = await this.waitingRoomModel
@@ -65,7 +65,7 @@ export class AllWaitingRoomService {
     const waitingRoom = await this.waitingRoomModel
       .find({
         sport_id: disableCourt.sport_id,
-        court_num: disableCourt.court_num,
+        court_number: disableCourt.court_num,
         date: { $gte: disableCourt.starting_date, $lt: disableCourt.expired_date },
         $or: queryArray,
       })
