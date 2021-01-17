@@ -15,7 +15,7 @@ export class FSService {
     @InjectModel(FileInfo.name) private fileInfoModel: Model<FileInfoDocument>,
     private userService: UsersService,
     private authService: AuthService
-  ) {}
+  ) { }
 
   async getFileInfo(fileId: string) {
     const fileInfo = await this.fileInfoModel.findById(fileId)
@@ -33,6 +33,9 @@ export class FSService {
   }
 
   async saveFiles(rootPath: string, owner: string, files: any) {
+    if (!files) {
+      return {}
+    }
     const result = {}
 
     const user = await this.userService.findById(owner)
