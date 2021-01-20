@@ -70,7 +70,7 @@ export class CourtManagerService {
   //create sport by Sport (schema)
   async createSport(court_data: Sport): Promise<Sport> {
     if (court_data.required_user < 2) throw new BadRequestException("Required user must be at least 2.")
-    if (court_data.quota < 0) throw new BadRequestException("Quota must be a non-negative number.")
+    if (court_data.quota < 0 || court_data.quota > 24) throw new BadRequestException("Quota must be between 1 and 24 (inclusive).")
 
     const doc = await this.Sport.findOne({ $or: [{ sport_name_th: court_data.sport_name_th }, { sport_name_en: court_data.sport_name_en }] })
 
@@ -86,7 +86,7 @@ export class CourtManagerService {
     newSportSetting: { sport_name_th: string; sport_name_en: string; required_user: number; quota: number }
   ): Promise<Sport> {
     if (newSportSetting.required_user < 2) throw new BadRequestException("Required user must be at least 2.")
-    if (newSportSetting.quota < 0) throw new BadRequestException("Quota must be a non-negative number.")
+    if (newSportSetting.quota < 0 || newSportSetting.quota > 24) throw new BadRequestException("Quota must be between 1 and 24 (inclusive).")
 
     const Sport = await this.findSportByID(sportID)
     Sport.required_user = newSportSetting.required_user
@@ -126,10 +126,10 @@ export class CourtManagerService {
     //check court time slot (1-48)
     newSettings.forEach((eachSetting) => {
       if (eachSetting.open_time < 1 || eachSetting.close_time > 48) {
-        throw new HttpException("Time slot is between 1 and 48.", HttpStatus.BAD_REQUEST)
+        throw new HttpException("Time slot is between 1 and 24.", HttpStatus.BAD_REQUEST)
       }
       if (eachSetting.open_time >= eachSetting.close_time) {
-        throw new HttpException("Time slot is between 1 and 48.", HttpStatus.BAD_REQUEST)
+        throw new HttpException("Time slot is between 1 and 24.", HttpStatus.BAD_REQUEST)
       }
     })
     const doc = await this.findSportByID(sportID)
