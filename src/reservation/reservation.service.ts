@@ -17,9 +17,9 @@ export class ReservationService {
     @InjectModel("User") private userModel: Model<User>,
     private disableCourtService: DisableCourtsService,
     private courtManagerService: CourtManagerService
-  ) {}
+  ) { }
 
-  @Cron("0 */30 * * * *")
+  @Cron("0 0 * * * *")
   async checkReservation() {
     const date = new Date()
     date.setHours(date.getHours() + 7)
@@ -28,16 +28,16 @@ export class ReservationService {
     const reservations = await this.reservationModel.find({ date: date })
     for (const reservation of reservations) {
       const max = Math.max(...reservation.time_slot)
-      if (time >= max / 2) {
+      if (time >= max) {
         if (reservation.is_check) {
           await reservation.remove()
         } else {
+          const bannedDate = new Date()
+          const bannedDay = (await this.courtManagerService.getSetting()).absence_punishment
+          bannedDate.setDate(bannedDate.getDate() + bannedDay)
           for (const member of reservation.list_member) {
             const user = await this.userModel.findById(member)
             user.is_penalize = true
-            const bannedDate = new Date()
-            const bannedDay = (await this.courtManagerService.getSetting()).absence_punishment
-            bannedDate.setDate(bannedDate.getDate() + bannedDay)
             user.expired_penalize_date = bannedDate
             user.save()
           }
@@ -113,8 +113,7 @@ export class ReservationService {
   async checkTimeSlot(waitingRoomDto: WaitingRoomDto): Promise<number[]> {
     const date = new Date()
     date.setHours(date.getHours() + 7)
-    const currentTime = date.getUTCHours() + date.getMinutes() / 60 + date.getSeconds() / 3600
-    const currentTimeSlot = Math.ceil(currentTime * 2)
+    const currentTimeSlot = Math.ceil(date.getUTCHours() + date.getMinutes() / 60 + date.getSeconds() / 3600)
     date.setUTCHours(0, 0, 0, 0)
     const waitingRoomDate = new Date(waitingRoomDto.date)
     if (waitingRoomDate < date) {
