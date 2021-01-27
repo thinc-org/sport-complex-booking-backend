@@ -1,3 +1,4 @@
+import { AdminGuard } from "./../auth/jwt.guard"
 import { StaffManagerService } from "./../staffs/staff-manager/staff-manager.service"
 import { JwtAuthGuard, StaffGuard } from "src/auth/jwt.guard"
 import { Body, Controller, Get, Post, Delete, Put, Param, UseGuards, Req, Query } from "@nestjs/common"
@@ -21,13 +22,13 @@ export class CourtManagerController {
   ) {}
 
   //might get deleted, no error handling
-  @UseGuards(StaffGuard)
+  @UseGuards(AdminGuard)
   @Post("setting")
   async postSetting(): Promise<Setting> {
     return await this.courtManagerService.writeSetting()
   }
 
-  @UseGuards(StaffGuard)
+  @UseGuards(AdminGuard)
   @Put("setting")
   async updateSetting(@Body() new_setting: Setting): Promise<Setting> {
     return await this.courtManagerService.updateSetting(new_setting)
