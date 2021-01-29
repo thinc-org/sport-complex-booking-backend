@@ -48,7 +48,7 @@ export class CourtManagerController {
   //Get sport by thai name (regex)
   //if no filter, use $ as param for filter
 
-  @UseGuards(StaffGuard)
+  @UseGuards(AdminGuard)
   @Get("/search") //    /search?start=<START>&end=<END>&filter=<FILTER>
   async getSportList(@Query() query: searchQuery): Promise<{ allSport_length: number; sport_list: Sport[] }> {
     console.log(query)
@@ -68,21 +68,21 @@ export class CourtManagerController {
   }
 
   //can be use for courts displaying
-  @UseGuards(StaffGuard)
+  @UseGuards(AdminGuard)
   @Get("/:id")
   async getSport(@Param("id") id: string): Promise<Sport> {
     return await this.courtManagerService.findSportByID(id)
   }
 
   //create new document for each sport using body as sport
-  @UseGuards(StaffGuard)
+  @UseGuards(AdminGuard)
   @Post("/")
   async createSport(@Body() sport_data: Sport): Promise<Sport> {
     return await this.courtManagerService.createSport(sport_data)
   }
 
   //for updating sport_name_th, sport_name_en, quotas, required_users
-  @UseGuards(StaffGuard)
+  @UseGuards(AdminGuard)
   @Put("/:id")
   async updateSport(
     @Param("id") id: string,
@@ -92,14 +92,14 @@ export class CourtManagerController {
   }
 
   //delete sport by sport's _id
-  @UseGuards(StaffGuard)
+  @UseGuards(AdminGuard)
   @Delete(":id")
   async deleteSport(@Param("id") id: string): Promise<Sport> {
     return await this.courtManagerService.deleteSport(id)
   }
 
   //Param is sportType ex. Basketball (in english)
-  @UseGuards(StaffGuard)
+  @UseGuards(AdminGuard)
   @Put("court-setting/update")
   async changeCourtSetting(@Body() new_court: { sport_id: string; new_setting: Court[] }): Promise<Sport> {
     return await this.courtManagerService.updateCourtbyID(new_court.sport_id, new_court.new_setting)
