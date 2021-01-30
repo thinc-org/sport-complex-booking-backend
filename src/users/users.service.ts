@@ -5,6 +5,8 @@ import * as bcrypt from "bcrypt"
 import { InjectModel } from "@nestjs/mongoose"
 import { SsoContent } from "./interfaces/sso.interface"
 import { AuthService } from "src/auth/auth.service"
+import { CreateOtherUserDTO } from "./dto/user.dto"
+import { exception } from "console"
 
 @Injectable()
 export class UsersService {
@@ -14,7 +16,7 @@ export class UsersService {
     @InjectModel("SatitCuPersonel") private satitStudentModel: Model<SatitCuPersonelUser>,
     @InjectModel("Other") private otherUserModel: Model<OtherUser>,
     private authService: AuthService
-  ) {}
+  ) { }
 
   async validateAndEditAccountInfo(userId: string, updt, full: boolean) {
     const user = await this.findById(userId)
@@ -168,5 +170,24 @@ export class UsersService {
     const user = await this.findById(id)
     user.is_thai_language = is_thai_language
     return await user.save()
+  }
+
+  async createOtherUser(user: CreateOtherUserDTO) {
+    const newUser = new this.otherUserModel(user);
+    newUser.password = await this.authService.hashPassword(user.password)
+    newUser.is_penalize = false
+    newUser.expired_penalize_date = null
+    try {
+      return await newUser.save();
+    } catch (err) {
+      if (err.code === 11000) {
+        const duplicateKey = Object.keys(err.keyPattern)[0];
+        throw new HttpException({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: duplicateKey + " is already used",
+          duplicateKey
+        }, HttpStatus.BAD_REQUEST);
+      }
+    }
   }
 }
