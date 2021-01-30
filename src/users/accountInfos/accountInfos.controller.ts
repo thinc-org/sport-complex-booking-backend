@@ -1,26 +1,30 @@
-import { Body, Controller, Get, Post, Put, Req, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common"
+import { Body, ClassSerializerInterceptor, Controller, Get, Post, Put, Req, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common"
 import { UserGuard } from "src/auth/jwt.guard"
+import { UserDTO } from "../dto/user.dto"
 import { UsersService } from "../users.service"
 import { ChangePasswordDTO } from "./accountInfos.dto"
 
 @UseGuards(UserGuard)
 @Controller("account_info")
 export class AccountInfosController {
-  constructor(private readonly userService: UsersService) {}
+  constructor(private readonly userService: UsersService) { }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
   async getAccountInfo(@Req() req) {
-    return await this.userService.findAndUpdateBan(req.user.userId)
+    return new UserDTO(await this.userService.findAndUpdateBan(req.user.userId));
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Put()
   async editAccountInfo(@Req() req, @Body() body) {
-    return await this.userService.validateAndEditAccountInfo(req.user.userId, body, false)
+    return new UserDTO(await this.userService.validateAndEditAccountInfo(req.user.userId, body, false));
   }
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Post()
   async postAccountInfo(@Req() req, @Body() body) {
-    return await this.userService.validateAndEditAccountInfo(req.user.userId, body, true)
+    return new UserDTO(await this.userService.validateAndEditAccountInfo(req.user.userId, body, true));
   }
 
   @UsePipes(new ValidationPipe())
