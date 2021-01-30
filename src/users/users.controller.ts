@@ -1,5 +1,5 @@
 import { CuStudentUser } from "src/users/interfaces/user.interface"
-import { Body, Controller, Post, Put, Res, HttpService, HttpException, UseGuards, Req } from "@nestjs/common"
+import { Body, Controller, Post, Put, Res, HttpService, HttpException, UseGuards, Req, UsePipes, ValidationPipe, ClassSerializerInterceptor, UseInterceptors } from "@nestjs/common"
 import { UsersService } from "./users.service"
 import { JwtAuthGuard, UserGuard } from "src/auth/jwt.guard"
 import { AuthService } from "src/auth/auth.service"
@@ -7,6 +7,8 @@ import { LoginUserDto } from "./dto/login-user.dto"
 import { map, catchError } from "rxjs/operators"
 import { ConfigService } from "@nestjs/config"
 import { ChangeLanguageDto } from "./dto/change-language.dto"
+import { CreateOtherUserDto } from "src/staffs/dto/add-user.dto"
+import { CreateOtherUserDTO, UserDTO } from "./dto/user.dto"
 
 @Controller("users")
 export class UsersController {
@@ -15,7 +17,7 @@ export class UsersController {
     private authService: AuthService,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService
-  ) {}
+  ) { }
 
   @Post("/login")
   async login(@Body() loginUserDto: LoginUserDto, @Res() res): Promise<string> {
@@ -65,6 +67,13 @@ export class UsersController {
         })
       )
     return res //return payload
+  }
+
+  @UseInterceptors(ClassSerializerInterceptor)
+  @UsePipes(ValidationPipe)
+  @Post('other')
+  async createOtherUser(@Body() user: CreateOtherUserDTO) {
+    return new UserDTO(await this.userService.createOtherUser(user));
   }
 
   @UseGuards(JwtAuthGuard)
