@@ -1,14 +1,14 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common"
-import { StaffGuard } from "src/auth/jwt.guard"
+import { AdminGuard, StaffGuard } from "src/auth/jwt.guard"
 import { CreateDisableCourtDTO, EditDisableCourtDTO, QueryDisableCourtDTO, QueryResult } from "./disable-courts.dto"
 import { DisableCourtsService } from "./disable-courts.service"
 import { DisableCourt } from "./interfaces/disable-courts.interface"
 
 @UsePipes(new ValidationPipe({ transform: true }))
-@UseGuards(StaffGuard)
+@UseGuards(AdminGuard)
 @Controller("courts/disable-courts")
 export class DisableCourtsController {
-  constructor(private readonly disableCourtsService: DisableCourtsService) {}
+  constructor(private readonly disableCourtsService: DisableCourtsService) { }
 
   @Post("")
   async createDisableCourt(@Body() body: CreateDisableCourtDTO): Promise<DisableCourt> {
