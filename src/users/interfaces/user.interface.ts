@@ -14,6 +14,12 @@ export enum Verification {
   Rejected = "Rejected",
 }
 
+export enum PaymentStatus {
+  Submitted = "Submitted",
+  Verified = "Verified",
+  Rejected = "Rejected",
+}
+
 export interface Contact_person {
   contact_person_prefix: string
   contact_person_name: string
@@ -105,8 +111,10 @@ export interface OtherUser extends User {
   account_expiration_date: Date
   user_photo: mongoose.Types.ObjectId //(ของcollectionที่เก็บรูป)
   medical_certificate: mongoose.Types.ObjectId
-  national_id_photo: mongoose.Types.ObjectId //also passport photo
-  house_registration_number: mongoose.Types.ObjectId //with reference person
+  national_id_house_registration: mongoose.Types.ObjectId //also passport photo
   relationship_verification_document: mongoose.Types.ObjectId
+  payment_slip: mongoose.Types.ObjectId,
+  previous_payment_slips: mongoose.Types.ObjectId[],
+  payment_status: PaymentStatus,
   validateAndEditAccountInfo?: (updt: editOtherAccountInfoDTO, all: boolean) => Promise<User>
 }

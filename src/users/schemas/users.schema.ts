@@ -120,11 +120,13 @@ class OtherSchemaClass extends UserSchemaClass {
       verification_status: verificationSchemaType,
       rejected_info: [String],
       account_expiration_date: Date,
-      user_photo: mongoose.Schema.Types.ObjectId, //(ของcollectionที่เก็บรูป)
-      medical_certificate: mongoose.Schema.Types.ObjectId,
-      national_id_photo: mongoose.Schema.Types.ObjectId, //also passport photo
-      house_registration_number: mongoose.Schema.Types.ObjectId, //with reference person
-      relationship_verification_document: mongoose.Schema.Types.ObjectId,
+      payment_status: { type: String, enum: ["NotSubmitted", "Submitted", "Rejected"] },
+      user_photo: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" }, //(ของcollectionที่เก็บรูป)
+      medical_certificate: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" },
+      national_id_house_registration: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" },
+      relationship_verification_document: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" },
+      payment_slip: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" },
+      previous_payment_slips: [{ type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" }]
     })
 
     this.statics.editAccountInfoDTO = editOtherAccountInfoDTO
