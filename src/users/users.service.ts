@@ -24,7 +24,14 @@ export class UsersService {
     try {
       return await user.save()
     } catch (err) {
-      if (err.code === 11000) throw new HttpException("Email is already used", HttpStatus.CONFLICT)
+      if (err.code === 11000) {
+        const duplicateKey = Object.keys(err.keyPattern)[0];
+        throw new HttpException({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: duplicateKey + " is already used",
+          duplicateKey
+        }, HttpStatus.BAD_REQUEST);
+      }
     }
   }
 

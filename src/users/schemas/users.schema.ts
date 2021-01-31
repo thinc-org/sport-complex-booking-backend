@@ -3,7 +3,7 @@ import { plainToClass } from "class-transformer"
 import { validateOrReject } from "class-validator"
 import * as mongoose from "mongoose"
 import { editOtherAccountInfoDTO, EditUserInfoDTO } from "../accountInfos/accountInfos.dto"
-import { Verification } from "../interfaces/user.interface"
+import { OtherUser, Verification } from "../interfaces/user.interface"
 
 const verificationSchemaType = { type: String, enum: ["NotSubmitted", "Submitted", "Verified", "Rejected"] }
 
@@ -133,12 +133,17 @@ class OtherSchemaClass extends UserSchemaClass {
 
     const oldEditMethod: (dto: any) => void = this.methods.editAccountInfo
 
-    this.methods.editAccountInfo = function (updt: editOtherAccountInfoDTO) {
+    this.methods.editAccountInfo = function (this: OtherUser, updt: editOtherAccountInfoDTO) {
       if (this.verification_status == Verification.Submitted || this.verification_status == Verification.Verified) {
-        throw new HttpException("Please contact admin to modify account data", HttpStatus.FORBIDDEN)
+        // can only edit email, phone number, and address
+        this.address = updt.address ?? this.address;
+        this.phone = updt.phone ?? this.phone;
+        this.home_phone = updt.home_phone ?? this.home_phone;
+        this.personal_email = updt.personal_email ?? this.personal_email;
+      } else {
+        oldEditMethod.call(this, updt)
+        OtherSchemaClass.assignNotNull(this, updt, { verification_status: Verification.Submitted, rejected_info: [] })
       }
-      oldEditMethod.call(this, updt)
-      OtherSchemaClass.assignNotNull(this, updt, { verification_status: Verification.Submitted, rejected_info: [] })
     }
   }
 
