@@ -17,7 +17,7 @@ export class FileInfo {
   @Prop()
   file_type: string
 
-  @Prop({ type: MongooseSchema.Types.ObjectId })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: "User" })
   owner: Types.ObjectId
 }
 

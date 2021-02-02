@@ -8,8 +8,7 @@ export class UserDTO {
     _id: string;
     constructor(user: Partial<User>) {
         const userJSON = user.toJSON({ getters: true, virtuals: true });
-        userJSON._id = userJSON.id;
-        Object.assign(this, userJSON);
+        Object.assign(this, JSON.parse(JSON.stringify(userJSON)));
     }
 }
 
