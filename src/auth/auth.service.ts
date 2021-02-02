@@ -4,10 +4,10 @@ import * as bcrypt from "bcrypt"
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(private jwtService: JwtService) { }
 
-  generateJWT(userId: string, isStaff: boolean) {
-    return { token: this.jwtService.sign({ userId, isStaff }) }
+  generateJWT(userId: string, isStaff: boolean, isAdmin: boolean) {
+    return { token: this.jwtService.sign({ userId, isStaff, isAdmin }) }
   }
 
   generateCustomJWT(payload, signOptions?: JwtSignOptions) {
