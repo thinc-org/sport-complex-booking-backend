@@ -7,7 +7,7 @@ import { AuthService } from "src/auth/auth.service"
 
 @Controller("staffs")
 export class StaffsController {
-  constructor(private readonly staffsService: StaffsService, private authService: AuthService) {}
+  constructor(private readonly staffsService: StaffsService, private authService: AuthService) { }
 
   @UseGuards(StaffGuard)
   @Get("/profile")
@@ -29,7 +29,7 @@ export class StaffsController {
     return res.status(201).json({
       statusCode: 201,
       message: "Login successfully",
-      jwt: this.authService.generateJWT(staff._id, true).token,
+      jwt: this.authService.generateJWT(staff._id, true, staff.is_admin).token,
     })
   }
 }
