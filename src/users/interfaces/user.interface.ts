@@ -118,3 +118,5 @@ export interface OtherUser extends User {
   payment_status: PaymentStatus,
   validateAndEditAccountInfo?: (updt: editOtherAccountInfoDTO, all: boolean) => Promise<User>
 }
+
+export const MAX_PREV_SLIPS = 2;

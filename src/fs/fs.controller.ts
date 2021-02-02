@@ -23,14 +23,14 @@ export class FSController {
   private static fileUploadConfig = [
     { name: "user_photo", maxCount: 1 },
     { name: "medical_certificate", maxCount: 1 },
-    { name: "national_id_photo", maxCount: 1 },
-    { name: "house_registration_number", maxCount: 1 },
+    { name: "national_id_house_registration", maxCount: 1 },
     { name: "relationship_verification_document", maxCount: 1 },
+    { name: "payment_slip", maxCount: 1 }
   ]
 
   private static maxFileSize = 20 * 1000 * 1000
 
-  constructor(private readonly fsService: FSService, private readonly configService: ConfigService) {}
+  constructor(private readonly fsService: FSService, private readonly configService: ConfigService) { }
 
   @UseGuards(JwtAuthGuard)
   @Post("upload")
