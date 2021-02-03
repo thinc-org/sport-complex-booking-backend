@@ -4,7 +4,7 @@ import { createWriteStream, existsSync, unlinkSync } from "fs"
 import { Model } from "mongoose"
 import { extname } from "path"
 import { AuthService } from "src/auth/auth.service"
-import { Account, MAX_PREV_SLIPS, OtherUser } from "src/users/interfaces/user.interface"
+import { Account, MAX_PREV_SLIPS, OtherUser, PaymentStatus, Verification } from "src/users/interfaces/user.interface"
 import { UsersService } from "src/users/users.service"
 import { FileInfo, FileInfoDocument } from "./fileInfo.schema"
 import * as path from "path"
@@ -66,6 +66,7 @@ export class FSService {
       }
       result["payment_slip"] = fileInfo._id;
       user.payment_slip = fileInfo._id;
+      if (user.verification_status == Verification.Verified) user.payment_status = PaymentStatus.Submitted;
     }
     await user.save()
     return result
