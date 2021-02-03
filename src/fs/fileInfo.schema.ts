@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose"
 import { Document, Schema as MongooseSchema, Types } from "mongoose"
+import { OtherUser } from "src/users/interfaces/user.interface"
 
 export type FileInfoDocument = FileInfo & Document
 
@@ -18,7 +19,7 @@ export class FileInfo {
   file_type: string
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: "User" })
-  owner: Types.ObjectId
+  owner: OtherUser
 }
 
 export const FileInfoSchema = SchemaFactory.createForClass(FileInfo)

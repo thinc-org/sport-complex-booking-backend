@@ -85,12 +85,12 @@ export class FSService {
   async deleteFile(fileId: string) {
     if (fileId == null) return;
 
-    const fileInfo = await this.fileInfoModel.findById(fileId);
+    const fileInfo = await await this.fileInfoModel.findById(fileId).populate("owner");
 
     if (fileInfo == null) return;
 
     const fullPath = fileInfo.full_path;
-    const owner = await this.userService.findById(fileInfo.owner);
+    const owner = fileInfo.owner;
     if (fileId == owner[fileInfo.file_type]) {
       owner[fileInfo.file_type] = null;
     }
