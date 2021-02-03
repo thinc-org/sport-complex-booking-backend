@@ -48,7 +48,7 @@ export class FSService {
     const fileFields = ["user_photo", "medical_certificate", "national_id_house_registration", "relationship_verification_document"]
 
     for (const field of fileFields) {
-      const file = files[field] == null ? null : files[field][0]
+      const file = files[field] ? files[field][0] : null
       if (file == null) continue
       const fileInfo = await this.saveFile(rootPath, owner, file, field)
       result[field] = fileInfo._id
