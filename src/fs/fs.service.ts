@@ -8,6 +8,7 @@ import { Account, MAX_PREV_SLIPS, OtherUser } from "src/users/interfaces/user.in
 import { UsersService } from "src/users/users.service"
 import { FileInfo, FileInfoDocument } from "./fileInfo.schema"
 import * as path from "path"
+import { UploadedFiles } from "./fs.interface"
 
 @Injectable()
 export class FSService {
@@ -32,7 +33,7 @@ export class FSService {
     return fileInfo
   }
 
-  async saveFiles(rootPath: string, owner: string, files) {
+  async saveFiles(rootPath: string, owner: string, files: UploadedFiles) {
     if (!files) {
       return {}
     }
