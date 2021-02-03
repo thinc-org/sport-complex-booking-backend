@@ -56,16 +56,11 @@ export class FSService {
       user[field] = fileInfo._id
     }
 
-    if (files.payment_slip != null) {
+    if (files.payment_slip != null && user.payment_status != PaymentStatus.Submitted) {
       const fileInfo = await this.saveFile(rootPath, owner, files.payment_slip[0], "payment_slip");
-      if (user.payment_slip != null) user.previous_payment_slips.push(user.payment_slip);
-      while (user.previous_payment_slips.length > MAX_PREV_SLIPS) { // runs only once for most cases
-        // good enough for MAX_PREV_SLIP = 2 
-        const removedFile = user.previous_payment_slips.shift();
-        await this.deleteFile(removedFile.toHexString());
-      }
       result["payment_slip"] = fileInfo._id;
       user.payment_slip = fileInfo._id;
+      // for users who are registering, payment_status will be NotSubmitted
       if (user.verification_status == Verification.Verified) user.payment_status = PaymentStatus.Submitted;
     }
     await user.save()
@@ -122,5 +117,17 @@ export class FSService {
   async verifyUserEligibility(userId: string) {
     const user = await this.userService.findById(userId)
     return user != null && user.account_type == Account.Other
+  }
+
+  // used when approving payment slip
+  async updatePaymentSlip(user: OtherUser) {
+    if (user.payment_slip != null) user.previous_payment_slips.push(user.payment_slip);
+    while (user.previous_payment_slips.length > MAX_PREV_SLIPS) { // runs more than once only when MAX_PREV_SLIPS is decreased
+      // good enough for MAX_PREV_SLIP = 2 
+      const removedFile = user.previous_payment_slips.shift();
+      await this.deleteFile(removedFile.toHexString());
+    }
+    user.payment_slip = null;
+    user.payment_status = PaymentStatus.NotSubmitted;
   }
 }
