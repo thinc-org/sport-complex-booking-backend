@@ -7,7 +7,7 @@ export class AuthService {
   constructor(private jwtService: JwtService) { }
 
   generateJWT(userId: string, isStaff: boolean, isAdmin: boolean) {
-    return { token: this.jwtService.sign({ userId, isStaff, isAdmin }) }
+    return this.jwtService.sign({ userId, isStaff, isAdmin });
   }
 
   generateCustomJWT(payload, signOptions?: JwtSignOptions) {
