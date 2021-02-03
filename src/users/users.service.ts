@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, HttpStatus, HttpException, NotFoundException } from "@nestjs/common"
-import { Account, CuStudentUser, OtherUser, SatitCuPersonelUser, User, Verification } from "./interfaces/user.interface"
+import { Account, CuStudentUser, OtherUser, PaymentStatus, SatitCuPersonelUser, User, Verification } from "./interfaces/user.interface"
 import { Model, isValidObjectId, Types } from "mongoose"
 import * as bcrypt from "bcrypt"
 import { InjectModel } from "@nestjs/mongoose"
@@ -182,6 +182,7 @@ export class UsersService {
   async createOtherUser(user: CreateOtherUserDTO) {
     const newUser = new this.otherUserModel(user);
     newUser.verification_status = Verification.Submitted;
+    newUser.payment_status = PaymentStatus.NotSubmitted;
     newUser.password = await this.authService.hashPassword(user.password)
     newUser.is_penalize = false
     newUser.expired_penalize_date = null
