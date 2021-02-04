@@ -28,7 +28,7 @@ export class FSController {
     { name: "payment_slip", maxCount: 1 }
   ]
 
-  private static maxFileSize = 20 * 1000 * 1000
+  private static maxFileSize = 2 * 1000 * 1000
 
   constructor(private readonly fsService: FSService, private readonly configService: ConfigService) { }
 
