@@ -15,7 +15,7 @@ export class ListAllUserService {
     @InjectModel("CuStudent") private cuStudentModel: Model<CuStudentUser>,
     @InjectModel("User") private userModel: Model<User>,
     private readonly usersService: UsersService
-  ) {}
+  ) { }
 
   async hashPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, Number(process.env.HASH_SALT))
@@ -136,23 +136,6 @@ export class ListAllUserService {
     await newUser.save()
   }
 
-  async createOtherUser(user: CreateOtherUserDto) {
-    //if username already exist
-    const isUsernameExist = await this.findUserByUsername(user.username)
-    if (isUsernameExist) {
-      throw new HttpException("Username already exist", HttpStatus.BAD_REQUEST)
-    }
-
-    //hash pasword
-    const newUser = new this.otherUserModel(user)
-    newUser.is_thai_language = true
-    newUser.password = await this.hashPassword(user.password)
-    newUser.is_penalize = false
-    newUser.expired_penalize_date = null
-    //create staff
-    await newUser.save()
-  }
-
   async deleteUser(id: Types.ObjectId): Promise<User> {
     const deleteResponse = await this.userModel.findByIdAndRemove(id)
     if (!deleteResponse) {
@@ -194,9 +177,9 @@ export class ListAllUserService {
     const newHashPassWord: string = await this.hashPassword(body["password"])
 
     if (type === Account.SatitAndCuPersonel) {
-      ;(tempUser as SatitCuPersonelUser).password = newHashPassWord
+      ; (tempUser as SatitCuPersonelUser).password = newHashPassWord
     } else if (type === Account.Other) {
-      ;(tempUser as OtherUser).password = newHashPassWord
+      ; (tempUser as OtherUser).password = newHashPassWord
     } else {
       throw new HttpException("This user can't change passowrd.", HttpStatus.BAD_REQUEST)
     }

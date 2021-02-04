@@ -11,7 +11,7 @@ import { CuStudentUserEditingDto, SatitAndCuPersonelEditingDto, OtherUserEditing
 @UseGuards(StaffGuard)
 @Controller("list-all-user")
 export class listAllUserController {
-  constructor(private readonly addUserService: ListAllUserService, private authService: AuthService) {}
+  constructor(private readonly addUserService: ListAllUserService, private authService: AuthService) { }
 
   idValidityChecker(id: Types.ObjectId) {
     if (!isValidObjectId(id)) {
@@ -39,17 +39,6 @@ export class listAllUserController {
     return res.status(201).json({
       statusCode: 201,
       message: "SatitUser added Successfully",
-    })
-  }
-
-  @Post("/OtherUser")
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async addOtherUser(@Body() createUserDto: CreateOtherUserDto, @Res() res) {
-    await this.addUserService.createOtherUser(createUserDto)
-
-    return res.status(201).json({
-      statusCode: 201,
-      message: "OtherUser added Successfully",
     })
   }
 
