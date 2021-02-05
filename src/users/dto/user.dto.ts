@@ -12,7 +12,14 @@ export class UserDTO {
     }
 }
 
-
+export class CreateUserResponseDTO {
+    user: UserDTO;
+    jwt: string;
+    constructor(user: Partial<User>, jwt: string) {
+        this.jwt = jwt;
+        this.user = new UserDTO(user);
+    }
+}
 
 export class CreateContactPersonDTO {
     @IsString()

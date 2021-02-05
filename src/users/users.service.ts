@@ -179,7 +179,7 @@ export class UsersService {
     return await user.save()
   }
 
-  async createOtherUser(user: CreateOtherUserDTO) {
+  async createOtherUser(user: CreateOtherUserDTO): Promise<[OtherUser, string]> {
     const newUser = new this.otherUserModel(user);
     newUser.verification_status = Verification.Submitted;
     newUser.payment_status = PaymentStatus.NotSubmitted;
@@ -187,7 +187,7 @@ export class UsersService {
     newUser.is_penalize = false
     newUser.expired_penalize_date = null
     try {
-      return await newUser.save();
+      return [await newUser.save(), this.authService.generateJWT(newUser._id, false, false)];
     } catch (err) {
       if (err.code === 11000) {
         const duplicateKey = Object.keys(err.keyPattern)[0];

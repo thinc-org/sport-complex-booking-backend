@@ -8,7 +8,7 @@ import { map, catchError } from "rxjs/operators"
 import { ConfigService } from "@nestjs/config"
 import { ChangeLanguageDto } from "./dto/change-language.dto"
 import { CreateOtherUserDto } from "src/staffs/dto/add-user.dto"
-import { CreateOtherUserDTO, UserDTO } from "./dto/user.dto"
+import { CreateOtherUserDTO, CreateUserResponseDTO, UserDTO } from "./dto/user.dto"
 
 @Controller("users")
 export class UsersController {
@@ -73,7 +73,8 @@ export class UsersController {
   @UsePipes(ValidationPipe)
   @Post('other')
   async createOtherUser(@Body() user: CreateOtherUserDTO) {
-    return new UserDTO(await this.userService.createOtherUser(user));
+    const [createdUser, jwt] = await this.userService.createOtherUser(user);
+    return new CreateUserResponseDTO(createdUser, jwt);
   }
 
   @UseGuards(JwtAuthGuard)
