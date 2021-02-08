@@ -9,6 +9,7 @@ import { ConfigService } from "@nestjs/config"
 import { ChangeLanguageDto } from "./dto/change-language.dto"
 import { CreateOtherUserDto } from "src/staffs/dto/add-user.dto"
 import { CreateOtherUserDTO, CreateUserResponseDTO, UserDTO } from "./dto/user.dto"
+import { Role } from "src/common/roles"
 
 @Controller("users")
 export class UsersController {
@@ -25,7 +26,7 @@ export class UsersController {
     return res.status(201).json({
       statusCode: 201,
       message: "Login successfully",
-      jwt: this.authService.generateJWT(user["_id"], false, false),
+      jwt: this.authService.generateJWT(user["_id"], Role.User),
       is_thai_language: user["is_thai_language"],
     })
   }
@@ -59,7 +60,7 @@ export class UsersController {
             acc = db_acc
           }
           const payload = {
-            token: this.authService.generateJWT(acc["_id"], false, false),
+            token: this.authService.generateJWT(acc["_id"], Role.User),
             is_first_login: acc["is_first_login"],
             is_thai_language: acc["is_thai_language"],
           }

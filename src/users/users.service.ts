@@ -7,6 +7,7 @@ import { SsoContent } from "./interfaces/sso.interface"
 import { AuthService } from "src/auth/auth.service"
 import { CreateOtherUserDTO } from "./dto/user.dto"
 import { exception } from "console"
+import { Role } from "src/common/roles"
 
 @Injectable()
 export class UsersService {
@@ -187,7 +188,7 @@ export class UsersService {
     newUser.is_penalize = false
     newUser.expired_penalize_date = null
     try {
-      return [await newUser.save(), this.authService.generateJWT(newUser._id, false, false)];
+      return [await newUser.save(), this.authService.generateJWT(newUser._id, Role.User)];
     } catch (err) {
       if (err.code === 11000) {
         const duplicateKey = Object.keys(err.keyPattern)[0];
