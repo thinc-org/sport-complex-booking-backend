@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable } from "@nestjs/common"
+import { ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common"
 import { AuthGuard } from "@nestjs/passport"
 import { Role } from "src/common/roles"
 import { StaffsService } from "src/staffs/staffs.service"
@@ -16,9 +16,10 @@ export class StaffGuard extends AuthGuard("jwt") {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const valid = await super.canActivate(context)
     const payload = context.switchToHttp().getRequest().user
-    if (!valid || (payload.role != Role.Staff && payload.role != Role.Admin)) return false
+    if (!valid || (payload.role != Role.Staff && payload.role != Role.Admin)) throw new UnauthorizedException();
     const staff = await this.staffsService.findById(context.switchToHttp().getRequest().user.userId)
-    return staff != null
+    if (staff == null) throw new UnauthorizedException();
+    return true;
   }
 }
 
@@ -31,9 +32,10 @@ export class AdminGuard extends AuthGuard("jwt") {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const valid = await super.canActivate(context)
     const payload = context.switchToHttp().getRequest().user
-    if (!valid || payload.role != Role.Admin) return false
+    if (!valid || payload.role != Role.Admin) throw new UnauthorizedException();
     const staff = await this.staffsService.findById(context.switchToHttp().getRequest().user.userId)
-    return staff != null && staff.is_admin
+    if (staff == null || !staff.is_admin) throw new UnauthorizedException();
+    return true;
   }
 }
 
@@ -46,8 +48,9 @@ export class UserGuard extends AuthGuard("jwt") {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const valid = await super.canActivate(context)
     const payload = context.switchToHttp().getRequest().user
-    if (!valid || payload.role != Role.User) return false
+    if (!valid || payload.role != Role.User) throw new UnauthorizedException();
     const user = await this.usersService.findById(payload.userId)
-    return user != null
+    if (user == null) throw new UnauthorizedException();
+    return true;
   }
 }
