@@ -1,13 +1,14 @@
 import { Injectable } from "@nestjs/common"
 import { JwtService, JwtSignOptions } from "@nestjs/jwt"
 import * as bcrypt from "bcrypt"
+import { Role } from "src/common/roles";
 
 @Injectable()
 export class AuthService {
   constructor(private jwtService: JwtService) { }
 
-  generateJWT(userId: string, isStaff: boolean, isAdmin: boolean) {
-    return this.jwtService.sign({ userId, isStaff, isAdmin });
+  generateJWT(userId: string, role: Role) {
+    return this.jwtService.sign({ userId, role });
   }
 
   generateCustomJWT(payload, signOptions?: JwtSignOptions) {

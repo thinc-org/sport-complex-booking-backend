@@ -4,6 +4,7 @@ import { StaffsService } from "./staffs.service"
 import { Staff } from "./interfaces/staff.interface"
 import { StaffGuard } from "src/auth/jwt.guard"
 import { AuthService } from "src/auth/auth.service"
+import { Role } from "src/common/roles"
 
 @Controller("staffs")
 export class StaffsController {
@@ -29,7 +30,7 @@ export class StaffsController {
     return res.status(201).json({
       statusCode: 201,
       message: "Login successfully",
-      jwt: this.authService.generateJWT(staff._id, true, staff.is_admin),
+      jwt: this.authService.generateJWT(staff._id, staff.is_admin ? Role.Admin : Role.Staff),
     })
   }
 }
