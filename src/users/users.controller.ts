@@ -1,5 +1,19 @@
 import { CuStudentUser } from "src/users/interfaces/user.interface"
-import { Body, Controller, Post, Put, Res, HttpService, HttpException, UseGuards, Req, UsePipes, ValidationPipe, ClassSerializerInterceptor, UseInterceptors } from "@nestjs/common"
+import {
+  Body,
+  Controller,
+  Post,
+  Put,
+  Res,
+  HttpService,
+  HttpException,
+  UseGuards,
+  Req,
+  UsePipes,
+  ValidationPipe,
+  ClassSerializerInterceptor,
+  UseInterceptors,
+} from "@nestjs/common"
 import { UsersService } from "./users.service"
 import { JwtAuthGuard, UserGuard } from "src/auth/jwt.guard"
 import { AuthService } from "src/auth/auth.service"
@@ -10,6 +24,7 @@ import { ChangeLanguageDto } from "./dto/change-language.dto"
 import { CreateOtherUserDto } from "src/staffs/dto/add-user.dto"
 import { CreateOtherUserDTO, CreateUserResponseDTO, UserDTO } from "./dto/user.dto"
 import { Role } from "src/common/roles"
+import { ApiBadRequestResponse, ApiOkResponse } from "@nestjs/swagger"
 
 @Controller("users")
 export class UsersController {
@@ -18,7 +33,7 @@ export class UsersController {
     private authService: AuthService,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService
-  ) { }
+  ) {}
 
   @Post("/login")
   async login(@Body() loginUserDto: LoginUserDto, @Res() res): Promise<string> {
@@ -70,12 +85,19 @@ export class UsersController {
     return res //return payload
   }
 
+  @ApiOkResponse({
+    description: "Created the user",
+    type: CreateUserResponseDTO,
+  })
+  @ApiBadRequestResponse({
+    description: "Username/Email is already used",
+  })
   @UseInterceptors(ClassSerializerInterceptor)
   @UsePipes(ValidationPipe)
-  @Post('other')
+  @Post("other")
   async createOtherUser(@Body() user: CreateOtherUserDTO) {
-    const [createdUser, jwt] = await this.userService.createOtherUser(user);
-    return new CreateUserResponseDTO(createdUser, jwt);
+    const [createdUser, jwt] = await this.userService.createOtherUser(user)
+    return new CreateUserResponseDTO(createdUser, jwt)
   }
 
   @UseGuards(JwtAuthGuard)
