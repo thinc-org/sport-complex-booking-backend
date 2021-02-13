@@ -16,6 +16,8 @@ import {
 import { ConfigService } from "@nestjs/config"
 import { FileFieldsInterceptor } from "@nestjs/platform-express"
 import {
+  ApiBearerAuth,
+  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -30,6 +32,7 @@ import { Role } from "src/common/roles"
 import { FileInfo, GenerateTokenResponse } from "./fileInfo.schema"
 import { FSService } from "./fs.service"
 
+@ApiBearerAuth()
 @ApiTags("fs")
 @Controller("fs")
 export class FSController {
@@ -51,6 +54,15 @@ export class FSController {
   @ApiNotFoundResponse({
     description: "Can't find the user",
   })
+  @ApiNotFoundResponse({
+    description: "Can't find the user",
+  })
+  @ApiUnauthorizedResponse({
+    description: "Not logged in",
+  })
+  @ApiForbiddenResponse({
+    description: "This user can't upload file, only the other type can upload",
+  })
   @UseGuards(JwtAuthGuard)
   @Post("upload")
   @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfig, { limits: { fileSize: FSController.maxFileSize } }))
@@ -62,11 +74,17 @@ export class FSController {
 
   @ApiQuery({
     name: "token",
-    description: "token genrated from fs/viewFileToken/:fileId",
+    description: "token generated from fs/viewFileToken/:fileId",
+  })
+  @ApiForbiddenResponse({
+    description: "No view file token",
+  })
+  @ApiNotFoundResponse({
+    description: "Can't find the file",
   })
   @Get("/view")
   async viewFile(@Res() res, @Query("token") token: string) {
-    if (!token) throw new HttpException("No token", HttpStatus.FORBIDDEN)
+    if (!token) throw new HttpException("No token", HttpStatus.BAD_REQUEST)
     const fileId = this.fsService.extractFileId(token)
     const fileInfo = await this.fsService.getFileInfo(fileId)
     res.sendFile(fileInfo.full_path)
