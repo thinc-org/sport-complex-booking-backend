@@ -11,14 +11,15 @@ import {
   UsePipes,
   ValidationPipe,
 } from "@nestjs/common"
-import { ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger"
+import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger"
 import { UserGuard } from "src/auth/jwt.guard"
 import { UserDTO } from "../dto/user.dto"
 import { UsersService } from "../users.service"
 import { ChangePasswordDTO } from "./accountInfos.dto"
 
+@ApiBearerAuth()
 @ApiTags("account_info")
-@ApiUnauthorizedResponse({ description: "Must be logged in user to use this endpoints" })
+@ApiUnauthorizedResponse({ description: "Must be a logged in user to use this endpoints" })
 @UseGuards(UserGuard)
 @Controller("account_info")
 export class AccountInfosController {
