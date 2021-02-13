@@ -1,102 +1,135 @@
-import { Exclude, Type } from "class-transformer";
-import { IsBoolean, IsDate, IsEmail, IsNotEmpty, IsString, ValidateNested } from "class-validator";
-import { User } from "../interfaces/user.interface";
+import { ApiProperty, ApiPropertyOptional, ApiResponse } from "@nestjs/swagger"
+import { Exclude, Type } from "class-transformer"
+import { IsBoolean, IsDate, IsEmail, IsNotEmpty, IsOptional, IsString, ValidateNested } from "class-validator"
+import { User } from "../interfaces/user.interface"
 
 export class UserDTO {
-    @Exclude()
-    password: string;
-    _id: string;
-    constructor(user: Partial<User>) {
-        const userJSON = user.toJSON({ getters: true, virtuals: true });
-        Object.assign(this, JSON.parse(JSON.stringify(userJSON)));
-    }
-}
-
-export class CreateUserResponseDTO {
-    user: UserDTO;
-    jwt: string;
-    constructor(user: Partial<User>, jwt: string) {
-        this.jwt = jwt;
-        this.user = new UserDTO(user);
-    }
+  @Exclude()
+  password: string
+  _id: string
+  constructor(user: Partial<User>) {
+    const userJSON = user.toJSON({ getters: true, virtuals: true })
+    Object.assign(this, JSON.parse(JSON.stringify(userJSON)))
+  }
 }
 
 export class CreateContactPersonDTO {
-    @IsString()
-    contact_person_prefix: string
+  @ApiProperty()
+  @IsString()
+  contact_person_prefix: string
 
-    @IsString()
-    contact_person_name: string
+  @ApiProperty()
+  @IsString()
+  contact_person_name: string
 
-    @IsString()
-    contact_person_surname: string
+  @ApiProperty()
+  @IsString()
+  contact_person_surname: string
 
-    @IsString()
-    contact_person_home_phone: string
+  @ApiProperty()
+  @IsString()
+  contact_person_home_phone: string
 
-    @IsString()
-    contact_person_phone: string
+  @ApiProperty()
+  @IsString()
+  contact_person_phone: string
 }
 
 export class CreateOtherUserDTO {
-    @IsEmail()
-    username: string // email (cannot change)
+  @ApiProperty()
+  @IsEmail()
+  username: string // email (cannot change)
 
-    @IsString()
-    membership_type: string
+  @ApiProperty()
+  @IsString()
+  membership_type: string
 
-    @IsString()
-    password: string //pass=phone(editable)
+  @ApiProperty()
+  @IsString()
+  password: string //pass=phone(editable)
 
-    @IsBoolean()
-    is_thai_language: boolean
+  @ApiProperty()
+  @IsBoolean()
+  is_thai_language: boolean
 
-    @IsString()
-    prefix: string
+  @ApiProperty()
+  @IsString()
+  prefix: string
 
-    @IsString()
-    name_th: string
+  @ApiProperty()
+  @IsString()
+  name_th: string
 
-    @IsString()
-    surname_th: string
+  @ApiProperty()
+  @IsString()
+  surname_th: string
 
-    @IsString()
-    name_en: string
+  @ApiProperty()
+  @IsString()
+  name_en: string
 
-    @IsString()
-    surname_en: string
+  @ApiProperty()
+  @IsString()
+  surname_en: string
 
-    @Type(() => Date)
-    @IsDate()
-    birthday: Date
+  @ApiProperty()
+  @Type(() => Date)
+  @IsDate()
+  birthday: Date
 
-    @IsString()
-    national_id: string
+  @ApiProperty()
+  @IsString()
+  national_id: string
 
-    @IsString()
-    gender: string
+  @ApiProperty()
+  @IsString()
+  gender: string
 
-    @IsString()
-    marital_status: string
+  @ApiProperty()
+  @IsString()
+  marital_status: string
 
-    @IsString()
-    address: string
+  @ApiProperty()
+  @IsString()
+  address: string
 
-    @IsString()
-    phone: string
+  @ApiProperty()
+  @IsString()
+  phone: string
 
-    @IsString()
-    home_phone: string
+  @ApiProperty()
+  @IsString()
+  home_phone: string
 
-    @IsString()
-    @IsEmail()
-    personal_email: string
+  @ApiProperty()
+  @IsString()
+  @IsEmail()
+  personal_email: string
 
-    @IsNotEmpty()
-    @Type(() => CreateContactPersonDTO)
-    @ValidateNested()
-    contact_person: CreateContactPersonDTO
+  @ApiProperty({
+    type: CreateContactPersonDTO,
+  })
+  @IsNotEmpty()
+  @Type(() => CreateContactPersonDTO)
+  @ValidateNested()
+  contact_person: CreateContactPersonDTO
 
-    @IsString()
-    medical_condition: string
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  medical_condition?: string
+}
+
+export class CreateUserResponseDTO {
+  @ApiProperty()
+  jwt: string
+  @ApiProperty({
+    type: CreateOtherUserDTO,
+    description: "Created User",
+  })
+  user: UserDTO
+  constructor(user: Partial<User>, jwt: string) {
+    this.jwt = jwt
+    this.user = new UserDTO(user)
+  }
 }
