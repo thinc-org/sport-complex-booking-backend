@@ -16,6 +16,7 @@ import {
 import { ConfigService } from "@nestjs/config"
 import { FileFieldsInterceptor } from "@nestjs/platform-express"
 import { JwtAuthGuard, StaffGuard } from "src/auth/jwt.guard"
+import { Role } from "src/common/roles"
 import { FSService } from "./fs.service"
 
 @Controller("fs")
@@ -25,12 +26,12 @@ export class FSController {
     { name: "medical_certificate", maxCount: 1 },
     { name: "national_id_house_registration", maxCount: 1 },
     { name: "relationship_verification_document", maxCount: 1 },
-    { name: "payment_slip", maxCount: 1 }
+    { name: "payment_slip", maxCount: 1 },
   ]
 
   private static maxFileSize = 2 * 1000 * 1000
 
-  constructor(private readonly fsService: FSService, private readonly configService: ConfigService) { }
+  constructor(private readonly fsService: FSService, private readonly configService: ConfigService) {}
 
   @UseGuards(JwtAuthGuard)
   @Post("upload")
@@ -53,7 +54,7 @@ export class FSController {
   @Get("/viewFileToken/:fileId")
   async viewFileToken(@Req() req, @Res() res, @Param("fileId") fileId: string) {
     const fileInfo = await this.fsService.getFileInfo(fileId)
-    if (!req.user.isStaff && fileInfo.owner != req.user.userId) {
+    if (!(req.user.role == Role.Admin || req.user.role == Role.Staff) && fileInfo.owner != req.user.userId) {
       throw new HttpException("Unauthorized", HttpStatus.UNAUTHORIZED)
     } else {
       res.send({ token: this.fsService.generateViewFileToken(fileId) })

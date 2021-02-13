@@ -6,6 +6,7 @@ import { CourtManagerService } from "./court-manager.service"
 import { Sport, Court } from "./interfaces/sportCourt.interface"
 import { Setting } from "./interfaces/setting.interface"
 import { ListAllUserService } from "./../staffs/list-all-user/list-all-user.service"
+import { Role } from "src/common/roles"
 
 interface searchQuery {
   start: number
@@ -37,7 +38,7 @@ export class CourtManagerController {
   @UseGuards(JwtAuthGuard)
   @Get("setting")
   async getSetting(@Req() req): Promise<Setting> {
-    if (req.user.isStaff === false) {
+    if (!(req.user.role == Role.Admin || req.user.role == Role.Staff) === false) {
       this.listAllUserService.getUserById(req.user.userId) //err handled in the function
     } else {
       this.staffManagerService.getStaffData(req.user.userId) //err handled in the function
@@ -59,7 +60,7 @@ export class CourtManagerController {
   @Get("/sports")
   async getAllSportList(@Req() req): Promise<Sport[]> {
     //check if user or staff exists + error handling
-    if (req.user.isStaff === false) {
+    if (!(req.user.role == Role.Admin || req.user.role == Role.Staff)) {
       this.listAllUserService.getUserById(req.user.userId) //err handled in the function
     } else {
       this.staffManagerService.getStaffData(req.user.userId) //err handled in the function
