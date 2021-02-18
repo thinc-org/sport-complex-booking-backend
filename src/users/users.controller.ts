@@ -22,10 +22,20 @@ import { map, catchError } from "rxjs/operators"
 import { ConfigService } from "@nestjs/config"
 import { ChangeLanguageDto } from "./dto/change-language.dto"
 import { CreateOtherUserDto } from "src/staffs/dto/add-user.dto"
-import { CreateOtherUserDTO, CreateUserResponseDTO, UserDTO } from "./dto/user.dto"
+import { AppticketDTO, CreateOtherUserDTO, CreateUserResponseDTO, SSOValidationUpdateInfoDTO, UserDTO } from "./dto/user.dto"
 import { Role } from "src/common/roles"
-import { ApiBadRequestResponse, ApiOkResponse } from "@nestjs/swagger"
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConflictResponse,
+  ApiBadRequestResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+  ApiNotFoundResponse,
+} from "@nestjs/swagger"
 
+@ApiTags("users")
 @Controller("users")
 export class UsersController {
   constructor(
@@ -46,6 +56,14 @@ export class UsersController {
     })
   }
 
+  @ApiOkResponse({
+    description: "Created the user",
+  })
+  @ApiBadRequestResponse({
+    description: "Appticket is not correct.",
+    type: AppticketDTO,
+  })
+  @ApiNotFoundResponse({ description: "Cannot find user from Chula SSO." })
   @Post("validation") //takes {"appticket": <ticket>} from front-end as body
   async authenticateUser(@Body() appticket: { appticket: string }): Promise<any> {
     const params = JSON.stringify(appticket)
@@ -101,6 +119,14 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({
+    description: "User retrieved.",
+    type: CreateUserResponseDTO,
+  })
+  @ApiBadRequestResponse({
+    description: "Incorrect input.",
+    type: SSOValidationUpdateInfoDTO,
+  })
   @Put("validation")
   async changeDBInfo(@Body() input: { is_thai_language: boolean; personal_email: string; phone: string }, @Req() req): Promise<CuStudentUser> {
     //recieve username (for query), is_thai_language, personal_email, phone
