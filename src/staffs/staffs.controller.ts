@@ -8,7 +8,7 @@ import { Role } from "src/common/roles"
 
 @Controller("staffs")
 export class StaffsController {
-  constructor(private readonly staffsService: StaffsService, private authService: AuthService) { }
+  constructor(private readonly staffsService: StaffsService, private authService: AuthService) {}
 
   @UseGuards(StaffGuard)
   @Get("/profile")
