@@ -8,6 +8,10 @@ import { UserGuard, StaffGuard } from "src/auth/jwt.guard"
 import { isValidObjectId, Types } from "mongoose"
 import { HttpException, HttpStatus } from "@nestjs/common"
 
+import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger"
+
+@ApiBearerAuth()
+@ApiTags("myreservation")
 @Controller("myreservation")
 export class MyReservationController {
   constructor(private readonly myResrvationService: MyReservationService) {}
@@ -18,6 +22,8 @@ export class MyReservationController {
     }
   }
 
+  @ApiUnauthorizedResponse({ description: "Must be a logged in user to use this endpoints" })
+  @ApiOkResponse({ description: "Return all reserveation info" })
   @UseGuards(UserGuard)
   @Get()
   async getAllReservation(@Req() req): Promise<Reservation[]> {
@@ -25,6 +31,10 @@ export class MyReservationController {
     return this.myResrvationService.getAllMyReservation(req.user.userId)
   }
 
+  @ApiUnauthorizedResponse({ description: "Must be a logged in user to use this endpoints" })
+  @ApiUnauthorizedResponse({ description: "The user is not authorized for the reservation room" })
+  @ApiNotFoundResponse({ description: "This reservation is not reserved" })
+  @ApiOkResponse({ description: "Return reservation by the given id" })
   @UseGuards(UserGuard)
   @Get("/:id")
   async getById(@Param() param, @Req() req): Promise<Reservation> {
@@ -33,6 +43,10 @@ export class MyReservationController {
     return this.myResrvationService.getById(req.user.userId, param.id)
   }
 
+  @ApiUnauthorizedResponse({ description: "The user is not authorized for the reservation room" })
+  @ApiNotFoundResponse({ description: "This reservation is not reserved" })
+  @ApiUnauthorizedResponse({ description: "Must be a logged in user to use this endpoints" })
+  @ApiOkResponse({ description: "Delete reservation by the given id" })
   @UseGuards(UserGuard)
   @Delete("/:id")
   async cancelReservation(@Param() param, @Req() req): Promise<Reservation> {
@@ -41,6 +55,9 @@ export class MyReservationController {
     return this.myResrvationService.cancelMyReservation(req.user.userId, param.id)
   }
 
+  @ApiNotFoundResponse({ description: "This reservation is not reserved" })
+  @ApiUnauthorizedResponse({ description: "Must be a logged in staff to use this endpoints" })
+  @ApiOkResponse({ description: "Check reservation by the given id" })
   @UseGuards(StaffGuard)
   @Patch("/:id")
   async checkReservation(@Param() param): Promise<Reservation> {
