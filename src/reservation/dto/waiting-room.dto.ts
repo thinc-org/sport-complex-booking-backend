@@ -6,3 +6,5 @@ export class WaitingRoomDto extends mongoose.Document {
   date: Date
   time_slot: number[]
 }
+
+
