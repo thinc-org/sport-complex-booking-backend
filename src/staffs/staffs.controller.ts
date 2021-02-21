@@ -41,7 +41,7 @@ export class StaffsController {
     return res.status(201).json({
       statusCode: 201,
       message: "Login successfully",
-      jwt: this.authService.generateJWT(staff._id, staff.is_admin ? Role.Admin : Role.Staff),
+      jwt: this.authService.generateJWT(staff._id, staff.is_admin ? "Admin" : "Staff"),
     })
   }
 }

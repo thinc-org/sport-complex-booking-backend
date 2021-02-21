@@ -43,7 +43,7 @@ export class CourtManagerController {
   @ApiUnauthorizedResponse({ description: "Must be user to use this endpoint" })
   @Get("setting")
   async getSetting(@Req() req): Promise<Setting> {
-    if (!(req.user.role == Role.Admin || req.user.role == Role.Staff) === false) {
+    if (!(req.user.role == "Admin" || req.user.role == "Staff") === false) {
       this.listAllUserService.getUserById(req.user.userId) //err handled in the function
     } else {
       this.staffManagerService.getStaffData(req.user.userId) //err handled in the function
@@ -69,7 +69,7 @@ export class CourtManagerController {
   @Get("/sports")
   async getAllSportList(@Req() req): Promise<Sport[]> {
     //check if user or staff exists + error handling
-    if (!(req.user.role == Role.Admin || req.user.role == Role.Staff)) {
+    if (!(req.user.role == "Admin" || req.user.role == "Staff")) {
       this.listAllUserService.getUserById(req.user.userId) //err handled in the function
     } else {
       this.staffManagerService.getStaffData(req.user.userId) //err handled in the function
