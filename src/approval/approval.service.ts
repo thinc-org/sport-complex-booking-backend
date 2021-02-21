@@ -17,12 +17,13 @@ export class ApprovalService {
 
   async getSearchResult(name: string, start: number, end: number, searchType: string): Promise<[number, User[]]> {
 
-    let filter = this.userModel.find(
-      { $or: [{ verification_status: Verification.Submitted }, { verification_status: Verification.Verified, payment_status: PaymentStatus.Submitted }] },
-      { _id: 1, name_en: 1, surname_en: 1, username: 1, name_th: 1, surname_th: 1 }
-    )
-    if (searchType === "extension") filter = filter.find({ verification_status: Verification.Verified, payment_status: PaymentStatus.Submitted })
-    if (searchType === "approval") filter = filter.find({ verification_status: Verification.Submitted })
+    let queryBlock;
+
+    if (!searchType) queryBlock = { $or: [{ verification_status: Verification.Submitted }, { verification_status: Verification.Verified, payment_status: PaymentStatus.Submitted }] };
+    if (searchType === "extension") queryBlock = { verification_status: Verification.Verified, payment_status: PaymentStatus.Submitted };
+    if (searchType === "approval") queryBlock = { verification_status: Verification.Submitted };
+
+    let filter = this.userModel.find(queryBlock, { _id: 1, name_en: 1, surname_en: 1, username: 1, name_th: 1, surname_th: 1 })
 
     if (name !== undefined) {
       if ("A" <= name.charAt(0) && name.charAt(0) <= "z")
@@ -52,7 +53,7 @@ export class ApprovalService {
       ? { verification_status: Verification.Verified, account_expiration_date: options.newExpiredDate }
       : { verification_status: Verification.Rejected, rejected_info: options.rejectInfo }
 
-    const user = await this.userModel.findByIdAndUpdate(id, { $set: setBlock }, { new: true, strict: false }).exec()
+    const user = await this.userModel.findByIdAndUpdate(id, { $set: setBlock }, { new: true, strict: false });
 
     if (!user) throw new HttpException("User not found", HttpStatus.NOT_FOUND)
     return user
@@ -65,12 +66,13 @@ export class ApprovalService {
       ? { payment_status: PaymentStatus.NotSubmitted, account_expiration_date: newExpiredDate }
       : { payment_status: PaymentStatus.Rejected }
 
-    const user = await this.userModel.findByIdAndUpdate(id, { $set: setBlock }, { new: true, strict: false }).exec();
+    const user = await this.userModel.findByIdAndUpdate(id, { $set: setBlock }, { new: true, strict: false });
+
+    if (!user) throw new HttpException("User not found", HttpStatus.NOT_FOUND)
 
     if (isApprove)
       await this.fsService.updatePaymentSlip((user) as OtherUser);
 
-    if (!user) throw new HttpException("User not found", HttpStatus.NOT_FOUND)
     return user
   }
 }

@@ -3,7 +3,7 @@ import { AllWaitingRoomService } from "./all-waiting-room.service"
 import { StaffGuard } from "src/auth/jwt.guard"
 import { WaitingRoomDTO, SearchWaitingRoomResultDTO, SearchDTO } from "src/reservation/all-reservation/dto/all-reservation.dto"
 import {
-  ApiBearerAuth, ApiNotFoundResponse,
+  ApiBearerAuth, ApiNotFoundResponse, ApiForbiddenResponse,
   ApiOkResponse,
   ApiParam,
   ApiTags,
@@ -12,7 +12,8 @@ import {
 
 @ApiTags("all-waiting-room")
 @ApiBearerAuth()
-@ApiUnauthorizedResponse({ description: "Must be staff to use this endpoints" })
+@ApiUnauthorizedResponse({ description: "User is not logged in" })
+@ApiForbiddenResponse({ description: "Must be staff to use this endpoints" })
 @UseGuards(StaffGuard)
 @Controller("all-waiting-room")
 export class AllWaitingRoomController {
