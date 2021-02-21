@@ -2,10 +2,10 @@ import { Controller, Get, Param, Patch, Body, Query, UseGuards } from "@nestjs/c
 import { ApprovalService } from "./approval.service"
 import { StaffGuard } from "src/auth/jwt.guard"
 import { CreateOtherUserDTO } from "src/users/dto/user.dto";
-import { ApproveDTO, RejectDTO, searchResultDTO, SetStatusDTO } from "./dto/approval.dto"
+import { ApproveDTO, RejectDTO, SearchResultDTO, SetStatusDTO } from "./dto/approval.dto"
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth, ApiBody, ApiNotFoundResponse,
+  ApiBearerAuth, ApiBody, ApiNotFoundResponse, ApiForbiddenResponse,
   ApiOkResponse,
   ApiParam,
   ApiQuery,
@@ -14,8 +14,8 @@ import {
 } from "@nestjs/swagger"
 
 @ApiTags("approval")
-@ApiUnauthorizedResponse({ description: "Must be staff to use this endpoints" })
-@ApiBearerAuth()
+@ApiUnauthorizedResponse({ description: "User is not logged in" })
+@ApiForbiddenResponse({ description: "Must be staff to use this endpoints" }) @ApiBearerAuth()
 @UseGuards(StaffGuard)
 @Controller("approval")
 export class ApprovalController {
@@ -24,14 +24,14 @@ export class ApprovalController {
   @ApiQuery({ name: "searchType", type: String, description: "\"approval\" or \"extension\" or null", required: false })
   @ApiQuery({ name: "end", type: Number, required: false })
   @ApiQuery({ name: "start", type: Number, required: false })
-  @ApiQuery({ name: "name", type: String, description: "substring of name or surname of user", required: false })
-  @ApiOkResponse({ description: "Return query results", type: searchResultDTO })
+  @ApiQuery({ name: "name", type: String, description: "Substring of name or surname of user", required: false })
+  @ApiOkResponse({ description: "Return query results", type: SearchResultDTO })
   @Get()
   getSearchResult(@Query() query) {
     return this.approvalService.getSearchResult(query.name, query.start, query.end, query.searchType)
   }
 
-  @ApiParam({ name: "id", type: String, description: "a user's ObjectID" })
+  @ApiParam({ name: "id", type: String, description: "A user's ObjectID" })
   @ApiOkResponse({ description: "Return a user with id in param", type: CreateOtherUserDTO })
   @ApiNotFoundResponse({ description: "Can't find a user" })
   @Get("/:id")

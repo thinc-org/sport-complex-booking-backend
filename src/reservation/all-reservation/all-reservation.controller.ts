@@ -3,7 +3,7 @@ import { AllReservationService } from "./all-reservation.service"
 import { StaffGuard } from "src/auth/jwt.guard"
 import { ReservationDTO, SearchReservationResultDTO, SearchDTO } from "src/reservation/all-reservation/dto/all-reservation.dto"
 import {
-  ApiBearerAuth, ApiBody, ApiNotFoundResponse,
+  ApiBearerAuth, ApiBody, ApiNotFoundResponse, ApiForbiddenResponse,
   ApiOkResponse,
   ApiParam,
   ApiTags,
@@ -12,7 +12,8 @@ import {
 
 @ApiTags("all-reservation")
 @ApiBearerAuth()
-@ApiUnauthorizedResponse({ description: "Must be staff to use this endpoints" })
+@ApiUnauthorizedResponse({ description: "User is not logged in" })
+@ApiForbiddenResponse({ description: "Must be staff to use this endpoints" })
 @UseGuards(StaffGuard)
 @Controller("all-reservation")
 export class AllReservationController {
