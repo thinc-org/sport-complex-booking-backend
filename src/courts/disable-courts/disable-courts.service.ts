@@ -13,7 +13,7 @@ export class DisableCourtsService {
     @InjectModel("DisableCourt") private readonly disableCourtModel: Model<DisableCourt>,
     private readonly allReservationService: AllReservationService,
     private readonly allWaitingRoomService: AllWaitingRoomService
-  ) { }
+  ) {}
   async createDisableCourt(data: CreateDisableCourtDTO): Promise<DisableCourt> {
     if (!this.verifyStartAndEndDate(data.starting_date, data.expired_date))
       throw new HttpException("starting_date cannot be after expired_date", HttpStatus.BAD_REQUEST)
@@ -74,14 +74,8 @@ export class DisableCourtsService {
 
     const results = await query.sort("starting_date expired_date")
 
-    let start: number
-    let end: number
-
-    if (data.start == null) start = 0
-    else start = data.start
-
-    if (data.end == null || data.end >= results.length) end = results.length - 1
-    else end = data.end
+    let start = data.start ?? 0
+    let end = data.end && data.end < results.length ? data.end : results.length - 1
 
     const sliced_results = results.slice(start, end + 1)
 

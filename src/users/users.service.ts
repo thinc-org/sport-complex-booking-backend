@@ -190,7 +190,7 @@ export class UsersService {
     newUser.is_penalize = false
     newUser.expired_penalize_date = null
     try {
-      return [await newUser.save(), this.authService.generateJWT(newUser._id, Role.User)]
+      return [await newUser.save(), this.authService.generateJWT(newUser._id, "User")]
     } catch (err) {
       if (err.code === 11000) {
         const duplicateKey = Object.keys(err.keyPattern)[0]
