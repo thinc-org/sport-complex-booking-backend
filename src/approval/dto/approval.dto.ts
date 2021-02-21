@@ -13,12 +13,11 @@ export class ApproveDTO extends SetStatusDTO {
     newExpiredDate: Date
 }
 export class RejectDTO extends SetStatusDTO {
-
     @ApiProperty()
     @IsArray()
     rejectInfo: String[]
 }
-export class listUserDTO {
+export class ListUserDTO {
     @ApiProperty()
     @IsEmail()
     username: string // email (cannot change)
@@ -39,14 +38,13 @@ export class listUserDTO {
     @IsString()
     surname_en: string
 }
-export class searchResultDTO {
+export class SearchResultDTO {
     @ApiProperty()
     @IsNumber()
     doc_count: Number
 
-    @ApiProperty({ type: listUserDTO })
+    @ApiProperty({ type: ListUserDTO })
     @ValidateNested()
-    @Type(() => listUserDTO)
-    doc_list: listUserDTO[]
-
+    @Type(() => ListUserDTO)
+    doc_list: ListUserDTO[]
 }
