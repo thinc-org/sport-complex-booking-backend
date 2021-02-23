@@ -1,23 +1,17 @@
-import { ApiOkResponse, ApiBadRequestResponse, ApiBearerAuth, ApiUnauthorizedResponse } from "@nestjs/swagger"
+import { ApiOkResponse, ApiBadRequestResponse, ApiBearerAuth, ApiUnauthorizedResponse, ApiNotFoundResponse } from "@nestjs/swagger"
 import { ApiTags } from "@nestjs/swagger"
-import { AdminGuard } from "./../auth/jwt.guard"
 import { StaffManagerService } from "./../staffs/staff-manager/staff-manager.service"
-import { JwtAuthGuard, StaffGuard } from "src/auth/jwt.guard"
+import { UserGuard, AdminGuard } from "src/auth/jwt.guard"
 import { Body, Controller, Get, Post, Delete, Put, Param, UseGuards, Req, Query } from "@nestjs/common"
 import { CourtManagerService } from "./court-manager.service"
 import { Sport, Court } from "./interfaces/sportCourt.interface"
 import { Setting } from "./interfaces/setting.interface"
 import { ListAllUserService } from "./../staffs/list-all-user/list-all-user.service"
 import { Role } from "src/common/roles"
-import { CourtDTO, searchQueryDTO, searchResultDTO, SettingDTO, updateSportDTO, SportDTO } from "./dto/courts.dto"
+import { CourtDTO, SearchQueryDTO, SearchResultDTO, SettingDTO, UpdateSportDTO, SportDTO } from "./dto/courts.dto"
 
-interface searchQuery {
-  start: number
-  end: number
-  filter: string
-}
 @ApiTags("court-manager")
-@ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
+@ApiBearerAuth()
 @Controller("court-manager")
 export class CourtManagerController {
   constructor(
@@ -28,24 +22,23 @@ export class CourtManagerController {
 
   //might get deleted, no error handling
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @Post("setting")
   async postSetting(): Promise<Setting> {
     return await this.courtManagerService.writeSetting()
   }
 
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Setting updated", type: SettingDTO })
-  @ApiBadRequestResponse({ description: "Incorrect body", type: SettingDTO })
+  @ApiBadRequestResponse({ description: "Incorrect body" })
+  @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
   @Put("setting")
-  async updateSetting(@Body() new_setting: Setting): Promise<Setting> {
+  async updateSetting(@Body() new_setting: SettingDTO): Promise<Setting> {
     return await this.courtManagerService.updateSetting(new_setting)
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @UseGuards(UserGuard)
   @ApiOkResponse({ description: "Setting received", type: SettingDTO })
+  @ApiUnauthorizedResponse({ description: "Must be user to use this endpoint" })
   @Get("setting")
   async getSetting(@Req() req): Promise<Setting> {
     if (!(req.user.role == Role.Admin || req.user.role == Role.Staff) === false) {
@@ -60,17 +53,18 @@ export class CourtManagerController {
   //if no filter, use $ as param for filter
 
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
-  @ApiOkResponse({ description: "Query successful (an array of Court)", type: searchResultDTO })
-  @ApiBadRequestResponse({ description: "Incorrect search query", type: searchQueryDTO })
+  @ApiOkResponse({ description: "Query successful (a list of Sport)", type: SearchResultDTO })
+  @ApiBadRequestResponse({ description: "Incorrect search query" })
+  @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoint" })
   @Get("/search") //    /search?start=<START>&end=<END>&filter=<FILTER>
-  async getSportList(@Query() query: searchQuery): Promise<{ allSport_length: number; sport_list: Sport[] }> {
+  async getSportList(@Query() query: SearchQueryDTO): Promise<{ allSport_length: number; sport_list: Sport[] }> {
     return await this.courtManagerService.sportRegexQuery(query.start, query.end, query.filter)
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiOkResponse({ description: "Query successful (an array of Court)", type: searchResultDTO })
-  @ApiBadRequestResponse({ description: "Incorrect search query", type: searchQueryDTO })
+  @UseGuards(UserGuard)
+  @ApiOkResponse({ description: "Query successful (a list of every Sport)", type: SearchResultDTO })
+  @ApiBadRequestResponse({ description: "Incorrect search query" })
+  @ApiUnauthorizedResponse({ description: "Must be user to use this endpoints" })
   @Get("/sports")
   async getAllSportList(@Req() req): Promise<Sport[]> {
     //check if user or staff exists + error handling
@@ -84,9 +78,10 @@ export class CourtManagerController {
 
   //can be use for courts displaying
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Query successful", type: CourtDTO })
   @ApiBadRequestResponse({ description: "Incorrect id." })
+  @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
+  @ApiNotFoundResponse({ description: "Can't find sport with specified id" })
   @Get("/:id")
   async getSport(@Param("id") id: string): Promise<Sport> {
     return await this.courtManagerService.findSportByID(id)
@@ -94,9 +89,9 @@ export class CourtManagerController {
 
   //create new document for each sport using body as sport
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Sport created", type: CourtDTO })
   @ApiBadRequestResponse({ description: "Incorrect body", type: CourtDTO })
+  @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
   @Post("/")
   async createSport(@Body() sport_data: Sport): Promise<Sport> {
     return await this.courtManagerService.createSport(sport_data)
@@ -104,22 +99,21 @@ export class CourtManagerController {
 
   //for updating sport_name_th, sport_name_en, quotas, required_users
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Sport updated", type: CourtDTO })
-  @ApiBadRequestResponse({ description: "Incorrect body", type: CourtDTO })
+  @ApiBadRequestResponse({ description: "Incorrect body" })
+  @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
+  @ApiNotFoundResponse({ description: "Can't find sport with specified id" })
   @Put("/:id")
-  async updateSport(
-    @Param("id") id: string,
-    @Body() sport_data: { sport_name_th: string; sport_name_en: string; required_user: number; quota: number }
-  ): Promise<Sport> {
+  async updateSport(@Param("id") id: string, @Body() sport_data: SportDTO): Promise<Sport> {
     return await this.courtManagerService.updateSport(id, sport_data)
   }
 
   //delete sport by sport's _id
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Sport deleted", type: CourtDTO })
-  @ApiBadRequestResponse({ description: "Incorrect body", type: CourtDTO })
+  @ApiBadRequestResponse({ description: "Incorrect object id" })
+  @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
+  @ApiNotFoundResponse({ description: "Can't find sport with specified id" })
   @Delete(":id")
   async deleteSport(@Param("id") id: string): Promise<Sport> {
     return await this.courtManagerService.deleteSport(id)
@@ -127,11 +121,12 @@ export class CourtManagerController {
 
   //Param is sportType ex. Basketball (in english)
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Sport created", type: SportDTO })
-  @ApiBadRequestResponse({ description: "Incorrect body", type: updateSportDTO })
+  @ApiBadRequestResponse({ description: "Incorrect body" })
+  @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
+  @ApiNotFoundResponse({ description: "Can't find sport with specified id" })
   @Put("court-setting/update")
-  async changeCourtSetting(@Body() new_court: { sport_id: string; new_setting: Court[] }): Promise<Sport> {
+  async changeCourtSetting(@Body() new_court: UpdateSportDTO): Promise<Sport> {
     return await this.courtManagerService.updateCourtbyID(new_court.sport_id, new_court.new_setting)
   }
 }

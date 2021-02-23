@@ -140,6 +140,18 @@ export class AppticketDTO {
   appticket: string
 }
 
+export class SSOValidationResult {
+  @ApiProperty()
+  @IsString()
+  token: string
+  @ApiProperty()
+  @IsBoolean()
+  is_first_login: boolean
+  @ApiProperty()
+  @IsBoolean()
+  is_thai_language: boolean
+}
+
 export class SSOValidationUpdateInfoDTO {
   @ApiProperty()
   @IsString()
