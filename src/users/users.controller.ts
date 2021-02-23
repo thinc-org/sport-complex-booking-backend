@@ -22,7 +22,7 @@ import { map, catchError } from "rxjs/operators"
 import { ConfigService } from "@nestjs/config"
 import { ChangeLanguageDto } from "./dto/change-language.dto"
 import { CreateOtherUserDto } from "src/staffs/dto/add-user.dto"
-import { AppticketDTO, CreateOtherUserDTO, CreateUserResponseDTO, SSOValidationUpdateInfoDTO, UserDTO } from "./dto/user.dto"
+import { AppticketDTO, CreateOtherUserDTO, CreateUserResponseDTO, SSOValidationResult, SSOValidationUpdateInfoDTO, UserDTO } from "./dto/user.dto"
 import { Role } from "src/common/roles"
 import {
   ApiBearerAuth,
@@ -57,15 +57,14 @@ export class UsersController {
   }
 
   @ApiOkResponse({
-    description: "Created the user",
+    description: "User created",
+    type: SSOValidationResult,
   })
   @ApiBadRequestResponse({
-    description: "Appticket is not correct.",
-    type: AppticketDTO,
+    description: "Incorrect appticket.",
   })
-  @ApiNotFoundResponse({ description: "Cannot find user from Chula SSO." })
   @Post("validation") //takes {"appticket": <ticket>} from front-end as body
-  async authenticateUser(@Body() appticket: { appticket: string }): Promise<any> {
+  async authenticateUser(@Body() appticket: AppticketDTO): Promise<any> {
     const params = JSON.stringify(appticket)
     const res = this.httpService
       .post(this.configService.get("ssoEndpoint_VALIDATE"), params, {
@@ -118,17 +117,17 @@ export class UsersController {
     return new CreateUserResponseDTO(createdUser, jwt)
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(UserGuard)
   @ApiOkResponse({
-    description: "User retrieved.",
+    description: "User updated.",
     type: CreateUserResponseDTO,
   })
   @ApiBadRequestResponse({
-    description: "Incorrect input.",
-    type: SSOValidationUpdateInfoDTO,
+    description: "This email is already exists or invalid Id",
   })
+  @ApiNotFoundResponse({ description: "Cannot find user." })
   @Put("validation")
-  async changeDBInfo(@Body() input: { is_thai_language: boolean; personal_email: string; phone: string }, @Req() req): Promise<CuStudentUser> {
+  async changeDBInfo(@Body() input: SSOValidationUpdateInfoDTO, @Req() req): Promise<CuStudentUser> {
     //recieve username (for query), is_thai_language, personal_email, phone
     const acc = this.userService.changeData(input, req.user.userId)
     return acc

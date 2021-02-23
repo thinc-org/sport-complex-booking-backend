@@ -1,16 +1,9 @@
-import { CreateStaffDto, StaffBodyDTO, SearchQueryDTO, SearchResultDTO } from "./../dto/create-staff.dto"
+import { CreateStaffDto, StaffBodyDTO, SearchQueryDTO, SearchResultDTO, PromoteStaffDTO } from "./../dto/create-staff.dto"
 import { AdminGuard } from "./../../auth/jwt.guard"
 import { Controller, Get, UseGuards, Param, Put, Body, Post, Delete, Query } from "@nestjs/common"
 import { Staff, StaffList } from "../interfaces/staff.interface"
 import { StaffManagerService } from "./staff-manager.service"
 import { ApiBadRequestResponse, ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger"
-
-interface searchQuery {
-  start: number
-  end: number
-  filter: string
-  type: string
-}
 
 @ApiTags("staff-manager")
 @ApiBearerAuth()
@@ -32,11 +25,10 @@ export class StaffManagerController {
   @ApiOkResponse({ description: "Query results", type: CreateStaffDto })
   @ApiBadRequestResponse({
     description: "Incorrect body.",
-    type: CreateStaffDto,
   })
   @ApiNotFoundResponse({ description: "Incorrect id" })
   @Put("/:id")
-  async updateStaffBoolean(@Param("id") id: string, @Body() input: { is_admin: boolean }): Promise<Staff> {
+  async updateStaffBoolean(@Param("id") id: string, @Body() input: PromoteStaffDTO): Promise<Staff> {
     return this.staffManagerService.updateStaffData(id, input.is_admin)
   }
   //regex staff name (thai language) search
@@ -45,7 +37,7 @@ export class StaffManagerController {
   @ApiOkResponse({ description: "Query results (an array of Staffs)", type: SearchResultDTO })
   @ApiBadRequestResponse({ description: "Incorrect body", type: SearchQueryDTO })
   @Get("admin-and-staff/search") //   /admin-and-staff/search?start=<START>&end=<END>&filter=<FILTER>&type=<TYPE>
-  async getStaffsList(@Query() query: searchQuery): Promise<StaffList> {
+  async getStaffsList(@Query() query: SearchQueryDTO): Promise<StaffList> {
     return await this.staffManagerService.staffRegexQuery(query.start, query.end, query.filter, query.type)
   }
 
@@ -53,7 +45,7 @@ export class StaffManagerController {
   @Post("/")
   @ApiOkResponse({ description: "Staff added", type: CreateStaffDto })
   @ApiBadRequestResponse({ description: "Incorrect body", type: StaffBodyDTO })
-  async addStaff(@Body() new_staff: Staff): Promise<Staff> {
+  async addStaff(@Body() new_staff: CreateStaffDto): Promise<Staff> {
     return await this.staffManagerService.addStaff(new_staff)
   }
 
