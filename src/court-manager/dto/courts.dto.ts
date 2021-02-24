@@ -29,7 +29,7 @@ export class CourtDTO {
   close_time: number
 }
 
-export class SportDTO {
+export class SportDTO extends CourtDTO {
   @ApiProperty()
   @IsString()
   sport_name_th: string
