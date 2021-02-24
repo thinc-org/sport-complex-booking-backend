@@ -30,10 +30,7 @@ export class StaffManagerController {
 
   //promote or demote staff
   @ApiOkResponse({ description: "Query results", type: CreateStaffDto })
-  @ApiBadRequestResponse({
-    description: "Incorrect body.",
-    type: CreateStaffDto,
-  })
+  @ApiBadRequestResponse({ description: "Incorrect body", type: CreateStaffDto })
   @ApiNotFoundResponse({ description: "Incorrect id" })
   @Put("/:id")
   async updateStaffBoolean(@Param("id") id: string, @Body() input: { is_admin: boolean }): Promise<Staff> {
