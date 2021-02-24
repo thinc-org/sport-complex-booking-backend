@@ -15,7 +15,7 @@ export class StaffManagerController {
 
   //get only one staff (by _id as param :id)
   @ApiOkResponse({ description: "Query results", type: CreateStaffDto })
-  @ApiNotFoundResponse({ description: "Incorrect id" })
+  @ApiNotFoundResponse({ description: "Cannot find the document of the id or incorrect object id." })
   @Get("/:id")
   async getStaff(@Param("id") id: string): Promise<Staff> {
     return await this.staffManagerService.getStaffData(id)
@@ -24,9 +24,9 @@ export class StaffManagerController {
   //promote or demote staff
   @ApiOkResponse({ description: "Query results", type: CreateStaffDto })
   @ApiBadRequestResponse({
-    description: "Incorrect body.",
+    description: "is_admin field must be a boolean.",
   })
-  @ApiNotFoundResponse({ description: "Incorrect id" })
+  @ApiNotFoundResponse({ description: "Cannot find the document of the id or incorrect object id." })
   @Put("/:id")
   async updateStaffBoolean(@Param("id") id: string, @Body() input: PromoteStaffDTO): Promise<Staff> {
     return this.staffManagerService.updateStaffData(id, input.is_admin)
@@ -51,7 +51,7 @@ export class StaffManagerController {
 
   //delete staff from db using _id in param, returns deleted document
   @ApiOkResponse({ description: "Deleted staff", type: CreateStaffDto })
-  @ApiNotFoundResponse({ description: "Incorrect id" })
+  @ApiNotFoundResponse({ description: "Cannot find the document of the id or incorrect object id." })
   @Delete("/:id")
   async deleteStaff(@Param("id") id: string): Promise<Staff> {
     return await this.staffManagerService.deleteStaffData(id)
