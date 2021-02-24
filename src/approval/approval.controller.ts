@@ -15,7 +15,8 @@ import {
 
 @ApiTags("approval")
 @ApiUnauthorizedResponse({ description: "User is not logged in" })
-@ApiForbiddenResponse({ description: "Must be staff to use this endpoints" }) @ApiBearerAuth()
+@ApiForbiddenResponse({ description: "Must be staff to use this endpoints" })
+@ApiBearerAuth()
 @UseGuards(StaffGuard)
 @Controller("approval")
 export class ApprovalController {
