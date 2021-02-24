@@ -1,4 +1,3 @@
-import { Court } from "./../interfaces/sportCourt.interface"
 import { IsString } from "class-validator"
 import { ApiProperty } from "@nestjs/swagger"
 import { IsNumber } from "class-validator"
@@ -46,7 +45,7 @@ export class SportDTO extends CourtDTO {
   list_court: CourtDTO[]
 }
 
-export class SearchQueryDTO {
+export class searchQueryDTO {
   @ApiProperty()
   @IsNumber()
   start: number
@@ -58,7 +57,7 @@ export class SearchQueryDTO {
   filter: string
 }
 
-export class SearchResultDTO {
+export class searchResultDTO {
   @ApiProperty()
   @IsNumber()
   allSport_length: number
@@ -66,10 +65,10 @@ export class SearchResultDTO {
   sport_list: SportDTO[]
 }
 
-export class UpdateSportDTO {
+export class updateSportDTO {
   @ApiProperty()
   @IsString()
   sport_id: string
   @ApiProperty()
-  new_setting: Court[]
+  new_setting: CourtDTO[]
 }

@@ -1,4 +1,4 @@
-import { IsBoolean, IsObject, IsString } from "class-validator"
+import { IsString } from "class-validator"
 import { IsNumber } from "class-validator"
 import { ApiProperty } from "@nestjs/swagger"
 import * as mongoose from "mongoose"
@@ -18,12 +18,6 @@ export class CreateStaffDto extends mongoose.Document {
 export class StaffBodyDTO {
   @ApiProperty()
   new_staff: CreateStaffDto
-}
-
-export class PromoteStaffDTO {
-  @ApiProperty()
-  @IsBoolean()
-  is_admin: boolean
 }
 
 export class SearchQueryDTO {
@@ -46,6 +40,5 @@ export class SearchResultDTO {
   @IsNumber()
   allStaff_length: number
   @ApiProperty()
-  @IsObject()
   staff_list: CreateStaffDto[]
 }
