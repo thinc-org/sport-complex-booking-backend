@@ -1,4 +1,5 @@
-import { ApiOkResponse, ApiBadRequestResponse, ApiBearerAuth, ApiUnauthorizedResponse } from "@nestjs/swagger"
+import { ApiBadRequestResponse } from "@nestjs/swagger"
+import { ApiOkResponse } from "@nestjs/swagger"
 import { ApiTags } from "@nestjs/swagger"
 import { AdminGuard } from "./../auth/jwt.guard"
 import { StaffManagerService } from "./../staffs/staff-manager/staff-manager.service"
@@ -17,7 +18,6 @@ interface searchQuery {
   filter: string
 }
 @ApiTags("court-manager")
-@ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
 @Controller("court-manager")
 export class CourtManagerController {
   constructor(
@@ -28,14 +28,12 @@ export class CourtManagerController {
 
   //might get deleted, no error handling
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @Post("setting")
   async postSetting(): Promise<Setting> {
     return await this.courtManagerService.writeSetting()
   }
 
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Setting updated", type: SettingDTO })
   @ApiBadRequestResponse({ description: "Incorrect body", type: SettingDTO })
   @Put("setting")
@@ -44,7 +42,6 @@ export class CourtManagerController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Setting received", type: SettingDTO })
   @Get("setting")
   async getSetting(@Req() req): Promise<Setting> {
@@ -60,7 +57,6 @@ export class CourtManagerController {
   //if no filter, use $ as param for filter
 
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Query successful (an array of Court)", type: searchResultDTO })
   @ApiBadRequestResponse({ description: "Incorrect search query", type: searchQueryDTO })
   @Get("/search") //    /search?start=<START>&end=<END>&filter=<FILTER>
@@ -84,7 +80,6 @@ export class CourtManagerController {
 
   //can be use for courts displaying
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Query successful", type: CourtDTO })
   @ApiBadRequestResponse({ description: "Incorrect id." })
   @Get("/:id")
@@ -94,7 +89,6 @@ export class CourtManagerController {
 
   //create new document for each sport using body as sport
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Sport created", type: CourtDTO })
   @ApiBadRequestResponse({ description: "Incorrect body", type: CourtDTO })
   @Post("/")
@@ -104,7 +98,6 @@ export class CourtManagerController {
 
   //for updating sport_name_th, sport_name_en, quotas, required_users
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Sport updated", type: CourtDTO })
   @ApiBadRequestResponse({ description: "Incorrect body", type: CourtDTO })
   @Put("/:id")
@@ -117,7 +110,6 @@ export class CourtManagerController {
 
   //delete sport by sport's _id
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Sport deleted", type: CourtDTO })
   @ApiBadRequestResponse({ description: "Incorrect body", type: CourtDTO })
   @Delete(":id")
@@ -127,7 +119,6 @@ export class CourtManagerController {
 
   //Param is sportType ex. Basketball (in english)
   @UseGuards(AdminGuard)
-  @ApiBearerAuth()
   @ApiOkResponse({ description: "Sport created", type: SportDTO })
   @ApiBadRequestResponse({ description: "Incorrect body", type: updateSportDTO })
   @Put("court-setting/update")
