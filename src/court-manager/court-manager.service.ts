@@ -1,4 +1,3 @@
-import { SettingDTO } from "./dto/courts.dto"
 import { Injectable, HttpException, HttpStatus, BadRequestException } from "@nestjs/common"
 import { Court, Sport } from "./interfaces/sportCourt.interface"
 import { Setting } from "./interfaces/setting.interface"
@@ -27,7 +26,7 @@ export class CourtManagerService {
     return court_setting.save()
   }
 
-  async updateSetting(new_setting: SettingDTO): Promise<Setting> {
+  async updateSetting(new_setting: Setting): Promise<Setting> {
     if (
       (new_setting.waiting_room_duration || new_setting.late_cancelation_day || new_setting.absence_punishment || new_setting.late_cancelation_day) <=
       0

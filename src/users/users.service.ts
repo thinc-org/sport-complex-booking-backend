@@ -17,7 +17,7 @@ export class UsersService {
     @InjectModel("SatitCuPersonel") private satitStudentModel: Model<SatitCuPersonelUser>,
     @InjectModel("Other") private otherUserModel: Model<OtherUser>,
     private authService: AuthService
-  ) {}
+  ) { }
 
   async validateAndEditAccountInfo(userId: string, updt, full: boolean) {
     const user = await this.findById(userId)
@@ -26,15 +26,12 @@ export class UsersService {
       return await user.save()
     } catch (err) {
       if (err.code === 11000) {
-        const duplicateKey = Object.keys(err.keyPattern)[0]
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.BAD_REQUEST,
-            message: duplicateKey + " is already used",
-            duplicateKey,
-          },
-          HttpStatus.BAD_REQUEST
-        )
+        const duplicateKey = Object.keys(err.keyPattern)[0];
+        throw new HttpException({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: duplicateKey + " is already used",
+          duplicateKey
+        }, HttpStatus.BAD_REQUEST);
       }
     }
   }
@@ -166,6 +163,7 @@ export class UsersService {
   async changeData(input: { is_thai_language: boolean; personal_email: string; phone: string }, id: string) {
     //check if db has personal_email yet
     const isUserEmailExist = await this.userModel.findOne({ personal_email: input.personal_email })
+    console.log(isUserEmailExist)
     if (isUserEmailExist && input.personal_email !== "") throw new BadRequestException("This email is already exists. Please use another email.")
     const acc = await this.findCUById(id)
     acc.is_thai_language = input.is_thai_language
@@ -183,25 +181,22 @@ export class UsersService {
   }
 
   async createOtherUser(user: CreateOtherUserDTO): Promise<[OtherUser, string]> {
-    const newUser = new this.otherUserModel(user)
-    newUser.verification_status = Verification.Submitted
-    newUser.payment_status = PaymentStatus.NotSubmitted
+    const newUser = new this.otherUserModel(user);
+    newUser.verification_status = Verification.Submitted;
+    newUser.payment_status = PaymentStatus.NotSubmitted;
     newUser.password = await this.authService.hashPassword(user.password)
     newUser.is_penalize = false
     newUser.expired_penalize_date = null
     try {
-      return [await newUser.save(), this.authService.generateJWT(newUser._id, Role.User)]
+      return [await newUser.save(), this.authService.generateJWT(newUser._id, Role.User)];
     } catch (err) {
       if (err.code === 11000) {
-        const duplicateKey = Object.keys(err.keyPattern)[0]
-        throw new HttpException(
-          {
-            statusCode: HttpStatus.BAD_REQUEST,
-            message: duplicateKey + " is already used",
-            duplicateKey,
-          },
-          HttpStatus.BAD_REQUEST
-        )
+        const duplicateKey = Object.keys(err.keyPattern)[0];
+        throw new HttpException({
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: duplicateKey + " is already used",
+          duplicateKey
+        }, HttpStatus.BAD_REQUEST);
       }
     }
   }
