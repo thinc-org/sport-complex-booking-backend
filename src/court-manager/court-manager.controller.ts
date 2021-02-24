@@ -63,6 +63,7 @@ export class CourtManagerController {
 
   @UseGuards(UserGuard)
   @ApiOkResponse({ description: "Query successful (a list of every Sport)", type: SearchResultDTO })
+  @ApiBadRequestResponse({ description: "Incorrect search query" })
   @ApiUnauthorizedResponse({ description: "Must be user to use this endpoints" })
   @Get("/sports")
   async getAllSportList(@Req() req): Promise<Sport[]> {
@@ -78,7 +79,7 @@ export class CourtManagerController {
   //can be use for courts displaying
   @UseGuards(AdminGuard)
   @ApiOkResponse({ description: "Query successful", type: CourtDTO })
-  @ApiBadRequestResponse({ description: "Invalid object id." })
+  @ApiBadRequestResponse({ description: "Incorrect id." })
   @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
   @ApiNotFoundResponse({ description: "Can't find sport with specified id" })
   @Get("/:id")
@@ -89,10 +90,7 @@ export class CourtManagerController {
   //create new document for each sport using body as sport
   @UseGuards(AdminGuard)
   @ApiOkResponse({ description: "Sport created", type: CourtDTO })
-  @ApiBadRequestResponse({
-    description: "Required user must be at least 2, quota must be between 1 and 23 (inclusive) or this Sport already exist.",
-    type: CourtDTO,
-  })
+  @ApiBadRequestResponse({ description: "Incorrect body", type: CourtDTO })
   @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
   @Post("/")
   async createSport(@Body() sport_data: Sport): Promise<Sport> {
@@ -102,7 +100,7 @@ export class CourtManagerController {
   //for updating sport_name_th, sport_name_en, quotas, required_users
   @UseGuards(AdminGuard)
   @ApiOkResponse({ description: "Sport updated", type: CourtDTO })
-  @ApiBadRequestResponse({ description: "Required user must be at least 2, quota must be between 1 and 23 (inclusive) or invalid object id" })
+  @ApiBadRequestResponse({ description: "Incorrect body" })
   @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
   @ApiNotFoundResponse({ description: "Can't find sport with specified id" })
   @Put("/:id")
@@ -112,8 +110,8 @@ export class CourtManagerController {
 
   //delete sport by sport's _id
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ description: "Sport deleted", type: SportDTO })
-  @ApiBadRequestResponse({ description: "Invalid Id or no document for this sport" })
+  @ApiOkResponse({ description: "Sport deleted", type: CourtDTO })
+  @ApiBadRequestResponse({ description: "Incorrect object id" })
   @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
   @ApiNotFoundResponse({ description: "Can't find sport with specified id" })
   @Delete(":id")
@@ -124,7 +122,7 @@ export class CourtManagerController {
   //Param is sportType ex. Basketball (in english)
   @UseGuards(AdminGuard)
   @ApiOkResponse({ description: "Sport created", type: SportDTO })
-  @ApiBadRequestResponse({ description: "Time slot is not between 1 and 23 or open time cannot be more than close time." })
+  @ApiBadRequestResponse({ description: "Incorrect body" })
   @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
   @ApiNotFoundResponse({ description: "Can't find sport with specified id" })
   @Put("court-setting/update")
