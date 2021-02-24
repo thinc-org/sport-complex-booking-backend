@@ -133,21 +133,3 @@ export class CreateUserResponseDTO {
     this.user = new UserDTO(user)
   }
 }
-
-export class AppticketDTO {
-  @ApiProperty()
-  @IsString()
-  appticket: string
-}
-
-export class SSOValidationUpdateInfoDTO {
-  @ApiProperty()
-  @IsString()
-  is_thai_language: boolean
-  @ApiProperty()
-  @IsString()
-  personal_email: string
-  @ApiProperty()
-  @IsString()
-  phone: string
-}
