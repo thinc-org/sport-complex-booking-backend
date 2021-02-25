@@ -40,7 +40,7 @@ export class MywaitingroomController {
   @ApiBadRequestResponse({ description: "The user ID isn't invalid" })
   @ApiBadRequestResponse({ description: "The witing room ID isn't invalid" })
   @ApiBadRequestResponse({ description: "The user is not in the waiting room" })
-  @ApiNotFoundResponse({ description: "This reservation is not reserved" })
+  @ApiNotFoundResponse({ description: "This waiting is not reserved" })
   @ApiOkResponse({ description: "Exclude the user of the waiting room" })
   @Delete("/exclude/:id/:userid")
   async excludeUser(@Param() param): Promise<WaitingRoom> {
@@ -50,7 +50,7 @@ export class MywaitingroomController {
   }
 
   @ApiBadRequestResponse({ description: "The waiting isn't invalid" })
-  @ApiNotFoundResponse({ description: "This reservation is not reserved" })
+  @ApiNotFoundResponse({ description: "This waiting is not reserved" })
   @ApiOkResponse({ description: "Cancel the waiting room" })
   @Delete("/cancel/:id")
   async cancelWaitingRoom(@Param() param): Promise<WaitingRoom> {
