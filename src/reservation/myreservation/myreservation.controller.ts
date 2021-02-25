@@ -8,7 +8,7 @@ import { UserGuard, StaffGuard } from "src/auth/jwt.guard"
 import { isValidObjectId, Types } from "mongoose"
 import { HttpException, HttpStatus } from "@nestjs/common"
 
-import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger"
+import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse, ApiBadRequestResponse } from "@nestjs/swagger"
 
 @ApiBearerAuth()
 @ApiTags("myreservation")
@@ -22,6 +22,7 @@ export class MyReservationController {
     }
   }
 
+  @ApiBadRequestResponse({ description: "The user ID isn't invalid" })
   @ApiUnauthorizedResponse({ description: "Must be a logged in user to use this endpoints" })
   @ApiOkResponse({ description: "Return all reserveation info" })
   @UseGuards(UserGuard)
@@ -31,6 +32,8 @@ export class MyReservationController {
     return this.myResrvationService.getAllMyReservation(req.user.userId)
   }
 
+  @ApiBadRequestResponse({ description: "The user ID isn't invalid" })
+  @ApiBadRequestResponse({ description: "The reservaiton ID isn't invalid" })
   @ApiUnauthorizedResponse({ description: "Must be a logged in user to use this endpoints" })
   @ApiUnauthorizedResponse({ description: "The user is not authorized for the reservation room" })
   @ApiNotFoundResponse({ description: "This reservation is not reserved" })
@@ -43,6 +46,8 @@ export class MyReservationController {
     return this.myResrvationService.getById(req.user.userId, param.id)
   }
 
+  @ApiBadRequestResponse({ description: "The user ID isn't invalid" })
+  @ApiBadRequestResponse({ description: "The reservaiton ID isn't invalid" })
   @ApiUnauthorizedResponse({ description: "The user is not authorized for the reservation room" })
   @ApiNotFoundResponse({ description: "This reservation is not reserved" })
   @ApiUnauthorizedResponse({ description: "Must be a logged in user to use this endpoints" })
@@ -55,6 +60,7 @@ export class MyReservationController {
     return this.myResrvationService.cancelMyReservation(req.user.userId, param.id)
   }
 
+  @ApiBadRequestResponse({ description: "The reservaiton ID isn't invalid" })
   @ApiNotFoundResponse({ description: "This reservation is not reserved" })
   @ApiUnauthorizedResponse({ description: "Must be a logged in staff to use this endpoints" })
   @ApiOkResponse({ description: "Check reservation by the given id" })
