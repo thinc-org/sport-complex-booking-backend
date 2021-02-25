@@ -67,7 +67,7 @@ export class UsersController {
     description: "User created",
     type: SSOValidationResult,
   })
-  @ApiBadRequestResponse({
+  @ApiUnauthorizedResponse({
     description: "Incorrect appticket.",
   })
   @Post("validation") //takes {"appticket": <ticket>} from front-end as body
@@ -124,7 +124,6 @@ export class UsersController {
     return new CreateUserResponseDTO(createdUser, jwt)
   }
 
-  //change
   @UseGuards(UserGuard)
   @ApiOkResponse({
     description: "User updated.",

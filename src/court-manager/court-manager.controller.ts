@@ -124,7 +124,7 @@ export class CourtManagerController {
 
   //Param is sportType ex. Basketball (in english)
   @UseGuards(AdminGuard)
-  @ApiOkResponse({ description: "Sport created", type: SportDTO })
+  @ApiOkResponse({ description: "Sport updated", type: SportDTO })
   @ApiBadRequestResponse({ description: "Time slot is not between 1 and 23 or open time cannot be more than close time." })
   @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
   @ApiNotFoundResponse({ description: "Can't find sport with specified id" })
