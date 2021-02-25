@@ -1,4 +1,5 @@
-import { IsEmail } from "class-validator"
+import { ApiProperty } from "@nestjs/swagger"
+import { IsBoolean, IsEmail, IsString } from "class-validator"
 
 export enum Account {
   CuStudent = "CuStudent",
@@ -22,16 +23,34 @@ export interface Contact_person {
 }
 
 export class CreateSatitUserDto {
+  @ApiProperty()
   account_type: Account.SatitAndCuPersonel
+  @ApiProperty()
+  @IsBoolean()
   is_thai_language: boolean
+  @ApiProperty()
+  @IsString()
   name_th: string
+  @ApiProperty()
+  @IsString()
   surname_th: string
+  @ApiProperty()
+  @IsString()
   name_en: string
+  @ApiProperty()
+  @IsString()
   surname_en: string
+  @ApiProperty()
   @IsEmail()
   username: string
+  @ApiProperty()
+  @IsString()
   password: string
+  @ApiProperty()
+  @IsString()
   personal_email: string
+  @ApiProperty()
+  @IsString()
   phone: string
 }
 
