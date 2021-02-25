@@ -15,7 +15,7 @@ export class ListAllUserService {
     @InjectModel("CuStudent") private cuStudentModel: Model<CuStudentUser>,
     @InjectModel("User") private userModel: Model<User>,
     private readonly usersService: UsersService
-  ) { }
+  ) {}
 
   async hashPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, Number(process.env.HASH_SALT))
@@ -26,7 +26,7 @@ export class ListAllUserService {
   }
 
   isEngLang(keyword: string) {
-    return ("A" <= keyword.charAt(0) && keyword.charAt(0) <= "z")
+    return "A" <= keyword.charAt(0) && keyword.charAt(0) <= "z"
   }
 
   //This method has a role to filter from the properties that front-end require but some property of the requirement isn't the property of User.
@@ -167,25 +167,29 @@ export class ListAllUserService {
   }
 
   async changePassWord(id: Types.ObjectId, body: ChangingPasswordDto): Promise<User> {
-    const tempUser: User = await this.getUserById(id)
+    const user: User = await this.getUserById(id)
 
     if (!body.hasOwnProperty("password")) {
       throw new HttpException("The body doesn't exist a password.", HttpStatus.CONFLICT)
     }
 
-    const type = tempUser.account_type
+    if (user === null) {
+      throw new HttpException("Invalid User", HttpStatus.NOT_FOUND)
+    }
+
+    const type = user.account_type
     const newHashPassWord: string = await this.hashPassword(body["password"])
 
     if (type === Account.SatitAndCuPersonel) {
-      ; (tempUser as SatitCuPersonelUser).password = newHashPassWord
+      ;(user as SatitCuPersonelUser).password = newHashPassWord
     } else if (type === Account.Other) {
-      ; (tempUser as OtherUser).password = newHashPassWord
+      ;(user as OtherUser).password = newHashPassWord
     } else {
       throw new HttpException("This user can't change passowrd.", HttpStatus.BAD_REQUEST)
     }
 
-    tempUser.save()
-    return tempUser
+    user.save()
+    return user
   }
 
   updatePenalizationState(user: User, current: Date) {
