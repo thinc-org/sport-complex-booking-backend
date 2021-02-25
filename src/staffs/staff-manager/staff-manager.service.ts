@@ -13,6 +13,10 @@ export class StaffManagerService {
     if (isUsernameExist) {
       throw new HttpException("This staff is already exist, please select new username.", HttpStatus.BAD_REQUEST)
     }
+    if (typeof new_staff.is_admin !== "boolean") throw new HttpException("is_admin field must be a boolean", HttpStatus.BAD_REQUEST)
+    if (typeof (new_staff.name && new_staff.surname && new_staff.password && new_staff.username) !== "string")
+      throw new HttpException("fields of 'name', 'surname', 'password', 'username' must be string", HttpStatus.BAD_REQUEST)
+
     const staff = new this.Staff(new_staff)
     staff.password = await bcrypt.hash(staff.password, Number(process.env.HASH_SALT))
     return await staff.save()
@@ -45,7 +49,6 @@ export class StaffManagerService {
     if (start < 0 || end < start) {
       throw new HttpException("Invalid start or end number.", HttpStatus.BAD_REQUEST)
     }
-
     let listDoc: Staff[]
 
     if (type_filter.toLowerCase() === "all") {

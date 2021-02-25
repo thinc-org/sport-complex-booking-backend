@@ -15,17 +15,34 @@ import {
   UseInterceptors,
 } from "@nestjs/common"
 import { UsersService } from "./users.service"
-import { JwtAuthGuard, UserGuard } from "src/auth/jwt.guard"
+import { UserGuard } from "src/auth/jwt.guard"
 import { AuthService } from "src/auth/auth.service"
 import { LoginUserDto } from "./dto/login-user.dto"
 import { map, catchError } from "rxjs/operators"
 import { ConfigService } from "@nestjs/config"
 import { ChangeLanguageDto } from "./dto/change-language.dto"
-import { CreateOtherUserDto } from "src/staffs/dto/add-user.dto"
-import { CreateOtherUserDTO, CreateUserResponseDTO, UserDTO } from "./dto/user.dto"
+import {
+  AppticketDTO,
+  CreateOtherUserDTO,
+  CreateUserResponseDTO,
+  CUStudentDTO,
+  SSOValidationResult,
+  SSOValidationUpdateInfoDTO,
+  UserDTO,
+} from "./dto/user.dto"
 import { Role } from "src/common/roles"
-import { ApiBadRequestResponse, ApiOkResponse } from "@nestjs/swagger"
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConflictResponse,
+  ApiBadRequestResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+  ApiNotFoundResponse,
+} from "@nestjs/swagger"
 
+@ApiTags("users")
 @Controller("users")
 export class UsersController {
   constructor(
@@ -46,8 +63,15 @@ export class UsersController {
     })
   }
 
+  @ApiOkResponse({
+    description: "User created",
+    type: SSOValidationResult,
+  })
+  @ApiBadRequestResponse({
+    description: "Incorrect appticket.",
+  })
   @Post("validation") //takes {"appticket": <ticket>} from front-end as body
-  async authenticateUser(@Body() appticket: { appticket: string }): Promise<any> {
+  async authenticateUser(@Body() appticket: AppticketDTO): Promise<any> {
     const params = JSON.stringify(appticket)
     const res = this.httpService
       .post(this.configService.get("ssoEndpoint_VALIDATE"), params, {
@@ -100,9 +124,18 @@ export class UsersController {
     return new CreateUserResponseDTO(createdUser, jwt)
   }
 
-  @UseGuards(JwtAuthGuard)
+  //change
+  @UseGuards(UserGuard)
+  @ApiOkResponse({
+    description: "User updated.",
+    type: CUStudentDTO,
+  })
+  @ApiBadRequestResponse({
+    description: "This email is already exists or invalid Id",
+  })
+  @ApiNotFoundResponse({ description: "Cannot find user." })
   @Put("validation")
-  async changeDBInfo(@Body() input: { is_thai_language: boolean; personal_email: string; phone: string }, @Req() req): Promise<CuStudentUser> {
+  async changeDBInfo(@Body() input: SSOValidationUpdateInfoDTO, @Req() req): Promise<CuStudentUser> {
     //recieve username (for query), is_thai_language, personal_email, phone
     const acc = this.userService.changeData(input, req.user.userId)
     return acc
