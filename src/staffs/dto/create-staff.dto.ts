@@ -1,8 +1,9 @@
 import { IsBoolean, IsString } from "class-validator"
 import { IsNumber } from "class-validator"
 import { ApiProperty } from "@nestjs/swagger"
+import * as mongoose from "mongoose"
 
-export class CreateStaffDto {
+export class CreateStaffDto extends mongoose.Document {
   @ApiProperty()
   readonly name: string
   @ApiProperty()
