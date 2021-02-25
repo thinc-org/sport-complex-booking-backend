@@ -4,7 +4,7 @@ import { WaitingRoom } from "./../interfaces/reservation.interface"
 import { isValidObjectId, Types } from "mongoose"
 import { HttpException, HttpStatus } from "@nestjs/common"
 import { UserGuard } from "src/auth/jwt.guard"
-import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger"
+import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse, ApiBadRequestResponse } from "@nestjs/swagger"
 
 @ApiBearerAuth()
 @ApiTags("mywaitingroom")
@@ -19,6 +19,8 @@ export class MywaitingroomController {
       throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
     }
   }
+
+  @ApiBadRequestResponse({ description: "The user ID isn't invalid" })
   @ApiNotFoundResponse({ description: "This waiting is not reserved" })
   @ApiOkResponse({ description: "Return all waiting of the given-id user" })
   @Get("")
@@ -27,6 +29,7 @@ export class MywaitingroomController {
     return this.mywaitingroomService.getWaitingRoomByUserId(req.user.userId)
   }
 
+  @ApiBadRequestResponse({ description: "The user ID isn't invalid" })
   @ApiOkResponse({ description: "Check the expiration of the waiting room by the given-waiting-room id." })
   @Get("/expire/:id")
   async expireWaitingRoom(@Param() param): Promise<boolean> {
@@ -34,7 +37,9 @@ export class MywaitingroomController {
     return this.mywaitingroomService.expiredChecker(param.id)
   }
 
-  @ApiUnauthorizedResponse({ description: "The user is not in the waiting room" })
+  @ApiBadRequestResponse({ description: "The user ID isn't invalid" })
+  @ApiBadRequestResponse({ description: "The witing room ID isn't invalid" })
+  @ApiBadRequestResponse({ description: "The user is not in the waiting room" })
   @ApiNotFoundResponse({ description: "This reservation is not reserved" })
   @ApiOkResponse({ description: "Exclude the user of the waiting room" })
   @Delete("/exclude/:id/:userid")
@@ -44,6 +49,7 @@ export class MywaitingroomController {
     return this.mywaitingroomService.excludeUser(param.id, param.userid)
   }
 
+  @ApiBadRequestResponse({ description: "The waiting isn't invalid" })
   @ApiNotFoundResponse({ description: "This reservation is not reserved" })
   @ApiOkResponse({ description: "Cancel the waiting room" })
   @Delete("/cancel/:id")
