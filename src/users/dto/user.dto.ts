@@ -1,3 +1,4 @@
+import { Account } from "./../../staffs/dto/add-user.dto"
 import { ApiProperty, ApiPropertyOptional, ApiResponse } from "@nestjs/swagger"
 import { Exclude, Type } from "class-transformer"
 import { IsBoolean, IsDate, IsEmail, IsNotEmpty, IsOptional, IsString, ValidateNested } from "class-validator"
@@ -132,4 +133,73 @@ export class CreateUserResponseDTO {
     this.jwt = jwt
     this.user = new UserDTO(user)
   }
+}
+
+export class AppticketDTO {
+  @ApiProperty()
+  @IsString()
+  appticket: string
+}
+
+export class SSOValidationResult {
+  @ApiProperty()
+  @IsString()
+  token: string
+  @ApiProperty()
+  @IsBoolean()
+  is_first_login: boolean
+  @ApiProperty()
+  @IsBoolean()
+  is_thai_language: boolean
+}
+
+export class SSOValidationUpdateInfoDTO {
+  @ApiProperty()
+  @IsString()
+  is_thai_language: boolean
+  @ApiProperty()
+  @IsString()
+  personal_email: string
+  @ApiProperty()
+  @IsString()
+  phone: string
+}
+
+export class CUStudentDTO {
+  @ApiProperty()
+  @Type(() => String)
+  account_type: Account
+  @ApiProperty()
+  @IsBoolean()
+  is_thai_language: boolean
+  @ApiProperty()
+  @IsString()
+  name_th: string
+  @ApiProperty()
+  @IsString()
+  surname_th: string
+  @ApiProperty()
+  @IsString()
+  name_en: string
+  @ApiProperty()
+  @IsString()
+  surname_en: string
+  @ApiProperty()
+  @IsString()
+  username: string
+  @ApiProperty()
+  @IsString()
+  personal_email: string
+  @ApiProperty()
+  @IsString()
+  phone: string
+  @ApiProperty()
+  @IsBoolean()
+  is_penalize: boolean
+  @ApiProperty()
+  @IsDate()
+  expired_penalize_date: Date
+  @ApiProperty()
+  @IsBoolean()
+  is_first_login: boolean
 }

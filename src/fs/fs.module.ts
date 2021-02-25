@@ -12,6 +12,5 @@ import { FSService } from "./fs.service"
   imports: [MongooseModule.forFeature([{ name: FileInfo.name, schema: FileInfoSchema }]), AuthModule, UsersModule, StaffsModule, ConfigModule],
   controllers: [FSController],
   providers: [FSService],
-  exports: [FSService]
 })
-export class FSModule { }
+export class FSModule {}

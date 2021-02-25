@@ -1,3 +1,4 @@
+import { SettingDTO, SportDTO } from "./dto/courts.dto"
 import { Injectable, HttpException, HttpStatus, BadRequestException } from "@nestjs/common"
 import { Court, Sport } from "./interfaces/sportCourt.interface"
 import { Setting } from "./interfaces/setting.interface"
@@ -26,7 +27,7 @@ export class CourtManagerService {
     return court_setting.save()
   }
 
-  async updateSetting(new_setting: Setting): Promise<Setting> {
+  async updateSetting(new_setting: SettingDTO): Promise<Setting> {
     if (
       (new_setting.waiting_room_duration || new_setting.late_cancelation_day || new_setting.absence_punishment || new_setting.late_cancelation_day) <=
       0
@@ -68,7 +69,7 @@ export class CourtManagerService {
   }
 
   //create sport by Sport (schema)
-  async createSport(court_data: Sport): Promise<Sport> {
+  async createSport(court_data: SportDTO): Promise<Sport> {
     if (court_data.required_user < 2) throw new BadRequestException("Required user must be at least 2.")
     if (court_data.quota < 0 || court_data.quota > 23) throw new BadRequestException("Quota must be between 1 and 23 (inclusive).")
 
