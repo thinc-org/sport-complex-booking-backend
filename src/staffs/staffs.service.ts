@@ -3,6 +3,7 @@ import { Staff } from "./interfaces/staff.interface"
 import { isValidObjectId, Model } from "mongoose"
 import { InjectModel } from "@nestjs/mongoose"
 import * as bcrypt from "bcrypt"
+import { StaffLoginDTO } from "./dto/create-staff.dto"
 
 @Injectable()
 export class StaffsService {
@@ -33,7 +34,7 @@ export class StaffsService {
     return await newStaff.save()
   }
 
-  async login(staff: Staff): Promise<Staff> {
+  async login(staff: StaffLoginDTO): Promise<Staff> {
     //if username is not exist
     const isUsernameExist = await this.findByUsername(staff.username)
     if (!isUsernameExist) {
@@ -47,9 +48,9 @@ export class StaffsService {
   }
 
   async findById(id: string): Promise<Staff> {
-    if (!isValidObjectId(id)) throw new HttpException("Not a valid Object id", HttpStatus.BAD_REQUEST)
+    if (!isValidObjectId(id)) throw new HttpException("Invalid ObjectId", HttpStatus.BAD_REQUEST)
     const staff = await this.staffModel.findById(id)
-    if (staff == null) throw new HttpException("Staff not found", HttpStatus.BAD_REQUEST)
+    if (staff == null) throw new HttpException("User not found", HttpStatus.NOT_FOUND)
     return staff
   }
 

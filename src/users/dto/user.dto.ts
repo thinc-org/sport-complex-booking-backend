@@ -155,7 +155,7 @@ export class SSOValidationResult {
 
 export class SSOValidationUpdateInfoDTO {
   @ApiProperty()
-  @IsString()
+  @IsBoolean()
   is_thai_language: boolean
   @ApiProperty()
   @IsString()
@@ -202,4 +202,13 @@ export class CUStudentDTO {
   @ApiProperty()
   @IsBoolean()
   is_first_login: boolean
+}
+export class LoginSuccessDTO {
+  @ApiProperty()
+  @IsString()
+  jwt: string
+
+  @ApiProperty()
+  @IsBoolean()
+  is_thai_language: boolean
 }

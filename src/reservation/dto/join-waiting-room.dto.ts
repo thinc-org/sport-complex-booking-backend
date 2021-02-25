@@ -1,5 +1,14 @@
-import * as mongoose from "mongoose"
+import { ApiProperty } from "@nestjs/swagger"
+import { IsBoolean, IsString } from "class-validator"
 
-export class JoinWaitingRoomDto extends mongoose.Document {
+export class JoinWaitingRoomDto {
+  @ApiProperty()
+  @IsString()
   access_code: string
+}
+
+export class JoinWaitingRoomSuccessDto {
+  @ApiProperty()
+  @IsBoolean()
+  isReservationCreated: boolean
 }
