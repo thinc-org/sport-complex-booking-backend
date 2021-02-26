@@ -16,7 +16,7 @@ export class ApprovalService {
 
   async getSearchResult(name: string, start: number, end: number): Promise<[number, User[]]> {
     let filter = this.userModel.find(
-      { verification_status: Verification.Submitted },
+      { verification_status: "Submitted" },
       { _id: 1, name_en: 1, surname_en: 1, username: 1, name_th: 1, surname_th: 1 }
     )
 
@@ -45,8 +45,8 @@ export class ApprovalService {
     if (!isApprove && options.rejectInfo === null) throw new HttpException("Cannot find reject_info in req.body", HttpStatus.BAD_REQUEST)
 
     const setBlock = isApprove
-      ? { verification_status: Verification.Verified, account_expiration_date: options.newExpiredDate }
-      : { verification_status: Verification.Rejected, rejected_info: options.rejectInfo }
+      ? { verification_status: "Verified", account_expiration_date: options.newExpiredDate }
+      : { verification_status: "Rejected", rejected_info: options.rejectInfo }
 
     const user = await this.userModel.findByIdAndUpdate(id, { $set: setBlock }, { new: true, strict: false }).exec()
 

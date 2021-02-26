@@ -1,6 +1,7 @@
 import { Verification } from "./../../../users/interfaces/user.interface"
 import { Types } from "mongoose"
-import { IsBoolean, IsString, IsEnum, IsMongoId, IsOptional, IsDateString } from "class-validator"
+import { IsBoolean, IsString, IsEnum, IsMongoId, IsOptional, IsDateString, ValidateNested } from "class-validator"
+import { Type } from "class-transformer"
 class Contact_person {
   @IsOptional()
   @IsString()
@@ -96,7 +97,7 @@ export class OtherUserEditingDto extends UserEditingDto {
   @IsString()
   membership_type?: string
   @IsOptional()
-  @IsEnum(Verification)
+  @IsEnum(["NotSubmitted", "Submitted", "Verified", "Rejected"])
   verification_status?: Verification
   @IsOptional()
   @IsString()

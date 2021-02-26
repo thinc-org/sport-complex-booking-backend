@@ -7,19 +7,10 @@ export enum Account {
   Other = "Other",
 }
 
-export enum Verification {
-  NotSubmitted = "NotSubmitted",
-  Submitted = "Submitted",
-  Verified = "Verified",
-  Rejected = "Rejected",
-}
+export type Verification = "NotSubmitted" | "Submitted" | "Verified" | "Rejected"
 
 // NotSubmitted -> Submitted -> Rejected -> Submitted -> NotSubmitted
-export enum PaymentStatus {
-  Submitted = "Submitted",
-  Rejected = "Rejected",
-  NotSubmitted = "NotSubmitted", // payment slip not submitted or already verified 
-}
+export type PaymentStatus = "Submitted" | "Rejected" | "NotSubmitted"
 
 export interface Contact_person {
   contact_person_prefix: string
@@ -114,10 +105,10 @@ export interface OtherUser extends User {
   medical_certificate: mongoose.Types.ObjectId
   national_id_house_registration: mongoose.Types.ObjectId //also passport photo
   relationship_verification_document: mongoose.Types.ObjectId
-  payment_slip: mongoose.Types.ObjectId, // current payment slip
-  previous_payment_slips: mongoose.Types.ObjectId[], // previous payment slip, up to MAX_PREV_SLIPS
-  payment_status: PaymentStatus,
+  payment_slip: mongoose.Types.ObjectId // current payment slip
+  previous_payment_slips: mongoose.Types.ObjectId[] // previous payment slip, up to MAX_PREV_SLIPS
+  payment_status: PaymentStatus
   validateAndEditAccountInfo?: (updt: editOtherAccountInfoDTO, all: boolean) => Promise<User>
 }
 
-export const MAX_PREV_SLIPS = 2;
+export const MAX_PREV_SLIPS = 2
