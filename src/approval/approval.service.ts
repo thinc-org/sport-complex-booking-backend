@@ -19,9 +19,9 @@ export class ApprovalService {
 
     let queryBlock;
 
-    if (!searchType) queryBlock = { $or: [{ verification_status: Verification.Submitted }, { verification_status: Verification.Verified, payment_status: PaymentStatus.Submitted }] };
-    if (searchType === "extension") queryBlock = { verification_status: Verification.Verified, payment_status: PaymentStatus.Submitted };
-    if (searchType === "approval") queryBlock = { verification_status: Verification.Submitted };
+    if (!searchType) queryBlock = { $or: [{ verification_status: "Submitted" }, { verification_status: "Verified", payment_status: "Submitted" }] };
+    if (searchType === "extension") queryBlock = { verification_status: "Verified", payment_status: "Submitted" };
+    if (searchType === "approval") queryBlock = { verification_status: "Submitted" };
 
     let filter = this.userModel.find(queryBlock, { _id: 1, name_en: 1, surname_en: 1, username: 1, name_th: 1, surname_th: 1 })
 
@@ -63,8 +63,8 @@ export class ApprovalService {
     if (isApprove && newExpiredDate === null) throw new HttpException("Cannot find newExpiredDate in req.body", HttpStatus.BAD_REQUEST)
 
     const setBlock = isApprove
-      ? { payment_status: PaymentStatus.NotSubmitted, account_expiration_date: newExpiredDate }
-      : { payment_status: PaymentStatus.Rejected }
+      ? { payment_status: "NotSubmitted", account_expiration_date: newExpiredDate }
+      : { payment_status: "Rejected" }
 
     const user = await this.userModel.findByIdAndUpdate(id, { $set: setBlock }, { new: true, strict: false });
 
