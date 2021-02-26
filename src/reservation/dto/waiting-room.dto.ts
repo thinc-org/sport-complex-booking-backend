@@ -14,5 +14,3 @@ export class WaitingRoomDto extends mongoose.Document {
   @ApiProperty({ type: [Number] })
   time_slot: number[]
 }
-
-
