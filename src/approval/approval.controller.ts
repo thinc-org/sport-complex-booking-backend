@@ -71,6 +71,4 @@ export class ApprovalController {
   extensionReject(@Body("id") id: string) {
     return this.approvalService.setPaymentstatus(id, false)
   }
-
-
 }
