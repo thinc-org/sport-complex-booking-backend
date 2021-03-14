@@ -1,7 +1,7 @@
 import { ApiOkResponse, ApiBadRequestResponse, ApiBearerAuth, ApiUnauthorizedResponse, ApiNotFoundResponse } from "@nestjs/swagger"
 import { ApiTags } from "@nestjs/swagger"
 import { StaffManagerService } from "./../staffs/staff-manager/staff-manager.service"
-import { UserGuard, AdminGuard } from "src/auth/jwt.guard"
+import { UserGuard, AdminGuard, JwtAuthGuard } from "src/auth/jwt.guard"
 import { Body, Controller, Get, Post, Delete, Put, Param, UseGuards, Req, Query } from "@nestjs/common"
 import { CourtManagerService } from "./court-manager.service"
 import { Sport } from "./interfaces/sportCourt.interface"
@@ -38,12 +38,12 @@ export class CourtManagerController {
     return await this.courtManagerService.updateSetting(new_setting)
   }
 
-  @UseGuards(UserGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: "Setting received", type: SettingDTO })
   @ApiUnauthorizedResponse({ description: "Must be user to use this endpoint" })
   @Get("setting")
   async getSetting(@Req() req): Promise<Setting> {
-    if (!(req.user.role == Role.Admin || req.user.role == Role.Staff) === false) {
+    if (!(req.user.role == "Admin" || req.user.role == "Staff") === false) {
       this.listAllUserService.getUserById(req.user.userId) //err handled in the function
     } else {
       this.staffManagerService.getStaffData(req.user.userId) //err handled in the function
@@ -63,13 +63,13 @@ export class CourtManagerController {
     return await this.courtManagerService.sportRegexQuery(query.start, query.end, query.filter)
   }
 
-  @UseGuards(UserGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ description: "Query successful (a list of every Sport)", type: SearchSportResultDTO })
   @ApiUnauthorizedResponse({ description: "Must be user to use this endpoints" })
   @Get("/sports")
   async getAllSportList(@Req() req): Promise<Sport[]> {
     //check if user or staff exists + error handling
-    if (!(req.user.role == Role.Admin || req.user.role == Role.Staff)) {
+    if (!(req.user.role == "Admin" || req.user.role == "Staff")) {
       this.listAllUserService.getUserById(req.user.userId) //err handled in the function
     } else {
       this.staffManagerService.getStaffData(req.user.userId) //err handled in the function

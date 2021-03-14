@@ -16,13 +16,13 @@ export class DisableCourtsController {
 
   @ApiConflictResponse({ description: "Can't create a disable court because there are some overlapping time/reservations" })
   @ApiOkResponse({ description: "Created a disable court", type: DisableCourtDTO })
-  @Post("")
+  @Post()
   async createDisableCourt(@Body() body: CreateDisableCourtDTO): Promise<DisableCourt> {
     return await this.disableCourtsService.createDisableCourt(body)
   }
 
   @ApiOkResponse({ description: "Query results", type: QueryResult })
-  @Post("/search")
+  @Post("search")
   async getDisableCourt(@Body() data: QueryDisableCourtDTO): Promise<QueryResult> {
     return await this.disableCourtsService.queryDisableCourt(data)
   }

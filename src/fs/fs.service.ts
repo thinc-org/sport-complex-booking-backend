@@ -16,7 +16,7 @@ export class FSService {
     @InjectModel(FileInfo.name) private fileInfoModel: Model<FileInfoDocument>,
     private userService: UsersService,
     private authService: AuthService
-  ) { }
+  ) {}
 
   async getFileInfo(fileId: string) {
     const fileInfo = await this.fileInfoModel.findById(fileId)
@@ -39,7 +39,7 @@ export class FSService {
     }
     const result = {}
 
-    const user = (await this.userService.findById(owner)) as OtherUser;
+    const user = (await this.userService.findById(owner)) as OtherUser
 
     if (user == null) {
       throw new HttpException("cannot find user: " + owner, HttpStatus.NOT_FOUND)
@@ -56,12 +56,12 @@ export class FSService {
       user[field] = fileInfo._id
     }
 
-    if (files.payment_slip != null && user.payment_status != PaymentStatus.Submitted) {
-      const fileInfo = await this.saveFile(rootPath, owner, files.payment_slip[0], "payment_slip");
-      result["payment_slip"] = fileInfo._id;
-      user.payment_slip = fileInfo._id;
+    if (files.payment_slip != null && user.payment_status != "Submitted") {
+      const fileInfo = await this.saveFile(rootPath, owner, files.payment_slip[0], "payment_slip")
+      result["payment_slip"] = fileInfo._id
+      user.payment_slip = fileInfo._id
       // for users who are registering, payment_status will be NotSubmitted
-      if (user.verification_status == Verification.Verified) user.payment_status = PaymentStatus.Submitted;
+      if (user.verification_status == "Verified") user.payment_status = "Submitted"
     }
     await user.save()
     return result
@@ -80,16 +80,16 @@ export class FSService {
   }
 
   async deleteFile(fileId: string) {
-    if (fileId == null) return;
+    if (fileId == null) return
 
-    const fileInfo = await await this.fileInfoModel.findById(fileId).populate("owner");
+    const fileInfo = await await this.fileInfoModel.findById(fileId).populate("owner")
 
-    if (fileInfo == null) return;
+    if (fileInfo == null) return
 
-    const fullPath = fileInfo.full_path;
-    const owner = fileInfo.owner;
+    const fullPath = fileInfo.full_path
+    const owner = fileInfo.owner
     if (fileId == owner[fileInfo.file_type]) {
-      owner[fileInfo.file_type] = null;
+      owner[fileInfo.file_type] = null
     }
 
     try {
@@ -98,8 +98,8 @@ export class FSService {
       console.log("Cannot delete file: " + fileId)
     }
 
-    await owner.save();
-    await fileInfo.remove();
+    await owner.save()
+    await fileInfo.remove()
   }
 
   generateViewFileToken(fileId: string): string {
@@ -121,13 +121,14 @@ export class FSService {
 
   // used when approving payment slip
   async updatePaymentSlip(user: OtherUser) {
-    if (user.payment_slip != null) user.previous_payment_slips.push(user.payment_slip);
-    while (user.previous_payment_slips.length > MAX_PREV_SLIPS) { // runs more than once only when MAX_PREV_SLIPS is decreased
-      // good enough for MAX_PREV_SLIP = 2 
-      const removedFile = user.previous_payment_slips.shift();
-      await this.deleteFile(removedFile.toHexString());
+    if (user.payment_slip != null) user.previous_payment_slips.push(user.payment_slip)
+    while (user.previous_payment_slips.length > MAX_PREV_SLIPS) {
+      // runs more than once only when MAX_PREV_SLIPS is decreased
+      // good enough for MAX_PREV_SLIP = 2
+      const removedFile = user.previous_payment_slips.shift()
+      await this.deleteFile(removedFile.toHexString())
     }
-    user.payment_slip = null;
-    user.payment_status = PaymentStatus.NotSubmitted;
+    user.payment_slip = null
+    user.payment_status = "NotSubmitted"
   }
 }

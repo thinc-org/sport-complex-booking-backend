@@ -1,7 +1,8 @@
 import { Verification } from "./../../../users/interfaces/user.interface"
 import { Types } from "mongoose"
-import { IsBoolean, IsString, IsEnum, IsMongoId, IsOptional, IsDateString } from "class-validator"
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
+import { IsBoolean, IsString, IsEnum, IsMongoId, IsOptional, IsDateString, ValidateNested } from "class-validator"
+import { Type } from "class-transformer"
 class Contact_person {
   @ApiPropertyOptional()
   @IsOptional()
@@ -125,7 +126,7 @@ export class OtherUserEditingDto extends UserEditingDto {
   membership_type?: string
   @ApiPropertyOptional()
   @IsOptional()
-  @IsEnum(Verification)
+  @IsEnum(["NotSubmitted", "Submitted", "Verified", "Rejected"])
   verification_status?: Verification
   @ApiPropertyOptional()
   @IsOptional()

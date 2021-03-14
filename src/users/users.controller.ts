@@ -24,9 +24,10 @@ import { ChangeLanguageDto } from "./dto/change-language.dto"
 import {
   AppticketDTO,
   CreateOtherUserDTO,
-  CreateUserResponseDTO,
   CUStudentDTO,
   SSOValidationResult,
+  CreateUserResponseDTO,
+  LoginSuccessDTO,
   SSOValidationUpdateInfoDTO,
   UserDTO,
 } from "./dto/user.dto"
@@ -40,6 +41,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
   ApiNotFoundResponse,
+  ApiCreatedResponse,
 } from "@nestjs/swagger"
 
 @ApiTags("users")
@@ -52,13 +54,19 @@ export class UsersController {
     private readonly configService: ConfigService
   ) {}
 
+  @ApiCreatedResponse({
+    description: "Login successfully",
+    type: LoginSuccessDTO,
+  })
+  @ApiBadRequestResponse({ description: "Username or Password is wrong" })
+  @UsePipes(new ValidationPipe())
   @Post("/login")
   async login(@Body() loginUserDto: LoginUserDto, @Res() res): Promise<string> {
     const user = await this.userService.login(loginUserDto.username, loginUserDto.password)
     return res.status(201).json({
       statusCode: 201,
       message: "Login successfully",
-      jwt: this.authService.generateJWT(user["_id"], Role.User),
+      jwt: this.authService.generateJWT(user["_id"], "User"),
       is_thai_language: user["is_thai_language"],
     })
   }
@@ -99,7 +107,7 @@ export class UsersController {
             acc = db_acc
           }
           const payload = {
-            token: this.authService.generateJWT(acc["_id"], Role.User),
+            token: this.authService.generateJWT(acc["_id"], "User"),
             is_first_login: acc["is_first_login"],
             is_thai_language: acc["is_thai_language"],
           }
@@ -140,6 +148,10 @@ export class UsersController {
     return acc
   }
 
+  @ApiBearerAuth()
+  @ApiBadRequestResponse({ description: "Invalid Id" })
+  @ApiNotFoundResponse({ description: "User not found" })
+  @ApiCreatedResponse({ description: "Change language already" })
   @UseGuards(UserGuard)
   @Put("changeLanguage")
   async changeLanguage(@Req() req, @Body() changeLanguageDto: ChangeLanguageDto, @Res() res) {

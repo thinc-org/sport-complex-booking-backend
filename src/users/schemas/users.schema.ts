@@ -25,13 +25,13 @@ class UserSchemaClass extends mongoose.Schema {
 
     this.statics.editAccountInfoDTO = EditUserInfoDTO
 
-    this.methods.editAccountInfo = function (updt: EditUserInfoDTO) {
+    this.methods.editAccountInfo = function(updt: EditUserInfoDTO) {
       this.is_thai_language = updt.is_thai_language ?? this.is_thai_language
       this.personal_email = updt.personal_email ?? this.personal_email
       this.phone = updt.phone ?? this.phone
     }
 
-    this.methods.validateAndEditAccountInfo = async function (updt, all: boolean) {
+    this.methods.validateAndEditAccountInfo = async function(updt, all: boolean) {
       const Model = this.constructor
       const info = plainToClass(Model.editAccountInfoDTO, updt, { excludeExtraneousValues: true })
       try {
@@ -42,16 +42,16 @@ class UserSchemaClass extends mongoose.Schema {
       }
     }
 
-    this.methods.setPassword = function (hashedPassword: string) {
+    this.methods.setPassword = function(hashedPassword: string) {
       this.password = hashedPassword
     }
 
-    this.methods.getPassword = function () {
+    this.methods.getPassword = function() {
       if (this.password) return this.password
       else throw new HttpException("password does not exist", HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
-    this.methods.updateBan = function () {
+    this.methods.updateBan = function() {
       if (!this.is_penalize) {
         return
       } else if (this.expired_penalize_date == null) {
@@ -66,21 +66,21 @@ class UserSchemaClass extends mongoose.Schema {
 
 export const UserSchema = new UserSchemaClass()
 UserSchema.index({ personal_email: 1 }, { unique: true })
-UserSchema.index({ username: 1 }, { unique: true });
+UserSchema.index({ username: 1 }, { unique: true })
 
 class CuStudentSchemaClass extends UserSchemaClass {
   constructor() {
     super({ is_first_login: Boolean })
-    this.methods.setPassword = function () {
+    this.methods.setPassword = function() {
       throw new HttpException("Custudent cannot change password", HttpStatus.FORBIDDEN)
     }
-    this.methods.getPassword = function () {
+    this.methods.getPassword = function() {
       throw new HttpException("Custudent does not have password", HttpStatus.FORBIDDEN)
     }
 
     const oldEditMethod: (dto: any) => void = this.methods.editAccountInfo
 
-    this.methods.editAccountInfo = function (updt: EditUserInfoDTO) {
+    this.methods.editAccountInfo = function(updt: EditUserInfoDTO) {
       oldEditMethod.call(this, updt)
       this.is_first_login = false
     }
@@ -126,23 +126,23 @@ class OtherSchemaClass extends UserSchemaClass {
       national_id_house_registration: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" },
       relationship_verification_document: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" },
       payment_slip: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" },
-      previous_payment_slips: [{ type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" }]
+      previous_payment_slips: [{ type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" }],
     })
 
     this.statics.editAccountInfoDTO = editOtherAccountInfoDTO
 
     const oldEditMethod: (dto: any) => void = this.methods.editAccountInfo
 
-    this.methods.editAccountInfo = function (this: OtherUser, updt: editOtherAccountInfoDTO) {
-      if (this.verification_status == Verification.Submitted || this.verification_status == Verification.Verified) {
+    this.methods.editAccountInfo = function(this: OtherUser, updt: editOtherAccountInfoDTO) {
+      if (this.verification_status == "Submitted" || this.verification_status == "Verified") {
         // can only edit email, phone number, and address
-        this.address = updt.address ?? this.address;
-        this.phone = updt.phone ?? this.phone;
-        this.home_phone = updt.home_phone ?? this.home_phone;
-        this.personal_email = updt.personal_email ?? this.personal_email;
+        this.address = updt.address ?? this.address
+        this.phone = updt.phone ?? this.phone
+        this.home_phone = updt.home_phone ?? this.home_phone
+        this.personal_email = updt.personal_email ?? this.personal_email
       } else {
         oldEditMethod.call(this, updt)
-        OtherSchemaClass.assignNotNull(this, updt, { verification_status: Verification.Submitted, rejected_info: [] })
+        OtherSchemaClass.assignNotNull(this, updt, { verification_status: "Submitted", rejected_info: [] })
       }
     }
   }

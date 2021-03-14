@@ -17,7 +17,7 @@ export class ReservationService {
     @InjectModel("User") private userModel: Model<User>,
     private disableCourtService: DisableCourtsService,
     private courtManagerService: CourtManagerService
-  ) { }
+  ) {}
 
   @Cron("0 0 * * * *")
   async checkReservation() {
@@ -52,7 +52,7 @@ export class ReservationService {
     if (user.account_type == Account.Other) {
       const otherUser = user as OtherUser
       const date = new Date()
-      if (otherUser.verification_status != Verification.Verified) {
+      if (otherUser.verification_status != "Verified") {
         throw new HttpException(
           {
             reason: "NOT_VERIFIED",

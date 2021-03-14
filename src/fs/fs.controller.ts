@@ -108,7 +108,7 @@ export class FSController {
   @Get("/viewFileToken/:fileId")
   async viewFileToken(@Req() req, @Res() res, @Param("fileId") fileId: string) {
     const fileInfo = await this.fsService.getFileInfo(fileId)
-    if (!(req.user.role == Role.Admin || req.user.role == Role.Staff) && fileInfo.owner != req.user.userId) {
+    if (!(req.user.role == "Admin" || req.user.role == "Staff") && fileInfo.owner != req.user.userId) {
       throw new HttpException("Unauthorized", HttpStatus.UNAUTHORIZED)
     } else {
       res.send({ token: this.fsService.generateViewFileToken(fileId) })
