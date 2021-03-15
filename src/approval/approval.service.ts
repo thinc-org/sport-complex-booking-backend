@@ -19,7 +19,7 @@ export class ApprovalService {
 
     let queryBlock;
 
-    if (!searchType) queryBlock = { $or: [{ verification_status: "Submitted" }, { verification_status: "Verified", payment_status: "Submitted" }] };
+    queryBlock = { $or: [{ verification_status: "Submitted" }, { verification_status: "Verified", payment_status: "Submitted" }] };
     if (searchType === "extension") queryBlock = { verification_status: "Verified", payment_status: "Submitted" };
     if (searchType === "approval") queryBlock = { verification_status: "Submitted" };
 
