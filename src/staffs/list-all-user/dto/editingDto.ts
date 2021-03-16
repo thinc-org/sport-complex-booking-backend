@@ -2,6 +2,7 @@ import { Verification } from "./../../../users/interfaces/user.interface"
 import { Types } from "mongoose"
 import { IsBoolean, IsString, IsEnum, IsMongoId, IsOptional, IsDateString, ValidateNested } from "class-validator"
 import { Type } from "class-transformer"
+import { ApiPropertyOptional, ApiProperty } from "@nestjs/swagger"
 class Contact_person {
   @ApiPropertyOptional()
   @IsOptional()
