@@ -57,11 +57,11 @@ export class DisableCourtsService {
 
     if (data.starting_date != null) {
       data.starting_date.setUTCHours(0, 0, 0, 0)
-      query = query.find({ starting_date: { $gte: data.starting_date } })
+      query = query.find({ starting_date: { $lte: data.expired_date } })
     }
     if (data.expired_date != null) {
       data.expired_date.setUTCHours(23, 0, 0, 0)
-      query = query.find({ expired_date: { $lte: data.expired_date } })
+      query = query.find({ expired_date: { $gte: data.starting_date } })
     }
     if (data.sport_id != null) query = query.find({ sport_id: data.sport_id })
     if (data.court_num != null) query = query.find({ court_num: data.court_num })
