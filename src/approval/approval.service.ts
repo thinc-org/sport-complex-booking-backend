@@ -17,21 +17,19 @@ export class ApprovalService {
 
   async getSearchResult(name: string, start: number, end: number, searchType: string): Promise<[number, User[]]> {
 
-    let queryBlock;
+    let queryBlock = [];
 
-    queryBlock = { $or: [{ verification_status: "Submitted" }, { verification_status: "Verified", payment_status: "Submitted" }] };
-    if (searchType === "extension") queryBlock = { verification_status: "Verified", payment_status: "Submitted" };
-    if (searchType === "approval") queryBlock = { verification_status: "Submitted" };
-
-    let filter = this.userModel.find(queryBlock, { _id: 1, name_en: 1, surname_en: 1, username: 1, name_th: 1, surname_th: 1 })
+    if (searchType === "extension") queryBlock.push({ verification_status: "Verified", payment_status: "Submitted" });
+    else if (searchType === "approval") queryBlock.push({ verification_status: "Submitted" });
+    else queryBlock.push({ $or: [{ verification_status: "Submitted" }, { verification_status: "Verified", payment_status: "Submitted" }] });
 
     if (name !== undefined) {
       if ("A" <= name.charAt(0) && name.charAt(0) <= "z")
-        filter = filter.find({ $or: [{ name_en: { $regex: name } }, { surname_en: { $regex: name } }] })
-      else filter = filter.find({ $or: [{ name_th: { $regex: name } }, { surname_th: { $regex: name } }] })
+        queryBlock.push({ $or: [{ name_en: { $regex: name } }, { surname_en: { $regex: name } }] })
+      else queryBlock.push({ $or: [{ name_th: { $regex: name } }, { surname_th: { $regex: name } }] })
     }
 
-    let user = await filter
+    let user = await this.userModel.find({ $and: queryBlock }, { _id: 1, name_en: 1, surname_en: 1, username: 1, name_th: 1, surname_th: 1 });
     const length = user.length
     if (start !== undefined) {
       start = Number(start)
