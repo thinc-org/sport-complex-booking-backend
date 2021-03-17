@@ -129,7 +129,7 @@ export class CourtManagerService {
       if (eachSetting.open_time < 1 || eachSetting.close_time > 23) {
         throw new HttpException("Time slot is between 1 and 23.", HttpStatus.BAD_REQUEST)
       }
-      if (eachSetting.open_time >= eachSetting.close_time) {
+      if (eachSetting.open_time > eachSetting.close_time) {
         throw new HttpException("Open time cannot be more than close time.", HttpStatus.BAD_REQUEST)
       }
     })
