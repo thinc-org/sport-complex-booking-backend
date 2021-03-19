@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common"
 import { InjectModel } from "@nestjs/mongoose"
-import { createWriteStream, existsSync, unlinkSync } from "fs"
+import { createWriteStream, existsSync, mkdirSync, unlinkSync } from "fs"
 import { Model } from "mongoose"
 import { extname } from "path"
 import { AuthService } from "src/auth/auth.service"
@@ -71,8 +71,11 @@ export class FSService {
     if (file == null) return
 
     const newFile = new this.fileInfoModel({ owner, file_name: file.originalname, ext: extname(file.originalname), file_type: fileType })
-    newFile.full_path = path.join(rootPath, newFile._id.toString() + newFile.ext)
-
+    const dir = path.join(rootPath, newFile.file_type)
+    newFile.full_path = path.join(dir, newFile._id.toString() + newFile.ext)
+    if (!existsSync(dir)) {
+      mkdirSync(dir)
+    }
     const ws = createWriteStream(newFile.full_path)
     ws.write(file.buffer)
 
