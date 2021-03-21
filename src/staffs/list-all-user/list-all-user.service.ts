@@ -6,6 +6,7 @@ import { SatitCuPersonelUser, OtherUser, User, Account, CuStudentUser } from "sr
 import { UsersService } from "./../../users/users.service"
 import { UserEditingDto, ChangingPasswordDto } from "./dto/editingDto"
 import { CreateOtherUserDto, CreateSatitUserDto } from "../dto/add-user.dto"
+import { FSService } from "src/fs/fs.service"
 
 @Injectable()
 export class ListAllUserService {
@@ -14,7 +15,8 @@ export class ListAllUserService {
     @InjectModel("Other") private otherUserModel: Model<OtherUser>,
     @InjectModel("CuStudent") private cuStudentModel: Model<CuStudentUser>,
     @InjectModel("User") private userModel: Model<User>,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly fsService: FSService
   ) {}
 
   async hashPassword(password: string): Promise<string> {
@@ -141,6 +143,7 @@ export class ListAllUserService {
     if (!deleteResponse) {
       throw new HttpException("User not found", HttpStatus.NOT_FOUND)
     }
+    await this.fsService.deleteUserFiles(deleteResponse as OtherUser)
     return deleteResponse
   }
 

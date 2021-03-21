@@ -33,6 +33,16 @@ export class FSService {
     return fileInfo
   }
 
+  async deleteUserFiles(user: OtherUser) {
+    const fileFields = ["user_photo", "medical_certificate", "national_id_house_registration", "relationship_verification_document", "payment_slip"]
+    for (const field of fileFields) {
+      await this.deleteFile(user[field])
+    }
+    for (const slip of user.previous_payment_slips) {
+      await this.deleteFile(slip.toHexString())
+    }
+  }
+
   async saveFiles(rootPath: string, owner: string, files: UploadedFiles) {
     if (!files) {
       return {}
@@ -91,7 +101,7 @@ export class FSService {
 
     const fullPath = fileInfo.full_path
     const owner = fileInfo.owner
-    if (fileId == owner[fileInfo.file_type]) {
+    if (owner != null && fileId == owner[fileInfo.file_type]) {
       owner[fileInfo.file_type] = null
     }
 
@@ -101,7 +111,7 @@ export class FSService {
       console.log("Cannot delete file: " + fileId)
     }
 
-    await owner.save()
+    if (owner != null) await owner.save()
     await fileInfo.remove()
   }
 
@@ -133,5 +143,6 @@ export class FSService {
     }
     user.payment_slip = null
     user.payment_status = "NotSubmitted"
+    await user.save()
   }
 }
