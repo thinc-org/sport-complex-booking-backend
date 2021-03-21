@@ -66,6 +66,7 @@ export class MyReservationService {
 
     const date1: Date = new Date()
     const date2: Date = reservation.date
+    date2.setHours(reservation.time_slot[0] - 1)
     const diffDate = (date2.getTime() - date1.getTime()) / (1000 * 3600 * 24)
 
     const setting: Setting = await this.courtManagerService.getSetting()
