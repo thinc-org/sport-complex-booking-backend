@@ -54,6 +54,10 @@ export class ApprovalService {
     const user = await this.userModel.findByIdAndUpdate(id, { $set: setBlock }, { new: true, strict: false });
 
     if (!user) throw new HttpException("User not found", HttpStatus.NOT_FOUND)
+
+    if (isApprove)
+      await this.fsService.updatePaymentSlip((user) as OtherUser);
+
     return user
   }
 
