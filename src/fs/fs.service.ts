@@ -141,7 +141,6 @@ export class FSService {
       const removedFile = user.previous_payment_slips.shift()
       await this.deleteFile(removedFile.toHexString())
     }
-    user.payment_slip = null
     user.payment_status = "NotSubmitted"
     await user.save()
   }
