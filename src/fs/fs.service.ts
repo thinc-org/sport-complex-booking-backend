@@ -34,8 +34,7 @@ export class FSService {
   }
 
   async deleteUserFiles(user: OtherUser) {
-    const eligible = await this.verifyUserEligibility(user._id)
-    if (!eligible) return
+    if (user.account_type != Account.Other) return
     const fileFields = ["user_photo", "medical_certificate", "national_id_house_registration", "relationship_verification_document", "payment_slip"]
     for (const field of fileFields) {
       await this.deleteFile(user[field])
