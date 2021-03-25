@@ -8,7 +8,15 @@ import { UserGuard, StaffGuard } from "src/auth/jwt.guard"
 import { isValidObjectId, Types } from "mongoose"
 import { HttpException, HttpStatus } from "@nestjs/common"
 
-import { ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse, ApiBadRequestResponse } from "@nestjs/swagger"
+import {
+  ApiBearerAuth,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+  ApiBadRequestResponse,
+  ApiForbiddenResponse,
+} from "@nestjs/swagger"
 
 @ApiBearerAuth()
 @ApiTags("myreservation")
@@ -52,6 +60,7 @@ export class MyReservationController {
   @ApiNotFoundResponse({ description: "This reservation is not reserved" })
   @ApiUnauthorizedResponse({ description: "Must be a logged in user to use this endpoints" })
   @ApiOkResponse({ description: "Delete reservation by the given id" })
+  @ApiForbiddenResponse({ description: "Cancelling before 2 hour the reserved time is not allow." })
   @UseGuards(UserGuard)
   @Delete("/:id")
   async cancelReservation(@Param() param, @Req() req): Promise<Reservation> {
