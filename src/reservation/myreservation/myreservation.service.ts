@@ -73,7 +73,7 @@ export class MyReservationService {
       throw new HttpException("Cancelling before 2 hour the reserved time is not allow.", HttpStatus.FORBIDDEN)
     }
 
-    //reservation.remove()
+    reservation.remove()
 
     const setting: Setting = await this.courtManagerService.getSetting()
     const lateCancelationPunishment: number = setting.late_cancelation_punishment,
