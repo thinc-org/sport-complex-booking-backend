@@ -62,18 +62,24 @@ export class MyReservationService {
       throw new HttpException("This user isn't in the reservation.", HttpStatus.UNAUTHORIZED)
     }
 
-    reservation.remove()
+    const currentTime: Date = new Date()
+    const reservedTime: Date = reservation.date
+    reservedTime.setHours(reservation.time_slot[0] - 1)
+    const diffTime = reservedTime.getTime() - currentTime.getTime()
+    const diffHour = diffTime / 3600000 // 3600000 ms = 1 hr
+    const diffMinute = diffTime / 60000 // 60000 ms = 1 minute
 
-    const date1: Date = new Date()
-    const date2: Date = reservation.date
-    date2.setHours(reservation.time_slot[0] - 1)
-    const diffDate = (date2.getTime() - date1.getTime()) / (1000 * 3600 * 24)
+    if (diffMinute < 120) {
+      throw new HttpException("Cancelling before 2 hour the reserved time is not allow.", HttpStatus.FORBIDDEN)
+    }
+
+    //reservation.remove()
 
     const setting: Setting = await this.courtManagerService.getSetting()
     const lateCancelationPunishment: number = setting.late_cancelation_punishment,
-      lateCancelationDay: number = setting.late_cancelation_day
+      lateCancelationHour: number = setting.late_cancelation_day * 24
 
-    if (0 <= diffDate && diffDate <= lateCancelationDay) {
+    if (diffHour <= lateCancelationHour) {
       for (const userid of reservation.list_member) {
         const newExpiredPenalizeDate = new Date()
         newExpiredPenalizeDate.setDate(newExpiredPenalizeDate.getDate() + lateCancelationPunishment)
