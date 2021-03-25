@@ -63,13 +63,14 @@ export class MyReservationService {
     }
 
     const currentTime: Date = new Date()
+    currentTime.setHours(currentTime.getHours() + 7)
     const reservedTime: Date = reservation.date
     reservedTime.setHours(reservation.time_slot[0] - 1)
     const diffTime = reservedTime.getTime() - currentTime.getTime()
     const diffHour = diffTime / 3600000 // 3600000 ms = 1 hr
     const diffMinute = diffTime / 60000 // 60000 ms = 1 minute
 
-    if (diffMinute < 120) {
+    if (diffMinute <= 120) {
       throw new HttpException("Cancelling before 2 hour the reserved time is not allow.", HttpStatus.FORBIDDEN)
     }
 
@@ -84,7 +85,7 @@ export class MyReservationService {
     const lateCancelationPunishment: number = setting.late_cancelation_punishment,
       lateCancelationHour: number = setting.late_cancelation_day * 24
 
-    if (diffHour <= lateCancelationHour) {
+    if (diffHour < lateCancelationHour) {
       for (const userid of reservation.list_member) {
         const newExpiredPenalizeDate = new Date()
         newExpiredPenalizeDate.setDate(newExpiredPenalizeDate.getDate() + lateCancelationPunishment)
