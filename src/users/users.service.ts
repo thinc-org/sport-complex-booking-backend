@@ -165,7 +165,7 @@ export class UsersService {
   //for change email, language, phone number (send all 3 variable for each change)
   async changeData(input: { is_thai_language: boolean; personal_email: string; phone: string }, id: string) {
     //check if db has personal_email yet
-    if (input.personal_email !== "") throw new BadRequestException("Please enter email.")
+    if (input.personal_email == "") throw new BadRequestException("Please enter email.")
     const acc = await this.findCUById(id)
     acc.is_thai_language = input.is_thai_language
     acc.personal_email = input.personal_email
