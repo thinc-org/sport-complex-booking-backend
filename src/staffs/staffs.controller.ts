@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Res, UseGuards, Req } from "@nestjs/common
 import { CreateStaffDto, StaffLoginDTO, StaffLoginSuccessDTO, StaffProfileDTO } from "./dto/create-staff.dto"
 import { StaffsService } from "./staffs.service"
 import { Staff } from "./interfaces/staff.interface"
-import { StaffGuard } from "src/auth/jwt.guard"
+import { PasswordGuard, StaffGuard } from "src/auth/jwt.guard"
 import { AuthService } from "src/auth/auth.service"
 import { Role } from "src/common/roles"
 import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags } from "@nestjs/swagger"
@@ -23,7 +23,7 @@ export class StaffsController {
     return staff
   }
 
-  //ลบก่อนส่ง
+  @UseGuards(PasswordGuard)
   @Post("addFirstAdmin")
   async addFirstAdmin() {
     const staff = this.staffsService.addFirstAdmin()
