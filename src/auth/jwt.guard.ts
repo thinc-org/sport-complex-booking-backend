@@ -1,10 +1,19 @@
-import { ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common"
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common"
 import { AuthGuard } from "@nestjs/passport"
 import { StaffsService } from "src/staffs/staffs.service"
 import { UsersService } from "src/users/users.service"
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard("jwt") {}
+
+@Injectable()
+export class PasswordGuard implements CanActivate {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const password = context.switchToHttp().getRequest().headers.password
+    if (password !== process.env.password) throw new UnauthorizedException()
+    return true
+  }
+}
 
 @Injectable()
 export class StaffGuard extends AuthGuard("jwt") {

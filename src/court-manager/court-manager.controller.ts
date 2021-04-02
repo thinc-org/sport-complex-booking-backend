@@ -20,13 +20,6 @@ export class CourtManagerController {
     private readonly staffManagerService: StaffManagerService
   ) {}
 
-  //might get deleted, no error handling
-  @UseGuards(AdminGuard)
-  @Post("setting")
-  async postSetting(): Promise<Setting> {
-    return await this.courtManagerService.writeSetting()
-  }
-
   @UseGuards(AdminGuard)
   @ApiOkResponse({ description: "Setting updated", type: SettingDTO })
   @ApiBadRequestResponse({
