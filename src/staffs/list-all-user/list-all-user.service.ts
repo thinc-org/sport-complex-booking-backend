@@ -124,11 +124,6 @@ export class ListAllUserService {
       throw new HttpException("Username already exist", HttpStatus.BAD_REQUEST)
     }
 
-    const isEmailExist = await this.findUserByEmail(user.personal_email)
-    if (isEmailExist) {
-      throw new HttpException("This Email is already used", HttpStatus.BAD_REQUEST)
-    }
-
     //hash pasword
     const newUser = new this.satitStudentModel(user)
     newUser.password = await this.hashPassword(user.password)
