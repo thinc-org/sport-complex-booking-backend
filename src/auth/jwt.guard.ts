@@ -10,7 +10,7 @@ export class JwtAuthGuard extends AuthGuard("jwt") {}
 export class PasswordGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const password = context.switchToHttp().getRequest().headers.password
-    if (password !== process.env.password) throw new UnauthorizedException()
+    if (password !== process.env.GUARD_PASSWORD) throw new UnauthorizedException()
     return true
   }
 }
