@@ -44,15 +44,14 @@ export class FSController {
     { name: "payment_slip", maxCount: 1 },
   ]
 
+  private static fileUploadConfigSatit = [{ name: "student_id_photo", maxCount: 1 }]
+
   private static maxFileSize = 2 * 1000 * 1000
 
   constructor(private readonly fsService: FSService, private readonly configService: ConfigService) {}
 
   @ApiInternalServerErrorResponse({
     description: "Can't upload file ( likely caused by insufficient write permission )",
-  })
-  @ApiNotFoundResponse({
-    description: "Can't find the user",
   })
   @ApiNotFoundResponse({
     description: "Can't find the user",
@@ -70,6 +69,27 @@ export class FSController {
     const eligible = await this.fsService.verifyUserEligibility(req.user.userId)
     if (!eligible) throw new HttpException("This user cannot upload", HttpStatus.FORBIDDEN)
     return this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), req.user.userId, files)
+  }
+
+  @ApiInternalServerErrorResponse({
+    description: "Can't upload file ( likely caused by insufficient write permission )",
+  })
+  @ApiNotFoundResponse({
+    description: "Can't find the user",
+  })
+  @ApiUnauthorizedResponse({
+    description: "Not logged in",
+  })
+  @ApiForbiddenResponse({
+    description: "Only the satit type can use this endpoint",
+  })
+  @UseGuards(JwtAuthGuard)
+  @Post("uploadSatit")
+  @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfigSatit, { limits: { fileSize: FSController.maxFileSize } }))
+  async uploadFileSatit(@UploadedFiles() files, @Req() req) {
+    const eligible = await this.fsService.verifyUserEligibilitySatit(req.user.userId)
+    if (!eligible) throw new HttpException("This user cannot upload", HttpStatus.FORBIDDEN)
+    return this.fsService.saveFilesSatit(this.configService.get("UPLOAD_DEST"), req.user.userId, files)
   }
 
   @ApiQuery({
@@ -134,7 +154,7 @@ export class FSController {
 
   @ApiParam({
     name: "userId",
-    description: "Id of the user which will own the uploaded files",
+    description: "Id of the other user which will own the uploaded files",
   })
   @ApiInternalServerErrorResponse({
     description: "Can't upload file ( likely caused by insufficient write permission )",
@@ -147,5 +167,22 @@ export class FSController {
   @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfig, { limits: { fileSize: FSController.maxFileSize } }))
   async uploadFileAdmin(@UploadedFiles() files, @Req() req, @Res() res, @Param("userId") userId: string) {
     res.send(await this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), userId, files, true))
+  }
+
+  @ApiParam({
+    name: "userId",
+    description: "Id of the satit user which will own the uploaded files",
+  })
+  @ApiInternalServerErrorResponse({
+    description: "Can't upload file ( likely caused by insufficient write permission )",
+  })
+  @ApiNotFoundResponse({
+    description: "Can't find the user",
+  })
+  @UseGuards(StaffGuard)
+  @Post("admin/uploadSatit/:userId")
+  @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfigSatit, { limits: { fileSize: FSController.maxFileSize } }))
+  async uploadFileAdminSatit(@UploadedFiles() files, @Req() req, @Res() res, @Param("userId") userId: string) {
+    res.send(await this.fsService.saveFilesSatit(this.configService.get("UPLOAD_DEST"), userId, files, true))
   }
 }

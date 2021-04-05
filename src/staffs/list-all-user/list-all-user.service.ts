@@ -117,7 +117,7 @@ export class ListAllUserService {
     if (!deleteResponse) {
       throw new HttpException("User not found", HttpStatus.NOT_FOUND)
     }
-    await this.fsService.deleteUserFiles(deleteResponse as OtherUser)
+    await this.fsService.deleteUserFiles(deleteResponse)
     return deleteResponse
   }
 

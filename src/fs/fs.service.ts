@@ -4,11 +4,11 @@ import { createWriteStream, existsSync, mkdirSync, unlinkSync } from "fs"
 import { Model } from "mongoose"
 import { extname } from "path"
 import { AuthService } from "src/auth/auth.service"
-import { Account, MAX_PREV_SLIPS, OtherUser, PaymentStatus, Verification } from "src/users/interfaces/user.interface"
+import { Account, MAX_PREV_SLIPS, OtherUser, PaymentStatus, SatitCuPersonelUser, User, Verification } from "src/users/interfaces/user.interface"
 import { UsersService } from "src/users/users.service"
 import { FileInfo, FileInfoDocument } from "./fileInfo.schema"
 import * as path from "path"
-import { UploadedFiles } from "./fs.interface"
+import { UploadedFiles, UploadedFilesSatit } from "./fs.interface"
 
 @Injectable()
 export class FSService {
@@ -33,13 +33,25 @@ export class FSService {
     return fileInfo
   }
 
-  async deleteUserFiles(user: OtherUser) {
-    if (user.account_type != Account.Other) return
+  async deleteUserFiles(user: User) {
+    if (user.account_type == Account.Other) this.deleteUserFilesOther(user as OtherUser)
+    else if (user.account_type == Account.SatitAndCuPersonel) this.deleteUserFilesSatit(user as SatitCuPersonelUser)
+  }
+
+  async deleteUserFilesOther(user: OtherUser) {
     const fileFields = ["user_photo", "medical_certificate", "national_id_house_registration", "relationship_verification_document", "payment_slip"]
     for (const field of fileFields) {
       await this.deleteFile(user[field])
     }
     for (const slip of user.previous_payment_slips) {
+      await this.deleteFile(slip.toHexString())
+    }
+  }
+
+  async deleteUserFilesSatit(user: SatitCuPersonelUser) {
+    if (user.account_type != Account.SatitAndCuPersonel) return
+    await this.deleteFile(user.student_card_photo.toHexString())
+    for (const slip of user.previous_student_card_photo) {
       await this.deleteFile(slip.toHexString())
     }
   }
@@ -73,6 +85,29 @@ export class FSService {
       user.payment_slip = fileInfo._id
       // for users who are registering, payment_status will be NotSubmitted
       if (user.verification_status == "Verified") user.payment_status = "Submitted"
+    }
+    await user.save()
+    return result
+  }
+
+  async saveFilesSatit(rootPath: string, owner: string, files: UploadedFilesSatit, overwrite = false) {
+    if (!files) {
+      return {}
+    }
+    const result = {}
+
+    const user = (await this.userService.findById(owner)) as SatitCuPersonelUser
+
+    if (user == null) {
+      throw new HttpException("cannot find user: " + owner, HttpStatus.NOT_FOUND)
+    }
+
+    if (files.student_card_photo != null && (user.student_card_photo_status != "Submitted" || overwrite)) {
+      const fileInfo = await this.saveFile(rootPath, owner, files.student_card_photo[0], "student_card_photo")
+      result["student_card_photo"] = fileInfo._id
+      user.student_card_photo = fileInfo._id
+      // for users who are registering, payment_status will be NotSubmitted
+      if (user.verification_status == "Verified") user.student_card_photo_status = "Submitted"
     }
     await user.save()
     return result
@@ -133,6 +168,11 @@ export class FSService {
     return user != null && user.account_type == Account.Other
   }
 
+  async verifyUserEligibilitySatit(userId: string) {
+    const user = await this.userService.findById(userId)
+    return user != null && user.account_type == Account.SatitAndCuPersonel
+  }
+
   // used when approving payment slip
   async updatePaymentSlip(user: OtherUser) {
     if (user.payment_slip != null) user.previous_payment_slips.push(user.payment_slip)
@@ -143,6 +183,19 @@ export class FSService {
       await this.deleteFile(removedFile.toHexString())
     }
     user.payment_status = "NotSubmitted"
+    await user.save()
+  }
+
+  // used when approving payment slip
+  async updateStudentCardPhoto(user: SatitCuPersonelUser) {
+    if (user.student_card_photo != null) user.previous_student_card_photo.push(user.student_card_photo)
+    while (user.previous_student_card_photo.length > MAX_PREV_SLIPS) {
+      // runs more than once only when MAX_PREV_SLIPS is decreased
+      // good enough for MAX_PREV_SLIP = 2
+      const removedFile = user.previous_student_card_photo.shift()
+      await this.deleteFile(removedFile.toHexString())
+    }
+    user.student_card_photo_status = "NotSubmitted"
     await user.save()
   }
 }
