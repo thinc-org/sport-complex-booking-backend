@@ -12,6 +12,8 @@ export type Verification = "NotSubmitted" | "Submitted" | "Verified" | "Rejected
 // NotSubmitted -> Submitted -> Rejected -> Submitted -> NotSubmitted
 export type PaymentStatus = "Submitted" | "Rejected" | "NotSubmitted"
 
+export type StudentCardStatus = "Submitted" | "Rejected" | "NotSubmitted"
+
 export interface Contact_person {
   contact_person_prefix: string
   contact_person_name: string
@@ -71,6 +73,12 @@ export interface SatitCuPersonelUser extends User {
     expired_penalize_date: Date 
     ---- Inherited from User ---- */
   password: string
+  verification_status: Verification
+  rejected_info: string[]
+  account_expiration_date: Date
+  student_card_photo_status: StudentCardStatus
+  student_card_photo: mongoose.Types.ObjectId
+  previous_student_card_photo: mongoose.Types.ObjectId[]
 }
 
 export interface OtherUser extends User {
