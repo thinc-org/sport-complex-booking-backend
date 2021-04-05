@@ -171,3 +171,14 @@ export class QueryDisableCourtDTO {
   @IsString()
   description?: string
 }
+
+export class DeleteDisableCourtDTO {
+  @ApiProperty()
+  @IsString()
+  sport_id: string
+
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  court_num?: number
+}
