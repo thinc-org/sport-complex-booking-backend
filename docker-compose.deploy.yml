@@ -1,0 +1,32 @@
+version: "3"
+services:
+  app:
+    image: ghcr.io/thinc-org/sport-complex-booking-backend:dev
+    restart: unless-stopped
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+      JWT_SECRET: ${JWT_SECRET}
+      UPLOAD_DEST: /uploads
+      DeeAppId: ${SSO_APP_ID}
+      DeeAppSecret: ${SSO_APP_SECRET}
+      ssoEndpoint_VALIDATE: ${SSO_VALIDATE_ENDPOINT}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=shared"
+      - "traefik.http.routers.backend-$STAGE.entrypoints=websecure"
+      - "traefik.http.routers.backend-$STAGE.rule=Host(`${APP_HOST}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend-$STAGE.tls=true"
+      - "traefik.http.routers.backend-$STAGE.tls.certresolver=letsencrypt"
+    volumes:
+      - uploads:/uploads
+    networks:
+      - shared
+networks:
+  shared:
+    external:
+      name: shared
+volumes:
+  uploads:
+    external: true
+    name: ${UPLOADS_VOLUME}
