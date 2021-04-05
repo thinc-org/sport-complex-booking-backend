@@ -93,13 +93,27 @@ export class MyReservationService {
 
   async checkReservation(reservationId: Types.ObjectId): Promise<Reservation> {
     const reservation: Reservation = await this.reservationModel
-      .findByIdAndUpdate(reservationId, { is_check: true })
+      .findById(reservationId)
       .populate("sport_id", "sport_name_th sport_name_en")
-      .select("is_check sport_id")
+      .select("is_check sport_id date time_slot")
 
     if (reservation === null) {
       throw new HttpException("Invalid reservation.", HttpStatus.NOT_FOUND)
     }
+
+    const currentTime: Date = new Date()
+    currentTime.setHours(currentTime.getHours() + 7)
+    const reservedTime: Date = reservation.date
+    reservedTime.setHours(reservation.time_slot[0] - 1)
+    const diffTime = reservedTime.getTime() - currentTime.getTime()
+    const diffMinute = diffTime / 60000
+
+    if (diffMinute > 60) {
+      throw new HttpException("Check the reservation only before one hour.", HttpStatus.METHOD_NOT_ALLOWED)
+    }
+
+    reservation.is_check = true
+    reservation.save()
 
     return reservation
   }
