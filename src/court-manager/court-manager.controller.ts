@@ -1,4 +1,11 @@
-import { ApiOkResponse, ApiBadRequestResponse, ApiBearerAuth, ApiUnauthorizedResponse, ApiNotFoundResponse } from "@nestjs/swagger"
+import {
+  ApiOkResponse,
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiUnauthorizedResponse,
+  ApiNotFoundResponse,
+  ApiConflictResponse,
+} from "@nestjs/swagger"
 import { ApiTags } from "@nestjs/swagger"
 import { StaffManagerService } from "./../staffs/staff-manager/staff-manager.service"
 import { UserGuard, AdminGuard, JwtAuthGuard } from "src/auth/jwt.guard"
@@ -110,6 +117,7 @@ export class CourtManagerController {
   @ApiBadRequestResponse({ description: "Invalid Id or no document for this sport" })
   @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
   @ApiNotFoundResponse({ description: "Can't find sport with specified id" })
+  @ApiConflictResponse({ description: "There are some reservations or disablecourts that use the sport" })
   @Delete(":id")
   async deleteSport(@Param("id") id: string): Promise<Sport> {
     return await this.courtManagerService.deleteSport(id)
@@ -121,6 +129,9 @@ export class CourtManagerController {
   @ApiBadRequestResponse({ description: "Time slot is not between 1 and 23 or open time cannot be more than close time." })
   @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
   @ApiNotFoundResponse({ description: "Can't find sport with specified id" })
+  @ApiConflictResponse({
+    description: "The updated list_court delete some courts and there are some reservations or disablecourts that use the deleted courts",
+  })
   @Put("court-setting/update")
   async changeCourtSetting(@Body() new_court: UpdateSportDTO): Promise<Sport> {
     return await this.courtManagerService.updateCourtbyID(new_court.sport_id, new_court.new_setting)
