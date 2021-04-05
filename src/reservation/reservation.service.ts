@@ -20,29 +20,42 @@ export class ReservationService {
   ) {}
 
   @Cron("0 0 * * * *")
-  async checkReservation() {
+  async deleteCheckedReservation() {
     const date = new Date()
     date.setHours(date.getHours() + 7)
     const time = date.getUTCHours() + date.getMinutes() / 60
     date.setUTCHours(0, 0, 0, 0)
-    const reservations = await this.reservationModel.find({ date: date })
+    const reservations = await this.reservationModel.find({ date: date, is_check: true })
     for (const reservation of reservations) {
       const max = Math.max(...reservation.time_slot)
       if (time >= max) {
-        if (reservation.is_check) {
-          await reservation.remove()
-        } else {
-          const bannedDate = new Date()
-          const bannedDay = (await this.courtManagerService.getSetting()).absence_punishment
-          bannedDate.setDate(bannedDate.getDate() + bannedDay)
-          for (const member of reservation.list_member) {
-            const user = await this.userModel.findById(member)
+        await reservation.remove()
+      }
+    }
+  }
+
+  @Cron("0 15 * * * *")
+  async deleteNotCheckReservation() {
+    const date = new Date()
+    date.setHours(date.getHours() + 7)
+    const time = date.getUTCHours() + date.getMinutes() / 60
+    date.setUTCHours(0, 0, 0, 0)
+    const reservations = await this.reservationModel.find({ date: date, is_check: false })
+    for (const reservation of reservations) {
+      const min = Math.min(...reservation.time_slot) - 1
+      if (time >= min + 15 / 60) {
+        const bannedDate = new Date()
+        const bannedDay = (await this.courtManagerService.getSetting()).absence_punishment
+        bannedDate.setDate(bannedDate.getDate() + bannedDay)
+        for (const member of reservation.list_member) {
+          const user = await this.userModel.findById(member)
+          if (user) {
             user.is_penalize = true
             user.expired_penalize_date = bannedDate
-            user.save()
+            await user.save()
           }
-          await reservation.remove()
         }
+        await reservation.remove()
       }
     }
   }
