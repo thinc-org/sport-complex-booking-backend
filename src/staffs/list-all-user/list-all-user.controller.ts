@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Query, Patch, Put, Delete, Body, Param, Res, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common"
 import { StaffGuard } from "src/auth/jwt.guard"
 import { AuthService } from "src/auth/auth.service"
-import { CreateOtherUserDto, CreateSatitUserDto } from "src/staffs/dto/add-user.dto"
 import { User, Account } from "src/users/interfaces/user.interface"
 import { ListAllUserService } from "./list-all-user.service"
 import { Types, isValidObjectId } from "mongoose"
@@ -45,20 +44,6 @@ export class listAllUserController {
   @Get("/filter")
   async filterUser(@Query() qparam): Promise<[number, User[]]> {
     return this.addUserService.filterUser(qparam)
-  }
-
-  @ApiBadRequestResponse({ description: "The given username or email is used" })
-  @ApiBadRequestResponse({ description: "The user ID isn't invalid" })
-  @ApiOkResponse({ description: "Add satit user" })
-  @Post("/SatitUser")
-  @UsePipes(new ValidationPipe({ transform: true }))
-  async addSatitUser(@Body() createUserDto: CreateSatitUserDto, @Res() res) {
-    await this.addUserService.createSatitUser(createUserDto)
-
-    return res.status(201).json({
-      statusCode: 201,
-      message: "SatitUser added Successfully",
-    })
   }
 
   @ApiNotFoundResponse({ description: "Can't find user with specified id (inside the jwt)" })

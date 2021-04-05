@@ -5,7 +5,6 @@ import * as bcrypt from "bcrypt"
 import { SatitCuPersonelUser, OtherUser, User, Account, CuStudentUser } from "src/users/interfaces/user.interface"
 import { UsersService } from "./../../users/users.service"
 import { UserEditingDto, ChangingPasswordDto } from "./dto/editingDto"
-import { CreateOtherUserDto, CreateSatitUserDto } from "../dto/add-user.dto"
 import { FSService } from "src/fs/fs.service"
 
 @Injectable()
@@ -95,10 +94,6 @@ export class ListAllUserService {
     return [users.length, users.slice(begin, end)]
   }
 
-  async findUserByUsername(username: string): Promise<User> {
-    const user = await this.userModel.findOne({ username: username })
-    return user
-  }
   async getUserById(id: Types.ObjectId): Promise<User> {
     const user: User = await this.userModel.findById(id)
     const current: Date = new Date()
@@ -115,22 +110,6 @@ export class ListAllUserService {
   async findUserByEmail(email: string): Promise<User> {
     const user = await this.userModel.findOne({ personal_email: email })
     return user
-  }
-
-  async createSatitUser(user: CreateSatitUserDto) {
-    //if username already exist
-    const isUsernameExist = await this.findUserByUsername(user.username)
-    if (isUsernameExist) {
-      throw new HttpException("Username already exist", HttpStatus.BAD_REQUEST)
-    }
-
-    //hash pasword
-    const newUser = new this.satitStudentModel(user)
-    newUser.password = await this.hashPassword(user.password)
-    newUser.is_penalize = false
-    newUser.expired_penalize_date = null
-    //create user
-    await newUser.save()
   }
 
   async deleteUser(id: Types.ObjectId): Promise<User> {
