@@ -9,6 +9,9 @@ import { SettingSchema } from "./schemas/setting.schema"
 import { CourtManagerController } from "./court-manager.controller"
 import { CourtManagerService } from "./court-manager.service"
 import { StaffsModule } from "src/staffs/staffs.module"
+import { AllReservationModule } from "src/reservation/all-reservation/all-reservation.module"
+import { AllWaitingRoomModule } from "src/reservation/all-waiting-room/all-waiting-room.module"
+import { DisableCourtsModule } from "src/courts/disable-courts/disable-courts.module"
 
 @Module({
   imports: [
@@ -20,6 +23,9 @@ import { StaffsModule } from "src/staffs/staffs.module"
     UsersModule,
     listAllUserModule,
     StaffManagerModule,
+    AllWaitingRoomModule,
+    AllReservationModule,
+    DisableCourtsModule,
   ],
   controllers: [CourtManagerController],
   providers: [CourtManagerService],
