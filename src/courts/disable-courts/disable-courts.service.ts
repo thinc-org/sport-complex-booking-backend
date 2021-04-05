@@ -96,8 +96,12 @@ export class DisableCourtsService {
     await this.disableCourtModel.deleteMany({})
   }
 
-  async deleteDisableCourt(id: string): Promise<void> {
+  async deleteDisableCourtById(id: string): Promise<void> {
     await this.disableCourtModel.deleteOne({ _id: id })
+  }
+
+  async deleteDisableCourt(filter: QueryDisableCourtDTO): Promise<void> {
+    await this.disableCourtModel.deleteMany(filter)
   }
 
   async editDisableCourt(id: string, data: EditDisableCourtDTO): Promise<DisableCourt> {

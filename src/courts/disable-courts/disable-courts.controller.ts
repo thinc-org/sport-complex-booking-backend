@@ -1,7 +1,14 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common"
 import { ApiBearerAuth, ApiBody, ApiConflictResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from "@nestjs/swagger"
 import { AdminGuard, StaffGuard } from "src/auth/jwt.guard"
-import { CreateDisableCourtDTO, DisableCourtDTO, EditDisableCourtDTO, QueryDisableCourtDTO, QueryResult } from "./disable-courts.dto"
+import {
+  CreateDisableCourtDTO,
+  DeleteDisableCourtDTO,
+  DisableCourtDTO,
+  EditDisableCourtDTO,
+  QueryDisableCourtDTO,
+  QueryResult,
+} from "./disable-courts.dto"
 import { DisableCourtsService } from "./disable-courts.service"
 import { DisableCourt } from "./interfaces/disable-courts.interface"
 
@@ -52,8 +59,14 @@ export class DisableCourtsController {
   @ApiNotFoundResponse({ description: "Can't find disable court with specified id" })
   @ApiOkResponse({ description: "Deleted the disable court" })
   @Delete(":id")
-  async deleteDisableCourt(@Param("id") id: string): Promise<void> {
-    await this.disableCourtsService.deleteDisableCourt(id)
+  async deleteDisableCourtById(@Param("id") id: string): Promise<void> {
+    await this.disableCourtsService.deleteDisableCourtById(id)
+  }
+
+  @ApiOkResponse({ description: "Deleted" })
+  @Delete("")
+  async deleteDisableCourt(@Body() filter: DeleteDisableCourtDTO): Promise<void> {
+    await this.disableCourtsService.deleteDisableCourt(filter)
   }
 
   @ApiNotFoundResponse({ description: "Can't find disable court with specified id" })
