@@ -1,8 +1,7 @@
-import { Account } from "./../../staffs/dto/add-user.dto"
 import { ApiProperty, ApiPropertyOptional, ApiResponse } from "@nestjs/swagger"
 import { Exclude, Type } from "class-transformer"
 import { IsBoolean, IsDate, IsEmail, IsNotEmpty, IsOptional, IsString, ValidateNested } from "class-validator"
-import { User } from "../interfaces/user.interface"
+import { User, Account } from "../interfaces/user.interface"
 
 export class UserDTO {
   @Exclude()
@@ -119,6 +118,38 @@ export class CreateOtherUserDTO {
   @IsOptional()
   @IsString()
   medical_condition?: string
+}
+
+export class CreateSatitUserDto {
+  @ApiProperty()
+  account_type: Account.SatitAndCuPersonel
+  @ApiProperty()
+  @IsBoolean()
+  is_thai_language: boolean
+  @ApiProperty()
+  @IsString()
+  name_th: string
+  @ApiProperty()
+  @IsString()
+  surname_th: string
+  @ApiProperty()
+  @IsString()
+  name_en: string
+  @ApiProperty()
+  @IsString()
+  surname_en: string
+  @ApiProperty()
+  @IsEmail()
+  username: string
+  @ApiProperty()
+  @IsString()
+  password: string
+  @ApiProperty()
+  @IsString()
+  personal_email: string
+  @ApiProperty()
+  @IsString()
+  phone: string
 }
 
 export class CreateUserResponseDTO {
