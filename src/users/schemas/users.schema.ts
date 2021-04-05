@@ -90,7 +90,15 @@ export const CuStudentSchema = new CuStudentSchemaClass()
 
 class SatitCuPersonelSchemaClass extends UserSchemaClass {
   constructor() {
-    super({ password: String })
+    super({
+      password: String,
+      verification_status: verificationSchemaType,
+      rejected_info: [String],
+      account_expiration_date: Date,
+      student_card_photo_status: { type: String, enum: ["NotSubmitted", "Submitted", "Rejected"] },
+      student_card_photo: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" },
+      previous_student_card_photo: [{ type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" }],
+    })
   }
 }
 
