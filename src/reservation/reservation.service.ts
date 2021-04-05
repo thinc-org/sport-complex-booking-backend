@@ -4,7 +4,7 @@ import { Model, Types } from "mongoose"
 import { Cron } from "@nestjs/schedule"
 
 import { DisableCourtsService } from "src/courts/disable-courts/disable-courts.service"
-import { Account, CuStudentUser, OtherUser, User, Verification } from "src/users/interfaces/user.interface"
+import { Account, CuStudentUser, OtherUser, SatitCuPersonelUser, User, Verification } from "src/users/interfaces/user.interface"
 import { WaitingRoomDto } from "./dto/waiting-room.dto"
 import { Reservation, WaitingRoom } from "./interfaces/reservation.interface"
 import { CourtManagerService } from "src/court-manager/court-manager.service"
@@ -49,10 +49,10 @@ export class ReservationService {
 
   async checkValidity(id: string): Promise<boolean> {
     const user = await this.userModel.findById(id)
-    if (user.account_type == Account.Other) {
-      const otherUser = user as OtherUser
+    if (user.account_type == Account.Other || user.account_type == Account.SatitAndCuPersonel) {
+      const castedUser = user as SatitCuPersonelUser | OtherUser
       const date = new Date()
-      if (otherUser.verification_status != "Verified") {
+      if (castedUser.verification_status != "Verified") {
         throw new HttpException(
           {
             reason: "NOT_VERIFIED",
@@ -60,7 +60,7 @@ export class ReservationService {
           },
           HttpStatus.FORBIDDEN
         )
-      } else if (otherUser.account_expiration_date < date) {
+      } else if (castedUser.account_expiration_date < date) {
         throw new HttpException(
           {
             reason: "ACCOUNT_EXPIRED",
