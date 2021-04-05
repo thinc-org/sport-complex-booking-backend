@@ -5,7 +5,7 @@ import * as bcrypt from "bcrypt"
 import { InjectModel } from "@nestjs/mongoose"
 import { SsoContent } from "./interfaces/sso.interface"
 import { AuthService } from "src/auth/auth.service"
-import { CreateOtherUserDTO } from "./dto/user.dto"
+import { CreateOtherUserDTO, CreateSatitUserDto } from "./dto/user.dto"
 import { exception } from "console"
 import { Role } from "src/common/roles"
 
@@ -203,5 +203,26 @@ export class UsersService {
         )
       }
     }
+  }
+
+  async findUserByUsername(username: string): Promise<User> {
+    const user = await this.userModel.findOne({ username: username })
+    return user
+  }
+
+  async createSatitUser(user: CreateSatitUserDto) {
+    //if username already exist
+    const isUsernameExist = await this.findUserByUsername(user.username)
+    if (isUsernameExist) {
+      throw new HttpException("Username already exist", HttpStatus.BAD_REQUEST)
+    }
+
+    //hash pasword
+    const newUser = new this.satitStudentModel(user)
+    newUser.password = await this.authService.hashPassword(user.password)
+    newUser.is_penalize = false
+    newUser.expired_penalize_date = null
+    //create user
+    await newUser.save()
   }
 }

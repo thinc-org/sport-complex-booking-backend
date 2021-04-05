@@ -23,6 +23,7 @@ import { ConfigService } from "@nestjs/config"
 import { ChangeLanguageDto } from "./dto/change-language.dto"
 import {
   AppticketDTO,
+  CreateSatitUserDto,
   CreateOtherUserDTO,
   CUStudentDTO,
   SSOValidationResult,
@@ -130,6 +131,19 @@ export class UsersController {
   async createOtherUser(@Body() user: CreateOtherUserDTO) {
     const [createdUser, jwt] = await this.userService.createOtherUser(user)
     return new CreateUserResponseDTO(createdUser, jwt)
+  }
+
+  @ApiBadRequestResponse({ description: "The given username is used" })
+  @ApiCreatedResponse({ description: "Created satit user" })
+  @Post("/satit")
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async createSatitUser(@Body() createUserDto: CreateSatitUserDto, @Res() res) {
+    await this.userService.createSatitUser(createUserDto)
+
+    return res.status(201).json({
+      statusCode: 201,
+      message: "SatitUser created Successfully",
+    })
   }
 
   @UseGuards(UserGuard)
