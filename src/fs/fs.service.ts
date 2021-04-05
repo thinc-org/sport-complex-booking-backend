@@ -44,7 +44,7 @@ export class FSService {
     }
   }
 
-  async saveFiles(rootPath: string, owner: string, files: UploadedFiles) {
+  async saveFiles(rootPath: string, owner: string, files: UploadedFiles, overwrite = false) {
     if (!files) {
       return {}
     }
@@ -67,7 +67,7 @@ export class FSService {
       user[field] = fileInfo._id
     }
 
-    if (files.payment_slip != null && user.payment_status != "Submitted") {
+    if (files.payment_slip != null && (user.payment_status != "Submitted" || overwrite)) {
       const fileInfo = await this.saveFile(rootPath, owner, files.payment_slip[0], "payment_slip")
       result["payment_slip"] = fileInfo._id
       user.payment_slip = fileInfo._id
