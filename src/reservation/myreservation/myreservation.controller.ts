@@ -16,6 +16,7 @@ import {
   ApiUnauthorizedResponse,
   ApiBadRequestResponse,
   ApiForbiddenResponse,
+  ApiMethodNotAllowedResponse,
 } from "@nestjs/swagger"
 
 @ApiBearerAuth()
@@ -73,6 +74,7 @@ export class MyReservationController {
   @ApiNotFoundResponse({ description: "This reservation is not reserved" })
   @ApiUnauthorizedResponse({ description: "Must be a logged in staff to use this endpoints" })
   @ApiOkResponse({ description: "Check reservation by the given id" })
+  @ApiMethodNotAllowedResponse({ description: "Check the reservation only before one hour" })
   @UseGuards(StaffGuard)
   @Patch("/:id")
   async checkReservation(@Param() param): Promise<Reservation> {
