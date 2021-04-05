@@ -1,16 +1,22 @@
 import { SettingDTO, SportDTO } from "./dto/courts.dto"
-import { Injectable, HttpException, HttpStatus, BadRequestException } from "@nestjs/common"
+import { Injectable, HttpException, HttpStatus, BadRequestException, ConflictException } from "@nestjs/common"
 import { Court, Sport } from "./interfaces/sportCourt.interface"
 import { Setting } from "./interfaces/setting.interface"
 import { Model, isValidObjectId } from "mongoose"
 import { InjectModel } from "@nestjs/mongoose"
+import { DisableCourtsService } from "src/courts/disable-courts/disable-courts.service"
+import { AllReservationService } from "src/reservation/all-reservation/all-reservation.service"
+import { AllWaitingRoomService } from "src/reservation/all-waiting-room/all-waiting-room.service"
 
 @Injectable()
 export class CourtManagerService {
   constructor(
     @InjectModel("Sport") private Sport: Model<Sport>,
     @InjectModel("Courts") private Court: Model<Court>,
-    @InjectModel("Setting") private Setting: Model<Setting>
+    @InjectModel("Setting") private Setting: Model<Setting>,
+    private readonly allReservationService: AllReservationService,
+    private readonly allWaitingRoomService: AllWaitingRoomService,
+    private readonly disableCourtsService: DisableCourtsService
   ) {}
 
   //might get deleted, no error handling
@@ -101,6 +107,21 @@ export class CourtManagerService {
     if (!isValidObjectId(sportID)) {
       throw new HttpException("Invalid Id.", HttpStatus.BAD_REQUEST)
     }
+
+    const overlapDisableCourts = (await this.disableCourtsService.queryDisableCourt({ lean: true, sport_id: sportID })).sliced_results
+    const overlapWaitingRooms = await this.allWaitingRoomService.queryWaitingRoom({ sport_id: sportID })
+    const overlapReservations = await this.allReservationService.queryReservation({ spor_id: sportID })
+
+    if (overlapDisableCourts.length != 0 || overlapWaitingRooms.length != 0 || overlapReservations.length != 0) {
+      throw new ConflictException({
+        statusCode: HttpStatus.CONFLICT,
+        message: "There are some conflicts",
+        overlapWaitingRooms,
+        overlapReservations,
+        overlapDisableCourts,
+      })
+    }
+
     const deleted_sport = await this.Sport.findByIdAndDelete(sportID)
     if (!deleted_sport) {
       throw new HttpException("No document for this sport.", HttpStatus.BAD_REQUEST)
@@ -134,11 +155,38 @@ export class CourtManagerService {
       }
     })
     const doc = await this.findSportByID(sportID)
+    const deletedCourts = this.findDeletedCourts(doc.list_court, newSettings)
+    const overlapDisableCourts = []
+    for (const court_num of deletedCourts) {
+      const overlap = await this.disableCourtsService.queryDisableCourt({ lean: true, sport_id: sportID, court_num })
+      overlapDisableCourts.push(...overlap.sliced_results)
+    }
+    const overlapWaitingRooms = await this.allWaitingRoomService.queryWaitingRoom({ sport_id: sportID, court_number: { $in: deletedCourts } })
+    const overlapReservations = await this.allReservationService.queryReservation({ sport_id: sportID, court_number: { $in: deletedCourts } })
+
+    if (overlapDisableCourts.length != 0 || overlapWaitingRooms.length != 0 || overlapReservations.length != 0) {
+      throw new ConflictException({
+        statusCode: HttpStatus.CONFLICT,
+        message: "There are some conflicts",
+        overlapWaitingRooms,
+        overlapReservations,
+        overlapDisableCourts,
+      })
+    }
+
     doc.list_court = newSettings
     return await doc.save()
   }
 
   async findAllSport(): Promise<Sport[]> {
     return await this.Sport.find({})
+  }
+
+  private findDeletedCourts(list_court: Court[], new_list_court: Court[]) {
+    const result = []
+    for (const court of list_court) {
+      if (new_list_court.findIndex((c) => court.court_num == c.court_num) == -1) result.push(court.court_num)
+    }
+    return result
   }
 }

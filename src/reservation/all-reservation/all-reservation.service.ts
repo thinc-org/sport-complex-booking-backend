@@ -6,7 +6,7 @@ import { DisableCourt } from "src/courts/disable-courts/interfaces/disable-court
 
 @Injectable()
 export class AllReservationService {
-  constructor(@InjectModel("Reservation") private readonly reservationModel: Model<Reservation>) { }
+  constructor(@InjectModel("Reservation") private readonly reservationModel: Model<Reservation>) {}
 
   async getReservation(id: string): Promise<Reservation> {
     const reservation = await this.reservationModel
@@ -68,7 +68,11 @@ export class AllReservationService {
         $or: queryArray,
       })
       .sort({ date: 1, time_slot: -1 })
-      .populate("list_member", "username personal_email phone")
+      .populate("list_member", "username personal_email phone name_en surname_en name_th surname_th")
     return reservation
+  }
+
+  public async queryReservation(filter) {
+    return await this.reservationModel.find(filter).populate("list_member", "username personal_email phone name_en surname_en name_th surname_th")
   }
 }
