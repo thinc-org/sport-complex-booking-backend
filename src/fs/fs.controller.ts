@@ -146,6 +146,6 @@ export class FSController {
   @Post("admin/upload/:userId")
   @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfig, { limits: { fileSize: FSController.maxFileSize } }))
   async uploadFileAdmin(@UploadedFiles() files, @Req() req, @Res() res, @Param("userId") userId: string) {
-    res.send(await this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), userId, files))
+    res.send(await this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), userId, files, true))
   }
 }
