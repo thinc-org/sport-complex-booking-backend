@@ -56,12 +56,7 @@ export class FSService {
     }
   }
 
-  async saveFiles(
-    rootPath: string,
-    owner: string,
-    files: UploadedFilesOther,
-    overwrite = false
-  ): Promise<{ result: Record<string, string>; user: OtherUser }> {
+  async saveFiles(rootPath: string, owner: string, files: UploadedFilesOther, overwrite = false): Promise<Record<string, string>> {
     if (!files) {
       return { result: null, user: null }
     }
@@ -92,7 +87,7 @@ export class FSService {
       if (user.verification_status == "Verified") user.payment_status = "Submitted"
     }
     await user.save()
-    return { result, user }
+    return result
   }
 
   async saveFilesSatit(rootPath: string, owner: string, files: UploadedFilesSatit, overwrite = false) {
