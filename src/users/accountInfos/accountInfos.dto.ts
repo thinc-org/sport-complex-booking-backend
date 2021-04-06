@@ -34,6 +34,39 @@ export class EditContactPersonDTO {
   contact_person_phone?: string
 }
 
+export class editSatitAccountInfoDTO {
+  @ApiProperty()
+  @Expose()
+  @IsBoolean({ always: true })
+  @IsOptional({ groups: ["optional"] })
+  is_thai_language?: boolean
+
+  @ApiProperty()
+  @Expose()
+  @IsString({ always: true })
+  @IsOptional({ groups: ["optional"] })
+  username?: string
+
+  @ApiProperty()
+  @Expose()
+  @IsString({ always: true })
+  @IsOptional({ groups: ["optional"] })
+  phone?: string
+
+  @ApiProperty()
+  @Expose()
+  @IsString({ always: true })
+  @IsOptional({ groups: ["optional"] })
+  @IsEmail({}, { always: true })
+  personal_email?: string
+
+  @ApiProperty()
+  @Expose()
+  @IsString({ always: true })
+  @IsOptional({ groups: ["optional"] })
+  student_card_photo?: string
+}
+
 export class editOtherAccountInfoDTO {
   @ApiProperty()
   @Expose()
