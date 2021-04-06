@@ -210,7 +210,7 @@ export class UsersService {
     return user
   }
 
-  async createSatitUser(user: CreateSatitUserDto) {
+  async createSatitUser(user: CreateSatitUserDto): Promise<string> {
     //if username already exist
     const isUsernameExist = await this.findUserByUsername(user.username)
     if (isUsernameExist) {
@@ -224,5 +224,6 @@ export class UsersService {
     newUser.expired_penalize_date = null
     //create user
     await newUser.save()
+    return this.authService.generateJWT(newUser._id, "User")
   }
 }
