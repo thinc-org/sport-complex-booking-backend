@@ -55,9 +55,8 @@ export class SatitApprovalService {
 
     if (!user) throw new HttpException("User not found", HttpStatus.NOT_FOUND)
 
-    //wait for function in FSservice
     if (isApprove)
-      await this.fsService.((user) as SatitCuPersonelUser);
+      await this.fsService.updateStudentCardPhoto((user) as SatitCuPersonelUser);
 
     return user
   }
@@ -73,9 +72,8 @@ export class SatitApprovalService {
 
     if (!user) throw new HttpException("User not found", HttpStatus.NOT_FOUND)
 
-    //wait for function in FSservice
     if (isApprove)
-      await this.fsService.((user) as SatitCuPersonelUser);
+      await this.fsService.updateStudentCardPhoto((user) as SatitCuPersonelUser);
 
     return user
   }
