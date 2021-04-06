@@ -1,8 +1,8 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger"
-import { CreateContactPersonDTO } from "src/users/dto/user.dto"
-import { IsArray, IsDate, IsEmail, IsNumber, ValidateNested, IsString, IsBoolean, IsNotEmpty, IsOptional } from "class-validator"
+import { ApiProperty } from "@nestjs/swagger"
+import { IsArray, IsDate, IsEmail, IsNumber, ValidateNested, IsString, IsBoolean } from "class-validator"
 import { Type } from "class-transformer"
-export class OtherUserDTO {
+
+export class SatitUserDTO {
     @ApiProperty()
     username: string
 
@@ -35,27 +35,6 @@ export class OtherUserDTO {
     surname_en: string
 
     @ApiProperty()
-    @Type(() => Date)
-    @IsDate()
-    birthday: Date
-
-    @ApiProperty()
-    @IsString()
-    national_id: string
-
-    @ApiProperty()
-    @IsString()
-    gender: string
-
-    @ApiProperty()
-    @IsString()
-    marital_status: string
-
-    @ApiProperty()
-    @IsString()
-    address: string
-
-    @ApiProperty()
     @IsString()
     phone: string
 
@@ -65,7 +44,7 @@ export class OtherUserDTO {
 
     @ApiProperty()
     @IsString()
-    payment_status: string
+    student_card_photo_status: string
 
     @ApiProperty()
     @IsArray()
@@ -75,19 +54,6 @@ export class OtherUserDTO {
     @IsString()
     @IsEmail()
     personal_email: string
-
-    @ApiProperty({
-        type: CreateContactPersonDTO,
-    })
-    @IsNotEmpty()
-    @Type(() => CreateContactPersonDTO)
-    @ValidateNested()
-    contact_person: CreateContactPersonDTO
-
-    @ApiPropertyOptional()
-    @IsOptional()
-    @IsString()
-    medical_condition?: string
 
 }
 
