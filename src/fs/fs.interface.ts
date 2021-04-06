@@ -1,6 +1,6 @@
 import { Multer } from "multer"
 
-export interface UploadedFiles {
+export interface UploadedFilesOther {
   user_photo?: Array<Express.Multer.File>
   medical_certificate?: Array<Express.Multer.File>
   national_id_house_registration?: Array<Express.Multer.File>

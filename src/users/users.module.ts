@@ -7,6 +7,7 @@ import { AuthModule } from "src/auth/auth.module"
 
 import { SsoContentSchema } from "./schemas/sso.schema"
 import { ConfigModule } from "@nestjs/config"
+import { FSModule } from "src/fs/fs.module"
 
 const cuStudentProviderFactory = {
   provide: getModelToken("CuStudent"),
@@ -30,6 +31,7 @@ const OtherProviderFactory = {
   imports: [
     ConfigModule,
     forwardRef(() => AuthModule),
+    forwardRef(() => FSModule),
     MongooseModule.forFeature([{ name: "User", schema: UserSchema, collection: "users" }]),
     MongooseModule.forFeature([{ name: "SsoContent", schema: SsoContentSchema }]),
     HttpModule,

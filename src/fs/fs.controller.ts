@@ -36,7 +36,7 @@ import { FSService } from "./fs.service"
 @ApiTags("fs")
 @Controller("fs")
 export class FSController {
-  private static fileUploadConfig = [
+  public static fileUploadConfig = [
     { name: "user_photo", maxCount: 1 },
     { name: "medical_certificate", maxCount: 1 },
     { name: "national_id_house_registration", maxCount: 1 },
@@ -44,9 +44,9 @@ export class FSController {
     { name: "payment_slip", maxCount: 1 },
   ]
 
-  private static fileUploadConfigSatit = [{ name: "student_card_photo", maxCount: 1 }]
+  public static fileUploadConfigSatit = [{ name: "student_card_photo", maxCount: 1 }]
 
-  private static maxFileSize = 2 * 1000 * 1000
+  public static maxFileSize = 2 * 1000 * 1000
 
   constructor(private readonly fsService: FSService, private readonly configService: ConfigService) {}
 
@@ -68,7 +68,7 @@ export class FSController {
   async uploadFile(@UploadedFiles() files, @Req() req) {
     const eligible = await this.fsService.verifyUserEligibility(req.user.userId)
     if (!eligible) throw new HttpException("This user cannot upload", HttpStatus.FORBIDDEN)
-    return this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), req.user.userId, files)
+    return await this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), req.user.userId, files)
   }
 
   @ApiInternalServerErrorResponse({
