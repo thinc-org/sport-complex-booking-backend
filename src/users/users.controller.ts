@@ -138,11 +138,12 @@ export class UsersController {
   @Post("/satit")
   @UsePipes(new ValidationPipe({ transform: true }))
   async createSatitUser(@Body() createUserDto: CreateSatitUserDto, @Res() res) {
-    await this.userService.createSatitUser(createUserDto)
+    const jwt = await this.userService.createSatitUser(createUserDto)
 
     return res.status(201).json({
       statusCode: 201,
       message: "SatitUser created Successfully",
+      jwt: jwt,
     })
   }
 
