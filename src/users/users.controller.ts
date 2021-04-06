@@ -1,4 +1,4 @@
-import { CuStudentUser } from "src/users/interfaces/user.interface"
+import { CuStudentUser, SatitCuPersonelUser } from "src/users/interfaces/user.interface"
 import {
   Body,
   Controller,
@@ -15,6 +15,7 @@ import {
   UseInterceptors,
   HttpStatus,
   UploadedFiles,
+  Get,
 } from "@nestjs/common"
 import { UsersService } from "./users.service"
 import { UserGuard } from "src/auth/jwt.guard"
@@ -51,9 +52,9 @@ import {
 import { FSController } from "src/fs/fs.controller"
 import { FileFieldsInterceptor } from "@nestjs/platform-express"
 import { FSService } from "src/fs/fs.service"
-import { validate } from "class-validator"
+import { validate, ValidationError } from "class-validator"
 import { plainToClass } from "class-transformer"
-import { UploadedFilesOther } from "src/fs/fs.interface"
+import { UploadedFilesOther, UploadedFilesSatit } from "src/fs/fs.interface"
 
 @ApiTags("users")
 @Controller("users")
@@ -156,10 +157,12 @@ export class UsersController {
   @ApiBadRequestResponse({ description: "The given username is used" })
   @ApiCreatedResponse({ description: "Created satit user" })
   @Post("/satit")
+  @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfigSatit, { limits: { fileSize: FSController.maxFileSize } }))
   @UsePipes(new ValidationPipe({ transform: true }))
-  async createSatitUser(@Body() createUserDto: CreateSatitUserDto, @Res() res) {
-    const jwt = await this.userService.createSatitUser(createUserDto)
-
+  async createSatitUser(@UploadedFiles() files: UploadedFilesSatit, @Body() body: FormDataDTO, @Res() res) {
+    const validatedUser = await this.userService.validateSatitUserData(body.data)
+    const [createdUser, jwt] = await this.userService.createSatitUser(validatedUser)
+    await this.fsService.saveFilesSatit(this.configService.get("UPLOAD_DEST"), createdUser._id, files)
     return res.status(201).json({
       statusCode: 201,
       message: "SatitUser created Successfully",

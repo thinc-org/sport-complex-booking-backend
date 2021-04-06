@@ -7,7 +7,7 @@ import { SsoContent } from "./interfaces/sso.interface"
 import { AuthService } from "src/auth/auth.service"
 import { CreateOtherUserDTO, CreateSatitUserDto } from "./dto/user.dto"
 import { plainToClass } from "class-transformer"
-import { validate } from "class-validator"
+import { validate, ValidationError } from "class-validator"
 
 @Injectable()
 export class UsersService {
@@ -185,18 +185,31 @@ export class UsersService {
     const user = plainToClass(CreateOtherUserDTO, JSON.parse(jsonstring))
     const err = await validate(user)
     if (err.length > 0) {
-      const message = []
-      err.forEach((e) => message.push(...Object.values(e.constraints)))
-      throw new HttpException(
-        {
-          status: 400,
-          message,
-          error: "Bad Request",
-        },
-        HttpStatus.BAD_REQUEST
-      )
+      this.handleValidatonError(err)
     }
     return user
+  }
+
+  async validateSatitUserData(jsonstring: string): Promise<CreateSatitUserDto> {
+    const user = plainToClass(CreateSatitUserDto, JSON.parse(jsonstring))
+    const err = await validate(user)
+    if (err.length > 0) {
+      this.handleValidatonError(err)
+    }
+    return user
+  }
+
+  private handleValidatonError(err: ValidationError[]) {
+    const message = []
+    err.forEach((e) => message.push(...Object.values(e.constraints)))
+    throw new HttpException(
+      {
+        status: 400,
+        message,
+        error: "Bad Request",
+      },
+      HttpStatus.BAD_REQUEST
+    )
   }
 
   async createOtherUser(user: CreateOtherUserDTO): Promise<[OtherUser, string]> {
@@ -228,7 +241,7 @@ export class UsersService {
     return user
   }
 
-  async createSatitUser(user: CreateSatitUserDto): Promise<string> {
+  async createSatitUser(user: CreateSatitUserDto): Promise<[SatitCuPersonelUser, string]> {
     //if username already exist
     const isUsernameExist = await this.findUserByUsername(user.username)
     if (isUsernameExist) {
@@ -240,8 +253,9 @@ export class UsersService {
     newUser.password = await this.authService.hashPassword(user.password)
     newUser.is_penalize = false
     newUser.expired_penalize_date = null
+    newUser.verification_status = "NotSubmitted"
+    newUser.student_card_photo_status = "NotSubmitted"
     //create user
-    await newUser.save()
-    return this.authService.generateJWT(newUser._id, "User")
+    return [await newUser.save(), await this.authService.generateJWT(newUser._id, "User")]
   }
 }
