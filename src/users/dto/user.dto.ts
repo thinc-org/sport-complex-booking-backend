@@ -121,7 +121,10 @@ export class CreateOtherUserDTO {
 }
 
 export class FormDataDTO {
-  @ApiProperty()
+  @ApiProperty({
+    oneOf: [{ type: "CreateOtherUserDTO ( stringified )" }, { type: "CreateSatitUserDTO ( stringified )" }],
+    description: "JSON string of user data ( Because FormData can only send key/value pairs, JSON data must be converted to string )",
+  })
   @IsString()
   data: string
 }
