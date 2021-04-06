@@ -45,12 +45,6 @@ export class editSatitAccountInfoDTO {
   @Expose()
   @IsString({ always: true })
   @IsOptional({ groups: ["optional"] })
-  username?: string
-
-  @ApiProperty()
-  @Expose()
-  @IsString({ always: true })
-  @IsOptional({ groups: ["optional"] })
   phone?: string
 
   @ApiProperty()

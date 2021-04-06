@@ -118,12 +118,9 @@ class SatitCuPersonelSchemaClass extends UserSchemaClass {
     const oldEditMethod: (dto: any) => void = this.methods.editAccountInfo
 
     this.methods.editAccountInfo = function(this: SatitCuPersonelUser, updt: editSatitAccountInfoDTO) {
-      if (this.verification_status == "Submitted" || this.verification_status == "Verified") {
-        // can only edit email, phone number, and address
-        this.phone = updt.phone ?? this.phone
-        this.personal_email = updt.personal_email ?? this.personal_email
-      } else {
-        oldEditMethod.call(this, updt)
+      oldEditMethod.call(this, updt)
+      UserSchemaClass.assignNotNull(this, updt)
+      if (this.verification_status == "Rejected") {
         UserSchemaClass.assignNotNull(this, updt, { verification_status: "Submitted", rejected_info: [] })
       }
     }
