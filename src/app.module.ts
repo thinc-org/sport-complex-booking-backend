@@ -17,7 +17,7 @@ import { CourtManagerModule } from "./court-manager/court-manager.module"
 import { listAllUserModule } from "./staffs/list-all-user/list-all-user.module"
 import { AllReservationModule } from "./reservation/all-reservation/all-reservation.module"
 import { AllWaitingRoomModule } from "./reservation/all-waiting-room/all-waiting-room.module"
-
+import { SatitApprovalModule } from "./satit-approval/satit-approval.module"
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: [".env", ".env.development"] }),
@@ -44,8 +44,9 @@ import { AllWaitingRoomModule } from "./reservation/all-waiting-room/all-waiting
     StaffManagerModule,
     AllReservationModule,
     AllWaitingRoomModule,
+    SatitApprovalModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

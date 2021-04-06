@@ -25,13 +25,13 @@ class UserSchemaClass extends mongoose.Schema {
 
     this.statics.editAccountInfoDTO = EditUserInfoDTO
 
-    this.methods.editAccountInfo = function(updt: EditUserInfoDTO) {
+    this.methods.editAccountInfo = function (updt: EditUserInfoDTO) {
       this.is_thai_language = updt.is_thai_language ?? this.is_thai_language
       this.personal_email = updt.personal_email ?? this.personal_email
       this.phone = updt.phone ?? this.phone
     }
 
-    this.methods.validateAndEditAccountInfo = async function(updt, all: boolean) {
+    this.methods.validateAndEditAccountInfo = async function (updt, all: boolean) {
       const Model = this.constructor
       const info = plainToClass(Model.editAccountInfoDTO, updt, { excludeExtraneousValues: true })
       try {
@@ -42,16 +42,16 @@ class UserSchemaClass extends mongoose.Schema {
       }
     }
 
-    this.methods.setPassword = function(hashedPassword: string) {
+    this.methods.setPassword = function (hashedPassword: string) {
       this.password = hashedPassword
     }
 
-    this.methods.getPassword = function() {
+    this.methods.getPassword = function () {
       if (this.password) return this.password
       else throw new HttpException("password does not exist", HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
-    this.methods.updateBan = function() {
+    this.methods.updateBan = function () {
       if (!this.is_penalize) {
         return
       } else if (this.expired_penalize_date == null) {
@@ -83,16 +83,16 @@ UserSchema.index({ username: 1 }, { unique: true })
 class CuStudentSchemaClass extends UserSchemaClass {
   constructor() {
     super({ is_first_login: Boolean })
-    this.methods.setPassword = function() {
+    this.methods.setPassword = function () {
       throw new HttpException("Custudent cannot change password", HttpStatus.FORBIDDEN)
     }
-    this.methods.getPassword = function() {
+    this.methods.getPassword = function () {
       throw new HttpException("Custudent does not have password", HttpStatus.FORBIDDEN)
     }
 
     const oldEditMethod: (dto: any) => void = this.methods.editAccountInfo
 
-    this.methods.editAccountInfo = function(updt: EditUserInfoDTO) {
+    this.methods.editAccountInfo = function (updt: EditUserInfoDTO) {
       oldEditMethod.call(this, updt)
       this.is_first_login = false
     }
@@ -165,7 +165,7 @@ class OtherSchemaClass extends UserSchemaClass {
 
     const oldEditMethod: (dto: any) => void = this.methods.editAccountInfo
 
-    this.methods.editAccountInfo = function(this: OtherUser, updt: editOtherAccountInfoDTO) {
+    this.methods.editAccountInfo = function (this: OtherUser, updt: editOtherAccountInfoDTO) {
       if (this.verification_status == "Submitted" || this.verification_status == "Verified") {
         // can only edit email, phone number, and address
         this.address = updt.address ?? this.address
