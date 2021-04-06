@@ -8,7 +8,7 @@ import { Account, MAX_PREV_SLIPS, OtherUser, PaymentStatus, SatitCuPersonelUser,
 import { UsersService } from "src/users/users.service"
 import { FileInfo, FileInfoDocument } from "./fileInfo.schema"
 import * as path from "path"
-import { UploadedFiles, UploadedFilesSatit } from "./fs.interface"
+import { UploadedFilesOther, UploadedFilesSatit } from "./fs.interface"
 
 @Injectable()
 export class FSService {
@@ -56,9 +56,14 @@ export class FSService {
     }
   }
 
-  async saveFiles(rootPath: string, owner: string, files: UploadedFiles, overwrite = false) {
+  async saveFiles(
+    rootPath: string,
+    owner: string,
+    files: UploadedFilesOther,
+    overwrite = false
+  ): Promise<{ result: Record<string, string>; user: OtherUser }> {
     if (!files) {
-      return {}
+      return { result: null, user: null }
     }
     const result = {}
 
@@ -87,7 +92,7 @@ export class FSService {
       if (user.verification_status == "Verified") user.payment_status = "Submitted"
     }
     await user.save()
-    return result
+    return { result, user }
   }
 
   async saveFilesSatit(rootPath: string, owner: string, files: UploadedFilesSatit, overwrite = false) {

@@ -13,6 +13,8 @@ import {
   ValidationPipe,
   ClassSerializerInterceptor,
   UseInterceptors,
+  HttpStatus,
+  UploadedFiles,
 } from "@nestjs/common"
 import { UsersService } from "./users.service"
 import { UserGuard } from "src/auth/jwt.guard"
@@ -31,6 +33,7 @@ import {
   LoginSuccessDTO,
   SSOValidationUpdateInfoDTO,
   UserDTO,
+  FormDataDTO,
 } from "./dto/user.dto"
 import { Role } from "src/common/roles"
 import {
@@ -43,7 +46,14 @@ import {
   ApiUnauthorizedResponse,
   ApiNotFoundResponse,
   ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
 } from "@nestjs/swagger"
+import { FSController } from "src/fs/fs.controller"
+import { FileFieldsInterceptor } from "@nestjs/platform-express"
+import { FSService } from "src/fs/fs.service"
+import { validate } from "class-validator"
+import { plainToClass } from "class-transformer"
+import { UploadedFilesOther } from "src/fs/fs.interface"
 
 @ApiTags("users")
 @Controller("users")
@@ -52,7 +62,8 @@ export class UsersController {
     private readonly userService: UsersService,
     private authService: AuthService,
     private readonly httpService: HttpService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly fsService: FSService
   ) {}
 
   @ApiCreatedResponse({
@@ -125,12 +136,21 @@ export class UsersController {
   @ApiBadRequestResponse({
     description: "Username/Email is already used",
   })
+  @ApiInternalServerErrorResponse({
+    description: "Can't create user ( likely caused by insufficient write permission )",
+  })
+  @ApiBadRequestResponse({
+    description: "Some user data is invalid",
+  })
   @UseInterceptors(ClassSerializerInterceptor)
   @UsePipes(ValidationPipe)
   @Post("other")
-  async createOtherUser(@Body() user: CreateOtherUserDTO) {
-    const [createdUser, jwt] = await this.userService.createOtherUser(user)
-    return new CreateUserResponseDTO(createdUser, jwt)
+  @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfig, { limits: { fileSize: FSController.maxFileSize } }))
+  async createOtherUser(@UploadedFiles() files: UploadedFilesOther, @Body() body: FormDataDTO) {
+    const validatedUser = await this.userService.validateOtherUserData(body.data)
+    const [createdUser, jwt] = await this.userService.createOtherUser(validatedUser)
+    const { result, user } = await this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), createdUser._id, files)
+    return new CreateUserResponseDTO(user, jwt)
   }
 
   @ApiBadRequestResponse({ description: "The given username is used" })

@@ -120,6 +120,12 @@ export class CreateOtherUserDTO {
   medical_condition?: string
 }
 
+export class FormDataDTO {
+  @ApiProperty()
+  @IsString()
+  data: string
+}
+
 export class CreateSatitUserDto {
   @ApiProperty()
   account_type: Account.SatitAndCuPersonel
