@@ -161,20 +161,6 @@ export class CreateSatitUserDto {
   phone: string
 }
 
-export class CreateUserResponseDTO {
-  @ApiProperty()
-  jwt: string
-  @ApiProperty({
-    type: CreateOtherUserDTO,
-    description: "Created User",
-  })
-  user: UserDTO
-  constructor(user: Partial<User>, jwt: string) {
-    this.jwt = jwt
-    this.user = new UserDTO(user)
-  }
-}
-
 export class AppticketDTO {
   @ApiProperty()
   @IsString()

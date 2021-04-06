@@ -24,18 +24,7 @@ import { LoginUserDto } from "./dto/login-user.dto"
 import { map, catchError } from "rxjs/operators"
 import { ConfigService } from "@nestjs/config"
 import { ChangeLanguageDto } from "./dto/change-language.dto"
-import {
-  AppticketDTO,
-  CreateSatitUserDto,
-  CreateOtherUserDTO,
-  CUStudentDTO,
-  SSOValidationResult,
-  CreateUserResponseDTO,
-  LoginSuccessDTO,
-  SSOValidationUpdateInfoDTO,
-  UserDTO,
-  FormDataDTO,
-} from "./dto/user.dto"
+import { AppticketDTO, CUStudentDTO, SSOValidationResult, LoginSuccessDTO, SSOValidationUpdateInfoDTO, UserDTO, FormDataDTO } from "./dto/user.dto"
 import { Role } from "src/common/roles"
 import {
   ApiBearerAuth,
@@ -132,7 +121,6 @@ export class UsersController {
 
   @ApiOkResponse({
     description: "Created the user",
-    type: CreateUserResponseDTO,
   })
   @ApiBadRequestResponse({
     description: "Username/Email is already used",
@@ -147,11 +135,15 @@ export class UsersController {
   @UsePipes(ValidationPipe)
   @Post("other")
   @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfig, { limits: { fileSize: FSController.maxFileSize } }))
-  async createOtherUser(@UploadedFiles() files: UploadedFilesOther, @Body() body: FormDataDTO) {
+  async createOtherUser(@UploadedFiles() files: UploadedFilesOther, @Body() body: FormDataDTO, @Res() res) {
     const validatedUser = await this.userService.validateOtherUserData(body.data)
     const [createdUser, jwt] = await this.userService.createOtherUser(validatedUser)
-    const { result, user } = await this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), createdUser._id, files)
-    return new CreateUserResponseDTO(user, jwt)
+    await this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), createdUser._id, files)
+    return res.status(201).json({
+      statusCode: 201,
+      message: "OtherUser created Successfully",
+      jwt: jwt,
+    })
   }
 
   @ApiBadRequestResponse({ description: "The given username is used" })
