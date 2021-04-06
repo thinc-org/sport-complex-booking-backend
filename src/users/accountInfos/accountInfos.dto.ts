@@ -64,6 +64,30 @@ export class editSatitAccountInfoDTO {
   @Expose()
   @IsString({ always: true })
   @IsOptional({ groups: ["optional"] })
+  name_th: string
+
+  @ApiProperty()
+  @Expose()
+  @IsString({ always: true })
+  @IsOptional({ groups: ["optional"] })
+  name_en: string
+
+  @ApiProperty()
+  @Expose()
+  @IsString({ always: true })
+  @IsOptional({ groups: ["optional"] })
+  surname_th: string
+
+  @ApiProperty()
+  @Expose()
+  @IsString({ always: true })
+  @IsOptional({ groups: ["optional"] })
+  surname_en: string
+
+  @ApiProperty()
+  @Expose()
+  @IsString({ always: true })
+  @IsOptional({ groups: ["optional"] })
   student_card_photo?: string
 }
 
