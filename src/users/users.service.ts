@@ -253,7 +253,7 @@ export class UsersService {
     newUser.password = await this.authService.hashPassword(user.password)
     newUser.is_penalize = false
     newUser.expired_penalize_date = null
-    newUser.verification_status = "NotSubmitted"
+    newUser.verification_status = "Submitted"
     newUser.student_card_photo_status = "NotSubmitted"
     //create user
     return [await newUser.save(), await this.authService.generateJWT(newUser._id, "User")]

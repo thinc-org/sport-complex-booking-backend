@@ -135,15 +135,15 @@ export class UsersController {
   @UsePipes(ValidationPipe)
   @Post("other")
   @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfig, { limits: { fileSize: FSController.maxFileSize } }))
-  async createOtherUser(@UploadedFiles() files: UploadedFilesOther, @Body() body: FormDataDTO, @Res() res) {
+  async createOtherUser(@UploadedFiles() files: UploadedFilesOther, @Body() body: FormDataDTO) {
     const validatedUser = await this.userService.validateOtherUserData(body.data)
     const [createdUser, jwt] = await this.userService.createOtherUser(validatedUser)
     await this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), createdUser._id, files)
-    return res.status(201).json({
+    return {
       statusCode: 201,
       message: "OtherUser created Successfully",
       jwt: jwt,
-    })
+    }
   }
 
   @ApiBadRequestResponse({ description: "The given username is used" })
