@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable, HttpStatus, HttpException, NotFoundException } from "@nestjs/common"
-import { Account, CuStudentUser, OtherUser, PaymentStatus, SatitCuPersonelUser, User, Verification } from "./interfaces/user.interface"
+import { Account, CuStudentUser, OtherUser, SatitCuPersonelUser, User } from "./interfaces/user.interface"
 import { Model, isValidObjectId, Types } from "mongoose"
 import * as bcrypt from "bcrypt"
 import { InjectModel } from "@nestjs/mongoose"
 import { SsoContent } from "./interfaces/sso.interface"
 import { AuthService } from "src/auth/auth.service"
 import { CreateOtherUserDTO, CreateSatitUserDto } from "./dto/user.dto"
-import { exception } from "console"
-import { Role } from "src/common/roles"
+import { plainToClass } from "class-transformer"
+import { validate } from "class-validator"
 
 @Injectable()
 export class UsersService {
@@ -179,6 +179,24 @@ export class UsersService {
     const user = await this.findById(id)
     user.is_thai_language = is_thai_language
     return await user.save()
+  }
+
+  async validateOtherUserData(jsonstring: string): Promise<CreateOtherUserDTO> {
+    const user = plainToClass(CreateOtherUserDTO, JSON.parse(jsonstring))
+    const err = await validate(user)
+    if (err.length > 0) {
+      const message = []
+      err.forEach((e) => message.push(...Object.values(e.constraints)))
+      throw new HttpException(
+        {
+          status: 400,
+          message,
+          error: "Bad Request",
+        },
+        HttpStatus.BAD_REQUEST
+      )
+    }
+    return user
   }
 
   async createOtherUser(user: CreateOtherUserDTO): Promise<[OtherUser, string]> {
