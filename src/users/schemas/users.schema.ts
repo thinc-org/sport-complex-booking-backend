@@ -2,8 +2,8 @@ import { HttpException, HttpStatus } from "@nestjs/common"
 import { plainToClass } from "class-transformer"
 import { validateOrReject } from "class-validator"
 import * as mongoose from "mongoose"
-import { editOtherAccountInfoDTO, EditUserInfoDTO } from "../accountInfos/accountInfos.dto"
-import { OtherUser, Verification } from "../interfaces/user.interface"
+import { editOtherAccountInfoDTO, editSatitAccountInfoDTO, EditUserInfoDTO } from "../accountInfos/accountInfos.dto"
+import { OtherUser, SatitCuPersonelUser, Verification } from "../interfaces/user.interface"
 
 const verificationSchemaType = { type: String, enum: ["NotSubmitted", "Submitted", "Verified", "Rejected"] }
 
@@ -62,6 +62,19 @@ class UserSchemaClass extends mongoose.Schema {
       }
     }
   }
+
+  protected static assignNotNull(target, ...sources) {
+    for (const source of sources) {
+      for (const key of Object.keys(source)) {
+        const val = source[key]
+        if (val != null) {
+          if (target[key] === undefined || val instanceof Array || !(val instanceof Object)) target[key] = val
+          else UserSchemaClass.assignNotNull(target[key], val)
+        }
+      }
+    }
+    return target
+  }
 }
 
 export const UserSchema = new UserSchemaClass()
@@ -99,6 +112,21 @@ class SatitCuPersonelSchemaClass extends UserSchemaClass {
       student_card_photo: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" },
       previous_student_card_photo: [{ type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" }],
     })
+
+    this.statics.editAccountInfoDTO = editSatitAccountInfoDTO
+
+    const oldEditMethod: (dto: any) => void = this.methods.editAccountInfo
+
+    this.methods.editAccountInfo = function(this: SatitCuPersonelUser, updt: editSatitAccountInfoDTO) {
+      if (this.verification_status == "Submitted" || this.verification_status == "Verified") {
+        // can only edit email, phone number, and address
+        this.phone = updt.phone ?? this.phone
+        this.personal_email = updt.personal_email ?? this.personal_email
+      } else {
+        oldEditMethod.call(this, updt)
+        UserSchemaClass.assignNotNull(this, updt, { verification_status: "Submitted", rejected_info: [] })
+      }
+    }
   }
 }
 
@@ -149,22 +177,9 @@ class OtherSchemaClass extends UserSchemaClass {
         this.personal_email = updt.personal_email ?? this.personal_email
       } else {
         oldEditMethod.call(this, updt)
-        OtherSchemaClass.assignNotNull(this, updt, { verification_status: "Submitted", rejected_info: [] })
+        UserSchemaClass.assignNotNull(this, updt, { verification_status: "Submitted", rejected_info: [] })
       }
     }
-  }
-
-  private static assignNotNull(target, ...sources) {
-    for (const source of sources) {
-      for (const key of Object.keys(source)) {
-        const val = source[key]
-        if (val != null) {
-          if (target[key] === undefined || val instanceof Array || !(val instanceof Object)) target[key] = val
-          else OtherSchemaClass.assignNotNull(target[key], val)
-        }
-      }
-    }
-    return target
   }
 }
 
