@@ -44,7 +44,7 @@ export class FSController {
     { name: "payment_slip", maxCount: 1 },
   ]
 
-  private static fileUploadConfigSatit = [{ name: "student_id_photo", maxCount: 1 }]
+  private static fileUploadConfigSatit = [{ name: "student_card_photo", maxCount: 1 }]
 
   private static maxFileSize = 2 * 1000 * 1000
 

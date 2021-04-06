@@ -110,7 +110,7 @@ export class CourtManagerService {
 
     const overlapDisableCourts = (await this.disableCourtsService.queryDisableCourt({ lean: true, sport_id: sportID })).sliced_results
     const overlapWaitingRooms = await this.allWaitingRoomService.queryWaitingRoom({ sport_id: sportID })
-    const overlapReservations = await this.allReservationService.queryReservation({ spor_id: sportID })
+    const overlapReservations = await this.allReservationService.queryReservation({ sport_id: sportID })
 
     if (overlapDisableCourts.length != 0 || overlapWaitingRooms.length != 0 || overlapReservations.length != 0) {
       throw new ConflictException({
