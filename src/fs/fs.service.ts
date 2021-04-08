@@ -94,7 +94,7 @@ export class FSService {
     if (!files) {
       return {}
     }
-    const result = {}
+    const result = { student_card_photo: null }
 
     const user = (await this.userService.findById(owner)) as SatitCuPersonelUser
 
@@ -104,7 +104,7 @@ export class FSService {
 
     if (files.student_card_photo != null && (user.student_card_photo_status != "Submitted" || overwrite)) {
       const fileInfo = await this.saveFile(rootPath, owner, files.student_card_photo[0], "student_card_photo")
-      result["student_card_photo"] = fileInfo._id
+      result.student_card_photo = fileInfo._id
       user.student_card_photo = fileInfo._id
       // for users who are registering, payment_status will be NotSubmitted
       if (user.verification_status == "Verified") user.student_card_photo_status = "Submitted"
@@ -168,7 +168,7 @@ export class FSService {
     return user != null && user.account_type == Account.Other
   }
 
-  async verifyUserEligibilitySatit(userId: string) {
+  async verifyIsSatit(userId: string) {
     const user = await this.userService.findById(userId)
     return user != null && user.account_type == Account.SatitAndCuPersonel
   }

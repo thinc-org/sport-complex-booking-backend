@@ -7,6 +7,7 @@ import { InjectModel } from "@nestjs/mongoose"
 import { DisableCourtsService } from "src/courts/disable-courts/disable-courts.service"
 import { AllReservationService } from "src/reservation/all-reservation/all-reservation.service"
 import { AllWaitingRoomService } from "src/reservation/all-waiting-room/all-waiting-room.service"
+import { DisableCourt } from "src/courts/disable-courts/interfaces/disable-courts.interface"
 
 @Injectable()
 export class CourtManagerService {
@@ -156,7 +157,7 @@ export class CourtManagerService {
     })
     const doc = await this.findSportByID(sportID)
     const deletedCourts = this.findDeletedCourts(doc.list_court, newSettings)
-    const overlapDisableCourts = []
+    const overlapDisableCourts: DisableCourt[] = []
     for (const court_num of deletedCourts) {
       const overlap = await this.disableCourtsService.queryDisableCourt({ lean: true, sport_id: sportID, court_num })
       overlapDisableCourts.push(...overlap.sliced_results)
