@@ -68,7 +68,7 @@ export class FSController {
   async uploadFile(@UploadedFiles() files, @Req() req) {
     const eligible = await this.fsService.verifyUserEligibility(req.user.userId)
     if (!eligible) throw new HttpException("This user cannot upload", HttpStatus.FORBIDDEN)
-    return await this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), req.user.userId, files)
+    return this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), req.user.userId, files)
   }
 
   @ApiInternalServerErrorResponse({
@@ -87,7 +87,7 @@ export class FSController {
   @Post("uploadSatit")
   @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfigSatit, { limits: { fileSize: FSController.maxFileSize } }))
   async uploadFileSatit(@UploadedFiles() files, @Req() req) {
-    const eligible = await this.fsService.verifyUserEligibilitySatit(req.user.userId)
+    const eligible = await this.fsService.verifyIsSatit(req.user.userId)
     if (!eligible) throw new HttpException("This user cannot upload", HttpStatus.FORBIDDEN)
     return this.fsService.saveFilesSatit(this.configService.get("UPLOAD_DEST"), req.user.userId, files)
   }
