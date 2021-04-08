@@ -50,12 +50,6 @@ export class DisableCourtsController {
     return await this.disableCourtsService.getDisableCourt(id)
   }
 
-  @ApiOkResponse({ description: "Deleted all disable courts" })
-  @Delete("")
-  async deleteAllDisableCourt(): Promise<void> {
-    await this.disableCourtsService.deleteAllDisableCourt()
-  }
-
   @ApiNotFoundResponse({ description: "Can't find disable court with specified id" })
   @ApiOkResponse({ description: "Deleted the disable court" })
   @Delete(":id")
@@ -63,8 +57,8 @@ export class DisableCourtsController {
     await this.disableCourtsService.deleteDisableCourtById(id)
   }
 
-  @ApiOkResponse({ description: "Deleted" })
-  @Delete("")
+  @ApiOkResponse({ description: "Deleted the disable courts" })
+  @Delete()
   async deleteDisableCourt(@Body() filter: DeleteDisableCourtDTO): Promise<void> {
     await this.disableCourtsService.deleteDisableCourt(filter)
   }
