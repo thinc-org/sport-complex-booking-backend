@@ -109,7 +109,7 @@ export class MyReservationService {
     const diffMinute = diffTime / 60000
 
     if (diffMinute > 60) {
-      throw new HttpException("Check the reservation only before one hour.", HttpStatus.METHOD_NOT_ALLOWED)
+      throw new HttpException("Can only check-in within one hour before the reservation time", HttpStatus.FORBIDDEN)
     }
 
     reservation.is_check = true
