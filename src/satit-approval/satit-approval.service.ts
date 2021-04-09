@@ -17,11 +17,15 @@ export class SatitApprovalService {
 
   async getSearchResult(name: string, start: number, end: number, searchType: string): Promise<[number, User[]]> {
 
-    let queryBlock = [];
+    const queryBlock = [];
 
-    if (searchType === "extension") queryBlock.push({ verification_status: "Verified", student_card_photo_status: "Submitted" });
-    else if (searchType === "approval") queryBlock.push({ verification_status: "Submitted", student_card_photo_status: { $exists: true } });
-    else queryBlock.push({ $or: [{ verification_status: "Submitted", student_card_photo_status: { $exists: true } }, { verification_status: "Verified", student_card_photo_status: "Submitted" }] });
+    queryBlock.push({ student_card_photo: { $exist: true } })
+
+    if (searchType === "extension") queryBlock.push({ verification_status: "Verified", document_status: "Submitted" });
+    else if (searchType === "approval") queryBlock.push({ verification_status: "Submitted" });
+    else queryBlock.push({
+      $or: [{ verification_status: "Submitted" }, { verification_status: "Verified", document_status: "Submitted" }]
+    });
 
     if (name !== undefined) {
       if ("A" <= name.charAt(0) && name.charAt(0) <= "z")
