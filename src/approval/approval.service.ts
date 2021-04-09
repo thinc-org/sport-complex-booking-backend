@@ -1,7 +1,7 @@
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common"
 import { InjectModel } from "@nestjs/mongoose"
 import { Model } from "mongoose"
-import { Verification, User, DocumentStatus, OtherUser } from "src/users/interfaces/user.interface"
+import { User, OtherUser } from "src/users/interfaces/user.interface"
 import { FSService } from "src/fs/fs.service"
 
 @Injectable()
@@ -16,7 +16,9 @@ export class ApprovalService {
   }
 
   async getSearchResult(name: string, start: number, end: number, searchType: string): Promise<[number, User[]]> {
-    let queryBlock = []
+    const queryBlock = []
+
+    queryBlock.push({ payment_slip: { $exist: true } })
 
     if (searchType === "extension") queryBlock.push({ verification_status: "Verified", document_status: "Submitted" })
     else if (searchType === "approval") queryBlock.push({ verification_status: "Submitted" })
