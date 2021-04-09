@@ -4,7 +4,7 @@ import { createWriteStream, existsSync, mkdirSync, unlinkSync } from "fs"
 import { Model } from "mongoose"
 import { extname } from "path"
 import { AuthService } from "src/auth/auth.service"
-import { Account, MAX_PREV_SLIPS, OtherUser, PaymentStatus, SatitCuPersonelUser, User, Verification } from "src/users/interfaces/user.interface"
+import { Account, MAX_PREV_SLIPS, OtherUser, DocumentStatus, SatitCuPersonelUser, User, Verification } from "src/users/interfaces/user.interface"
 import { UsersService } from "src/users/users.service"
 import { FileInfo, FileInfoDocument } from "./fileInfo.schema"
 import * as path from "path"
@@ -79,12 +79,12 @@ export class FSService {
       user[field] = fileInfo._id
     }
 
-    if (files.payment_slip != null && (user.payment_status != "Submitted" || overwrite)) {
+    if (files.payment_slip != null && (user.document_status != "Submitted" || overwrite)) {
       const fileInfo = await this.saveFile(rootPath, owner, files.payment_slip[0], "payment_slip")
       result["payment_slip"] = fileInfo._id
       user.payment_slip = fileInfo._id
-      // for users who are registering, payment_status will be NotSubmitted
-      if (user.verification_status == "Verified") user.payment_status = "Submitted"
+      // for users who are registering, document_status will be NotSubmitted
+      if (user.verification_status == "Verified") user.document_status = "Submitted"
     }
     await user.save()
     return result
@@ -102,12 +102,12 @@ export class FSService {
       throw new HttpException("cannot find user: " + owner, HttpStatus.NOT_FOUND)
     }
 
-    if (files.student_card_photo != null && (user.student_card_photo_status != "Submitted" || overwrite)) {
+    if (files.student_card_photo != null && (user.document_status != "Submitted" || overwrite)) {
       const fileInfo = await this.saveFile(rootPath, owner, files.student_card_photo[0], "student_card_photo")
       result.student_card_photo = fileInfo._id
       user.student_card_photo = fileInfo._id
-      // for users who are registering, payment_status will be NotSubmitted
-      if (user.verification_status == "Verified") user.student_card_photo_status = "Submitted"
+      // for users who are registering, document_status will be NotSubmitted
+      if (user.verification_status == "Verified") user.document_status = "Submitted"
     }
     await user.save()
     return result
@@ -182,7 +182,7 @@ export class FSService {
       const removedFile = user.previous_payment_slips.shift()
       await this.deleteFile(removedFile.toHexString())
     }
-    user.payment_status = "NotSubmitted"
+    user.document_status = "NotSubmitted"
     await user.save()
   }
 
@@ -195,7 +195,7 @@ export class FSService {
       const removedFile = user.previous_student_card_photo.shift()
       await this.deleteFile(removedFile.toHexString())
     }
-    user.student_card_photo_status = "NotSubmitted"
+    user.document_status = "NotSubmitted"
     await user.save()
   }
 }
