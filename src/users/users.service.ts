@@ -215,7 +215,7 @@ export class UsersService {
   async createOtherUser(user: CreateOtherUserDTO): Promise<[OtherUser, string]> {
     const newUser = new this.otherUserModel(user)
     newUser.verification_status = "Submitted"
-    newUser.payment_status = "NotSubmitted"
+    newUser.document_status = "NotSubmitted"
     newUser.password = await this.authService.hashPassword(user.password)
     newUser.is_penalize = false
     newUser.expired_penalize_date = null
@@ -254,7 +254,7 @@ export class UsersService {
     newUser.is_penalize = false
     newUser.expired_penalize_date = null
     newUser.verification_status = "Submitted"
-    newUser.student_card_photo_status = "NotSubmitted"
+    newUser.document_status = "NotSubmitted"
     //create user
     return [await newUser.save(), await this.authService.generateJWT(newUser._id, "User")]
   }
