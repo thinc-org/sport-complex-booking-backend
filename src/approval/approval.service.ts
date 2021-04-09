@@ -6,7 +6,7 @@ import { FSService } from "src/fs/fs.service"
 
 @Injectable()
 export class ApprovalService {
-  constructor(@InjectModel("User") private readonly userModel: Model<User>, private readonly fsService: FSService) { }
+  constructor(@InjectModel("User") private readonly userModel: Model<User>, private readonly fsService: FSService) {}
 
   async getPersonalData(id: string): Promise<User> {
     const user = await this.userModel.findById(id).exec()
@@ -18,7 +18,7 @@ export class ApprovalService {
   async getSearchResult(name: string, start: number, end: number, searchType: string): Promise<[number, User[]]> {
     const queryBlock = []
 
-    queryBlock.push({ payment_slip: { $exist: true } })
+    queryBlock.push({ payment_slip: { $exists: true } })
 
     if (searchType === "extension") queryBlock.push({ verification_status: "Verified", document_status: "Submitted" })
     else if (searchType === "approval") queryBlock.push({ verification_status: "Submitted" })
