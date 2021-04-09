@@ -18,7 +18,7 @@ export class SatitApprovalService {
   async getSearchResult(name: string, start: number, end: number, searchType: string): Promise<[number, User[]]> {
     const queryBlock = []
 
-    queryBlock.push({ student_card_photo: { $exist: true } })
+    queryBlock.push({ student_card_photo: { $exists: true } })
 
     if (searchType === "extension") queryBlock.push({ verification_status: "Verified", document_status: "Submitted" })
     else if (searchType === "approval") queryBlock.push({ verification_status: "Submitted" })
