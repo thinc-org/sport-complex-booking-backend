@@ -10,9 +10,7 @@ export enum Account {
 export type Verification = "NotSubmitted" | "Submitted" | "Verified" | "Rejected"
 
 // NotSubmitted -> Submitted -> Rejected -> Submitted -> NotSubmitted
-export type PaymentStatus = "Submitted" | "Rejected" | "NotSubmitted"
-
-export type StudentCardStatus = "Submitted" | "Rejected" | "NotSubmitted"
+export type DocumentStatus = "Submitted" | "Rejected" | "NotSubmitted"
 
 export interface Contact_person {
   contact_person_prefix: string
@@ -76,7 +74,7 @@ export interface SatitCuPersonelUser extends User {
   verification_status: Verification
   rejected_info: string[]
   account_expiration_date: Date
-  student_card_photo_status: StudentCardStatus
+  document_status: DocumentStatus
   student_card_photo: mongoose.Types.ObjectId
   previous_student_card_photo: mongoose.Types.ObjectId[]
 }
@@ -115,7 +113,7 @@ export interface OtherUser extends User {
   relationship_verification_document: mongoose.Types.ObjectId
   payment_slip: mongoose.Types.ObjectId // current payment slip
   previous_payment_slips: mongoose.Types.ObjectId[] // previous payment slip, up to MAX_PREV_SLIPS
-  payment_status: PaymentStatus
+  document_status: DocumentStatus
   validateAndEditAccountInfo?: (updt: editOtherAccountInfoDTO, all: boolean) => Promise<User>
 }
 

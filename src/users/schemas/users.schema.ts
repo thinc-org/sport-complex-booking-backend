@@ -108,7 +108,7 @@ class SatitCuPersonelSchemaClass extends UserSchemaClass {
       verification_status: verificationSchemaType,
       rejected_info: [String],
       account_expiration_date: Date,
-      student_card_photo_status: { type: String, enum: ["NotSubmitted", "Submitted", "Rejected"] },
+      document_status: { type: String, enum: ["NotSubmitted", "Submitted", "Rejected"] },
       student_card_photo: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" },
       previous_student_card_photo: [{ type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" }],
     })
@@ -152,7 +152,7 @@ class OtherSchemaClass extends UserSchemaClass {
       verification_status: verificationSchemaType,
       rejected_info: [String],
       account_expiration_date: Date,
-      payment_status: { type: String, enum: ["NotSubmitted", "Submitted", "Rejected"] },
+      document_status: { type: String, enum: ["NotSubmitted", "Submitted", "Rejected"] },
       user_photo: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" }, //(ของcollectionที่เก็บรูป)
       medical_certificate: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" },
       national_id_house_registration: { type: mongoose.Schema.Types.ObjectId, ref: "FileInfo" },
