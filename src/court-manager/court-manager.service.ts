@@ -144,6 +144,7 @@ export class CourtManagerService {
     return { allSport_length: allSportLength, sport_list: listDoc.slice(start, end) }
   }
 
+  private range = (start, stop) => Array.from({ length: stop - start + 1 }, (_, i) => start + i)
   //update a court by court number and its data
   async updateCourtbyID(sportID: string, newSettings: Court[]): Promise<Sport> {
     //check court time slot (1-48)
@@ -156,14 +157,16 @@ export class CourtManagerService {
       }
     })
     const doc = await this.findSportByID(sportID)
-    const deletedCourts = this.findDeletedCourts(doc.list_court, newSettings)
+    const [deletedCourts, tighterTime] = this.findChangedCourts(doc.list_court, newSettings)
     const overlapDisableCourts: DisableCourt[] = []
     for (const court_num of deletedCourts) {
       const overlap = await this.disableCourtsService.queryDisableCourt({ lean: true, sport_id: sportID, court_num })
       overlapDisableCourts.push(...overlap.sliced_results)
     }
-    const overlapWaitingRooms = await this.allWaitingRoomService.queryWaitingRoom({ sport_id: sportID, court_number: { $in: deletedCourts } })
-    const overlapReservations = await this.allReservationService.queryReservation({ sport_id: sportID, court_number: { $in: deletedCourts } })
+
+    const [waitingRoomFilter, reservationFilter] = this.makeFilter(sportID, deletedCourts, tighterTime)
+    const overlapWaitingRooms = await this.allWaitingRoomService.queryWaitingRoom(waitingRoomFilter)
+    const overlapReservations = await this.allReservationService.queryReservation(reservationFilter)
 
     if (overlapDisableCourts.length != 0 || overlapWaitingRooms.length != 0 || overlapReservations.length != 0) {
       throw new ConflictException({
@@ -179,15 +182,58 @@ export class CourtManagerService {
     return await doc.save()
   }
 
+  private makeFilter(sportID: string, deletedCourts: number[], tighterTime: TighterTime[]) {
+    const waitingRoomFilter = { sport_id: sportID, $or: [] }
+    const reservationFilter = { sport_id: sportID, $or: [] }
+
+    waitingRoomFilter.$or.push({ court_number: { $in: deletedCourts } })
+    reservationFilter.$or.push({ court_number: { $in: deletedCourts } })
+
+    tighterTime.forEach((court) => {
+      const deletedTimeslots = this.range(court.old[0], court.new[0] - 1)
+      deletedTimeslots.push(...this.range(court.new[1] + 1, court.old[1]))
+      const filter = {
+        court_number: court.court_num,
+        time_slot: { $elemMatch: { $in: deletedTimeslots } },
+      }
+      waitingRoomFilter.$or.push(filter)
+      reservationFilter.$or.push(filter)
+    })
+
+    return [waitingRoomFilter, reservationFilter]
+  }
+
   async findAllSport(): Promise<Sport[]> {
     return await this.Sport.find({})
   }
 
-  private findDeletedCourts(list_court: Court[], new_list_court: Court[]) {
-    const result = []
+  private findChangedCourts(list_court: Court[], new_list_court: Court[]): [number[], TighterTime[]] {
+    const deleted: number[] = []
+    const tighterTime: TighterTime[] = []
+
     for (const court of list_court) {
-      if (new_list_court.findIndex((c) => court.court_num == c.court_num) == -1) result.push(court.court_num)
+      const index = new_list_court.findIndex((c) => court.court_num == c.court_num)
+      if (index == -1) {
+        deleted.push(court.court_num)
+        continue
+      }
+
+      const newCourt = new_list_court[index]
+      if (newCourt.open_time > court.open_time || newCourt.close_time < court.close_time)
+        tighterTime.push({
+          court_num: court.court_num,
+          old: [court.open_time, court.close_time],
+          new: [newCourt.open_time, newCourt.close_time],
+        })
     }
-    return result
+
+    return [deleted, tighterTime]
   }
 }
+
+interface TighterTime {
+  court_num: number
+  old: [number, number]
+  new: [number, number]
+}
+;[]
