@@ -98,11 +98,11 @@ export class SatitAndCuPersonelEditingDto extends UserEditingDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsMongoId()
-  student_card_photo?: Date
+  student_card_photo?: Types.ObjectId
   @ApiPropertyOptional()
   @IsOptional()
   @IsMongoId()
-  previous_student_card_photo?: Date
+  previous_student_card_photo?: Types.ObjectId
 }
 
 export class OtherUserEditingDto extends UserEditingDto {
