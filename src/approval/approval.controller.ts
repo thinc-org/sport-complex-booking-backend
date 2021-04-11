@@ -23,9 +23,9 @@ import {
 @UseGuards(AdminGuard)
 @Controller("approval")
 export class ApprovalController {
-  constructor(private readonly approvalService: ApprovalService) {}
+  constructor(private readonly approvalService: ApprovalService) { }
 
-  @ApiQuery({ name: "searchType", type: String, description: '"approval" or "extension" or null', required: false })
+  @ApiQuery({ name: "searchType", type: String, description: "\"approval\" or \"extension\" or null", required: false })
   @ApiQuery({ name: "end", type: Number, required: false })
   @ApiQuery({ name: "start", type: Number, required: false })
   @ApiQuery({ name: "name", type: String, description: "Substring of name or surname of user", required: false })

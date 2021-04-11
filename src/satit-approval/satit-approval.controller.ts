@@ -23,9 +23,9 @@ import {
 @UseGuards(AdminGuard)
 @Controller("satit-approval")
 export class SatitApprovalController {
-  constructor(private readonly satitApprovalService: SatitApprovalService) {}
+  constructor(private readonly satitApprovalService: SatitApprovalService) { }
 
-  @ApiQuery({ name: "searchType", type: String, description: '"approval" or "extension" or null', required: false })
+  @ApiQuery({ name: "searchType", type: String, description: "\"approval\" or \"extension\" or null", required: false })
   @ApiQuery({ name: "end", type: Number, required: false })
   @ApiQuery({ name: "start", type: Number, required: false })
   @ApiQuery({ name: "name", type: String, description: "Substring of name or surname of satit user", required: false })
