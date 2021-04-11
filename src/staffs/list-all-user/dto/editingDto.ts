@@ -82,7 +82,12 @@ export class CuStudentUserEditingDto extends UserEditingDto {
   is_first_login?: boolean
 }
 
-export class SatitAndCuPersonelEditingDto extends UserEditingDto {}
+export class SatitAndCuPersonelEditingDto extends UserEditingDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  account_expiration_date?: Date
+}
 
 export class OtherUserEditingDto extends UserEditingDto {
   @ApiPropertyOptional()
