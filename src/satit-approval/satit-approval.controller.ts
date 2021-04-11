@@ -1,11 +1,14 @@
 import { Controller, Get, Param, Patch, Body, Query, UseGuards } from "@nestjs/common"
 import { SatitApprovalService } from "./satit-approval.service"
-import { StaffGuard } from "src/auth/jwt.guard"
-import { SatitUserDTO } from "./dto/satit-approval.dto";
+import { AdminGuard } from "src/auth/jwt.guard"
+import { SatitUserDTO } from "./dto/satit-approval.dto"
 import { ApproveDTO, RejectDTO, SearchResultDTO, SetStatusDTO } from "./dto/satit-approval.dto"
 import {
   ApiBadRequestResponse,
-  ApiBearerAuth, ApiBody, ApiNotFoundResponse, ApiForbiddenResponse,
+  ApiBearerAuth,
+  ApiBody,
+  ApiNotFoundResponse,
+  ApiForbiddenResponse,
   ApiOkResponse,
   ApiParam,
   ApiQuery,
@@ -17,12 +20,12 @@ import {
 @ApiUnauthorizedResponse({ description: "User is not logged in" })
 @ApiForbiddenResponse({ description: "Must be staff to use this endpoints" })
 @ApiBearerAuth()
-@UseGuards(StaffGuard)
+@UseGuards(AdminGuard)
 @Controller("satit-approval")
 export class SatitApprovalController {
-  constructor(private readonly satitApprovalService: SatitApprovalService) { }
+  constructor(private readonly satitApprovalService: SatitApprovalService) {}
 
-  @ApiQuery({ name: "searchType", type: String, description: "\"approval\" or \"extension\" or null", required: false })
+  @ApiQuery({ name: "searchType", type: String, description: '"approval" or "extension" or null', required: false })
   @ApiQuery({ name: "end", type: Number, required: false })
   @ApiQuery({ name: "start", type: Number, required: false })
   @ApiQuery({ name: "name", type: String, description: "Substring of name or surname of satit user", required: false })
