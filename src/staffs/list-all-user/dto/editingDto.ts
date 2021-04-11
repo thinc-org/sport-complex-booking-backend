@@ -85,8 +85,24 @@ export class CuStudentUserEditingDto extends UserEditingDto {
 export class SatitAndCuPersonelEditingDto extends UserEditingDto {
   @ApiPropertyOptional()
   @IsOptional()
+  @IsEnum(["NotSubmitted", "Submitted", "Verified", "Rejected"])
+  verification_status?: Verification
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  rejected_info?: string[]
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsDateString()
   account_expiration_date?: Date
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsMongoId()
+  student_card_photo?: Date
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsMongoId()
+  previous_student_card_photo?: Date
 }
 
 export class OtherUserEditingDto extends UserEditingDto {
