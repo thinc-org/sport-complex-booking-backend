@@ -112,8 +112,10 @@ export class MyReservationService {
       throw new HttpException("Can only check-in within one hour before the reservation time", HttpStatus.FORBIDDEN)
     }
 
+    const previousIsCheck = reservation.is_check
     reservation.is_check = true
     reservation.save()
+    reservation.is_check = previousIsCheck
 
     return reservation
   }
