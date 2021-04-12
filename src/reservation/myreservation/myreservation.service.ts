@@ -114,7 +114,7 @@ export class MyReservationService {
 
     const previousIsCheck = reservation.is_check
     reservation.is_check = true
-    reservation.save()
+    await reservation.save()
     reservation.is_check = previousIsCheck
 
     return reservation

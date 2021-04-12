@@ -78,6 +78,6 @@ export class MyReservationController {
   @Patch("/:id")
   async checkReservation(@Param() param): Promise<Reservation> {
     this.idValidityChecker(param.id)
-    return this.myResrvationService.checkReservation(param.id)
+    return await this.myResrvationService.checkReservation(param.id)
   }
 }
