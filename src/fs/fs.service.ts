@@ -83,8 +83,19 @@ export class FSService {
       const fileInfo = await this.saveFile(rootPath, owner, files.payment_slip[0], "payment_slip")
       result["payment_slip"] = fileInfo._id
       user.payment_slip = fileInfo._id
+
+      // admin overwrite
+      if (overwrite) {
+        user.previous_payment_slips.push(user.payment_slip)
+        while (user.previous_payment_slips.length > MAX_PREV_SLIPS) {
+          // runs more than once only when MAX_PREV_SLIPS is decreased
+          // good enough for MAX_PREV_SLIP = 2
+          const removedFile = user.previous_payment_slips.shift()
+          await this.deleteFile(removedFile.toHexString())
+        }
+      }
       // for users who are registering, document_status will be NotSubmitted
-      if (user.verification_status == "Verified") user.document_status = "Submitted"
+      else if (user.verification_status == "Verified") user.document_status = "Submitted"
     }
     await user.save()
     return result
@@ -106,8 +117,19 @@ export class FSService {
       const fileInfo = await this.saveFile(rootPath, owner, files.student_card_photo[0], "student_card_photo")
       result.student_card_photo = fileInfo._id
       user.student_card_photo = fileInfo._id
+
+      // admin overwrite
+      if (overwrite) {
+        user.previous_student_card_photo.push(user.student_card_photo)
+        while (user.previous_student_card_photo.length > MAX_PREV_SLIPS) {
+          // runs more than once only when MAX_PREV_SLIPS is decreased
+          // good enough for MAX_PREV_SLIP = 2
+          const removedFile = user.previous_student_card_photo.shift()
+          await this.deleteFile(removedFile.toHexString())
+        }
+      }
       // for users who are registering, document_status will be NotSubmitted
-      if (user.verification_status == "Verified") user.document_status = "Submitted"
+      else if (user.verification_status == "Verified") user.document_status = "Submitted"
     }
     await user.save()
     return result
