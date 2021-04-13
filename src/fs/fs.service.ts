@@ -80,7 +80,7 @@ export class FSService {
     }
 
     // save file if payment_slip is uploaded
-    if (files.payment_slip != null && (user.document_status != "Submitted" || admin)) {
+    if (files.payment_slip != null && ((user.document_status != "Submitted" && user.verification_status != "Submitted") || admin)) {
       const fileInfo = await this.saveFile(rootPath, owner, files.payment_slip[0], "payment_slip")
       result["payment_slip"] = fileInfo._id
       user.payment_slip = fileInfo._id
@@ -117,7 +117,7 @@ export class FSService {
     }
 
     // save file
-    if (user.document_status != "Submitted" || admin) {
+    if ((user.document_status != "Submitted" && user.verification_status != "Submitted") || admin) {
       const fileInfo = await this.saveFile(rootPath, owner, files.student_card_photo[0], "student_card_photo")
       result.student_card_photo = fileInfo._id
       user.student_card_photo = fileInfo._id
