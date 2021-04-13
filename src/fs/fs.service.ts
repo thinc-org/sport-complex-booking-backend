@@ -56,7 +56,7 @@ export class FSService {
     }
   }
 
-  async saveFiles(rootPath: string, owner: string, files: UploadedFilesOther, overwrite = false): Promise<Record<string, string>> {
+  async saveFiles(rootPath: string, owner: string, files: UploadedFilesOther, admin = false): Promise<Record<string, string>> {
     if (!files) {
       return { result: null, user: null }
     }
@@ -79,30 +79,33 @@ export class FSService {
       user[field] = fileInfo._id
     }
 
-    if (files.payment_slip != null && (user.document_status != "Submitted" || overwrite)) {
+    // save file if payment_slip is uploaded
+    if (files.payment_slip != null && (user.document_status != "Submitted" || admin)) {
       const fileInfo = await this.saveFile(rootPath, owner, files.payment_slip[0], "payment_slip")
       result["payment_slip"] = fileInfo._id
       user.payment_slip = fileInfo._id
+      // if the user is still in registeration process, document_status will not be changed
+      // document status is only changed during membership extension process
+      // if the file is uploaded by admin, statuses won't change
+      if (!admin && user.verification_status == "Verified") user.document_status = "Submitted"
+    }
 
-      // admin overwrite
-      if (overwrite) {
-        user.previous_payment_slips.push(user.payment_slip)
-        while (user.previous_payment_slips.length > MAX_PREV_SLIPS) {
-          // runs more than once only when MAX_PREV_SLIPS is decreased
-          // good enough for MAX_PREV_SLIP = 2
-          const removedFile = user.previous_payment_slips.shift()
-          await this.deleteFile(removedFile.toHexString())
-        }
+    // if uploaded by admin when the user haven't submit the document for membership extension
+    if (admin && user.verification_status == "Verified" && user.document_status == "NotSubmitted") {
+      user.previous_payment_slips.push(user.payment_slip)
+      while (user.previous_payment_slips.length > MAX_PREV_SLIPS) {
+        // runs more than once only when MAX_PREV_SLIPS is decreased
+        // good enough for MAX_PREV_SLIP = 2
+        const removedFile = user.previous_payment_slips.shift()
+        await this.deleteFile(removedFile.toHexString())
       }
-      // for users who are registering, document_status will be NotSubmitted
-      else if (user.verification_status == "Verified") user.document_status = "Submitted"
     }
     await user.save()
     return result
   }
 
-  async saveFilesSatit(rootPath: string, owner: string, files: UploadedFilesSatit, overwrite = false) {
-    if (!files) {
+  async saveFilesSatit(rootPath: string, owner: string, files: UploadedFilesSatit, admin = false) {
+    if (!files || files.student_card_photo == null) {
       return {}
     }
     const result = { student_card_photo: null }
@@ -113,23 +116,26 @@ export class FSService {
       throw new HttpException("cannot find user: " + owner, HttpStatus.NOT_FOUND)
     }
 
-    if (files.student_card_photo != null && (user.document_status != "Submitted" || overwrite)) {
+    // save file
+    if (user.document_status != "Submitted" || admin) {
       const fileInfo = await this.saveFile(rootPath, owner, files.student_card_photo[0], "student_card_photo")
       result.student_card_photo = fileInfo._id
       user.student_card_photo = fileInfo._id
+      // if the user is still in registeration process, document_status will not be changed
+      // document status is only changed during membership extension process
+      // if the file is uploaded by admin, statuses won't change
+      if (!admin && user.verification_status == "Verified") user.document_status = "Submitted"
+    }
 
-      // admin overwrite
-      if (overwrite) {
-        user.previous_student_card_photo.push(user.student_card_photo)
-        while (user.previous_student_card_photo.length > MAX_PREV_SLIPS) {
-          // runs more than once only when MAX_PREV_SLIPS is decreased
-          // good enough for MAX_PREV_SLIP = 2
-          const removedFile = user.previous_student_card_photo.shift()
-          await this.deleteFile(removedFile.toHexString())
-        }
+    // if uploaded by admin and the user haven't submit the document for membership extension
+    if (admin && user.verification_status == "Verified" && user.document_status == "NotSubmitted") {
+      user.previous_student_card_photo.push(user.student_card_photo)
+      while (user.previous_student_card_photo.length > MAX_PREV_SLIPS) {
+        // runs more than once only when MAX_PREV_SLIPS is decreased
+        // good enough for MAX_PREV_SLIP = 2
+        const removedFile = user.previous_student_card_photo.shift()
+        await this.deleteFile(removedFile.toHexString())
       }
-      // for users who are registering, document_status will be NotSubmitted
-      else if (user.verification_status == "Verified") user.document_status = "Submitted"
     }
     await user.save()
     return result
