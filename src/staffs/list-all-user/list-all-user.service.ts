@@ -136,11 +136,27 @@ export class ListAllUserService {
       throw new HttpException("User isn't " + account_type, HttpStatus.BAD_REQUEST)
     }
 
+    this.deleteFileInfo(update)
     Object.assign(user, update)
 
     user.save()
 
     return user
+  }
+
+  // file infomation will only be updated by fs endpoints
+  private deleteFileInfo(update) {
+    const keys = [
+      "user_photo",
+      "medical_certificate",
+      "national_id_house_registration",
+      "relationship_verification_document",
+      "payment_slip",
+      "student_card_photo",
+      "previous_payment_slips",
+      "previous_student_card_photo",
+    ]
+    for (const key of keys) delete update[key]
   }
 
   async changePassWord(id: Types.ObjectId, body: ChangingPasswordDto): Promise<User> {
