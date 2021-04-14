@@ -8,6 +8,7 @@ export type FileInfoDocument = FileInfo & Document
 
 @Schema()
 export class FileInfo {
+  _id: Types.ObjectId
   @ApiProperty()
   @Prop()
   file_name: string
