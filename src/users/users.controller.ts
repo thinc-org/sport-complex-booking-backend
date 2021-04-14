@@ -1,4 +1,4 @@
-import { CuStudentUser, SatitCuPersonelUser } from "src/users/interfaces/user.interface"
+import { CuStudentUser, OtherUser, SatitCuPersonelUser } from "src/users/interfaces/user.interface"
 import {
   Body,
   Controller,
@@ -16,6 +16,7 @@ import {
   HttpStatus,
   UploadedFiles,
   Get,
+  Patch,
 } from "@nestjs/common"
 import { UsersService } from "./users.service"
 import { UserGuard } from "src/auth/jwt.guard"
@@ -44,6 +45,7 @@ import { FSService } from "src/fs/fs.service"
 import { validate, ValidationError } from "class-validator"
 import { plainToClass } from "class-transformer"
 import { UploadedFilesOther, UploadedFilesSatit } from "src/fs/fs.interface"
+import { editOtherAccountInfoDTO } from "./accountInfos/accountInfos.dto"
 
 @ApiTags("users")
 @Controller("users")
@@ -134,7 +136,7 @@ export class UsersController {
   @UseInterceptors(ClassSerializerInterceptor)
   @UsePipes(ValidationPipe)
   @Post("other")
-  @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfig, { limits: { fileSize: FSController.maxFileSize } }))
+  @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfigOther, { limits: { fileSize: FSController.maxFileSize } }))
   async createOtherUser(@UploadedFiles() files: UploadedFilesOther, @Body() body: FormDataDTO) {
     const validatedUser = await this.userService.validateOtherUserData(body.data)
     const [createdUser, jwt] = await this.userService.createOtherUser(validatedUser)

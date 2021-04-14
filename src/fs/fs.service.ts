@@ -9,14 +9,20 @@ import { UsersService } from "src/users/users.service"
 import { FileInfo, FileInfoDocument } from "./fileInfo.schema"
 import * as path from "path"
 import { UploadedFilesOther, UploadedFilesSatit } from "./fs.interface"
+import { ConfigService } from "@nestjs/config"
 
 @Injectable()
 export class FSService {
   constructor(
     @InjectModel(FileInfo.name) private fileInfoModel: Model<FileInfoDocument>,
     private userService: UsersService,
-    private authService: AuthService
-  ) {}
+    private authService: AuthService,
+    private configService: ConfigService
+  ) {
+    this.rootPath = this.configService.get("UPLOAD_DEST")
+  }
+
+  private rootPath: string
 
   async getFileInfo(fileId: string) {
     const fileInfo = await this.fileInfoModel.findById(fileId)
@@ -141,6 +147,8 @@ export class FSService {
     return result
   }
 
+  // should not be used in future codes, this will change some value of the file's owner
+  // left here for compatibility with some old codes
   async saveFile(rootPath: string, owner: string, file: Express.Multer.File, fileType: string) {
     if (file == null) return
 
@@ -156,6 +164,43 @@ export class FSService {
     return await newFile.save()
   }
 
+  async createFile(owner: User, file: Express.Multer.File, fileType: string) {
+    if (file == null) return null
+    const newFile = new this.fileInfoModel({ owner, file_name: file.originalname, ext: extname(file.originalname), file_type: fileType })
+    const dir = path.join(this.rootPath, newFile.file_type)
+    newFile.full_path = path.join(dir, newFile._id.toString() + newFile.ext)
+    if (!existsSync(dir)) {
+      mkdirSync(dir)
+    }
+    const ws = createWriteStream(newFile.full_path)
+    ws.write(file.buffer)
+    return await newFile.save()
+  }
+
+  async removeFile(fileId: string) {
+    if (fileId == null) return
+
+    const fileInfo = await await this.fileInfoModel.findById(fileId).populate("owner")
+
+    if (fileInfo == null) return
+
+    const fullPath = fileInfo.full_path
+    const owner = fileInfo.owner
+    if (owner != null && fileId == owner[fileInfo.file_type]) {
+      owner[fileInfo.file_type] = null
+    }
+
+    try {
+      unlinkSync(fullPath)
+    } catch (err) {
+      console.log("Cannot delete file: " + fileId)
+    }
+
+    await fileInfo.remove()
+  }
+
+  // should not be used in future codes, this will change some value of the file's owner
+  // left here for compatibility with some old codes
   async deleteFile(fileId: string) {
     if (fileId == null) return
 

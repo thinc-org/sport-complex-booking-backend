@@ -36,7 +36,7 @@ import { FSService } from "./fs.service"
 @ApiTags("fs")
 @Controller("fs")
 export class FSController {
-  public static fileUploadConfig = [
+  public static fileUploadConfigOther = [
     { name: "user_photo", maxCount: 1 },
     { name: "medical_certificate", maxCount: 1 },
     { name: "national_id_house_registration", maxCount: 1 },
@@ -45,6 +45,8 @@ export class FSController {
   ]
 
   public static fileUploadConfigSatit = [{ name: "student_card_photo", maxCount: 1 }]
+
+  public static fileUploadConfigAll = FSController.fileUploadConfigOther.concat(FSController.fileUploadConfigSatit)
 
   public static maxFileSize = 2 * 1000 * 1000
 
@@ -64,7 +66,7 @@ export class FSController {
   })
   @UseGuards(JwtAuthGuard)
   @Post("upload")
-  @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfig, { limits: { fileSize: FSController.maxFileSize } }))
+  @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfigOther, { limits: { fileSize: FSController.maxFileSize } }))
   async uploadFile(@UploadedFiles() files, @Req() req) {
     const eligible = await this.fsService.verifyUserEligibility(req.user.userId)
     if (!eligible) throw new HttpException("This user cannot upload", HttpStatus.FORBIDDEN)
@@ -164,7 +166,7 @@ export class FSController {
   })
   @UseGuards(StaffGuard)
   @Post("admin/upload/:userId")
-  @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfig, { limits: { fileSize: FSController.maxFileSize } }))
+  @UseInterceptors(FileFieldsInterceptor(FSController.fileUploadConfigOther, { limits: { fileSize: FSController.maxFileSize } }))
   async uploadFileAdmin(@UploadedFiles() files, @Req() req, @Res() res, @Param("userId") userId: string) {
     res.send(await this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), userId, files, true))
   }
