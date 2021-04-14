@@ -2,8 +2,9 @@ import { HttpException, HttpStatus } from "@nestjs/common"
 import { plainToClass } from "class-transformer"
 import { validateOrReject } from "class-validator"
 import * as mongoose from "mongoose"
+import { FileInfo } from "src/fs/fileInfo.schema"
 import { editOtherAccountInfoDTO, editSatitAccountInfoDTO, EditUserInfoDTO } from "../accountInfos/accountInfos.dto"
-import { OtherUser, SatitCuPersonelUser, Verification } from "../interfaces/user.interface"
+import { OtherUser, SatitCuPersonelUser, User, Verification } from "../interfaces/user.interface"
 
 const verificationSchemaType = { type: String, enum: ["NotSubmitted", "Submitted", "Verified", "Rejected"] }
 
@@ -23,15 +24,26 @@ class UserSchemaClass extends mongoose.Schema {
       username: String,
     })
 
+    this.methods.uploadableFileTypes = function() {
+      // Only some account type can upload files
+      return []
+    }
+
+    this.methods.updateFileInfo = function(fileInfo: FileInfo) {
+      // Shouldn't be possible
+      console.warn("This User Shouldn't be able to upload files")
+      return null
+    }
+
     this.statics.editAccountInfoDTO = EditUserInfoDTO
 
-    this.methods.editAccountInfo = function (updt: EditUserInfoDTO) {
+    this.methods.editAccountInfo = function(updt: EditUserInfoDTO) {
       this.is_thai_language = updt.is_thai_language ?? this.is_thai_language
       this.personal_email = updt.personal_email ?? this.personal_email
       this.phone = updt.phone ?? this.phone
     }
 
-    this.methods.validateAndEditAccountInfo = async function (updt, all: boolean) {
+    this.methods.validateAndEditAccountInfo = async function(updt, all: boolean) {
       const Model = this.constructor
       const info = plainToClass(Model.editAccountInfoDTO, updt, { excludeExtraneousValues: true })
       try {
@@ -42,16 +54,16 @@ class UserSchemaClass extends mongoose.Schema {
       }
     }
 
-    this.methods.setPassword = function (hashedPassword: string) {
+    this.methods.setPassword = function(hashedPassword: string) {
       this.password = hashedPassword
     }
 
-    this.methods.getPassword = function () {
+    this.methods.getPassword = function() {
       if (this.password) return this.password
       else throw new HttpException("password does not exist", HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
-    this.methods.updateBan = function () {
+    this.methods.updateBan = function() {
       if (!this.is_penalize) {
         return
       } else if (this.expired_penalize_date == null) {
@@ -83,16 +95,16 @@ UserSchema.index({ username: 1 }, { unique: true })
 class CuStudentSchemaClass extends UserSchemaClass {
   constructor() {
     super({ is_first_login: Boolean })
-    this.methods.setPassword = function () {
+    this.methods.setPassword = function() {
       throw new HttpException("Custudent cannot change password", HttpStatus.FORBIDDEN)
     }
-    this.methods.getPassword = function () {
+    this.methods.getPassword = function() {
       throw new HttpException("Custudent does not have password", HttpStatus.FORBIDDEN)
     }
 
     const oldEditMethod: (dto: any) => void = this.methods.editAccountInfo
 
-    this.methods.editAccountInfo = function (updt: EditUserInfoDTO) {
+    this.methods.editAccountInfo = function(updt: EditUserInfoDTO) {
       oldEditMethod.call(this, updt)
       this.is_first_login = false
     }
@@ -115,13 +127,26 @@ class SatitCuPersonelSchemaClass extends UserSchemaClass {
 
     this.statics.editAccountInfoDTO = editSatitAccountInfoDTO
 
+    this.methods.updateFileInfo = function(this: SatitCuPersonelUser, fileInfo: FileInfo) {
+      if (this.verification_status == "Verified") this.document_status = "Submitted"
+      const oldFileInfo = this.student_card_photo
+      this.student_card_photo = fileInfo._id
+      return oldFileInfo
+    }
+
+    this.methods.uploadableFileTypes = function(this: SatitCuPersonelUser) {
+      if (this.verification_status == "Submitted" || this.document_status == "Submitted") return []
+      return ["student_card_photo"]
+    }
+
     const oldEditMethod: (dto: any) => void = this.methods.editAccountInfo
 
     this.methods.editAccountInfo = function(this: SatitCuPersonelUser, updt: editSatitAccountInfoDTO) {
       oldEditMethod.call(this, updt)
       UserSchemaClass.assignNotNull(this, updt)
       if (this.verification_status == "Rejected") {
-        UserSchemaClass.assignNotNull(this, updt, { verification_status: "Submitted", rejected_info: [] })
+        this.verification_status = "Submitted"
+        this.rejected_info = []
       }
     }
   }
@@ -163,9 +188,31 @@ class OtherSchemaClass extends UserSchemaClass {
 
     this.statics.editAccountInfoDTO = editOtherAccountInfoDTO
 
+    this.methods.uploadableFileTypes = function(this: SatitCuPersonelUser) {
+      if (this.verification_status == "Submitted" || this.document_status == "Submitted") return []
+      if (this.verification_status != "Verified")
+        // users who are registering
+        return ["user_photo", "medical_certificate", "national_id_house_registration", "relationship_verification_document", "payment_slip"]
+      // user who are extending membership
+      else return ["payment_slip"]
+    }
+
+    this.methods.updateFileInfo = function(this: OtherUser, fileInfo: FileInfo) {
+      if (fileInfo.file_type != "payment_slip") {
+        const oldFileInfo = this[fileInfo.file_type]
+        this[fileInfo.file_type] = fileInfo._id
+        return oldFileInfo
+      }
+
+      if (this.verification_status == "Verified") this.document_status = "Submitted"
+      const oldFileInfo = this.payment_slip
+      this.payment_slip = fileInfo._id
+      return oldFileInfo
+    }
+
     const oldEditMethod: (dto: any) => void = this.methods.editAccountInfo
 
-    this.methods.editAccountInfo = function (this: OtherUser, updt: editOtherAccountInfoDTO) {
+    this.methods.editAccountInfo = function(this: OtherUser, updt: editOtherAccountInfoDTO) {
       if (this.verification_status == "Submitted" || this.verification_status == "Verified") {
         // can only edit email, phone number, and address
         this.address = updt.address ?? this.address
@@ -174,7 +221,8 @@ class OtherSchemaClass extends UserSchemaClass {
         this.personal_email = updt.personal_email ?? this.personal_email
       } else {
         oldEditMethod.call(this, updt)
-        UserSchemaClass.assignNotNull(this, updt, { verification_status: "Submitted", rejected_info: [] })
+        this.verification_status = "Submitted"
+        this.rejected_info = []
       }
     }
   }

@@ -1,4 +1,5 @@
 import * as mongoose from "mongoose"
+import { FileInfo } from "src/fs/fileInfo.schema"
 import { editOtherAccountInfoDTO, EditUserInfoDTO } from "../accountInfos/accountInfos.dto"
 
 export enum Account {
@@ -32,6 +33,8 @@ export interface User extends mongoose.Document {
   phone: string
   is_penalize: boolean
   expired_penalize_date: Date
+  uploadableFileTypes: () => Array<string>
+  updateFileInfo: (FileInfo) => mongoose.Types.ObjectId
   validateAndEditAccountInfo?: (updt: EditUserInfoDTO, all: boolean) => Promise<User>
   editAccountInfo?: (updt: EditUserInfoDTO) => User
   setPassword?: (hashedPassword: string) => void

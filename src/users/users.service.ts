@@ -19,8 +19,13 @@ export class UsersService {
     private authService: AuthService
   ) {}
 
-  async validateAndEditAccountInfo(userId: string, updt, full: boolean) {
-    const user = await this.findById(userId)
+  async validateAndEditAccountInfo(userOrId: string | User, updt, full: boolean): Promise<User> {
+    let user = null
+    if (typeof userOrId == "string") {
+      user = await this.findById(userOrId as string)
+    } else {
+      user = userOrId as User
+    }
     await user.validateAndEditAccountInfo(updt, full)
     try {
       return await user.save()
