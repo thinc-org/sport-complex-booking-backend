@@ -139,6 +139,8 @@ export class UsersController {
     const validatedUser = await this.userService.validateOtherUserData(body.data)
     const [createdUser, jwt] = await this.userService.createOtherUser(validatedUser)
     await this.fsService.saveFiles(this.configService.get("UPLOAD_DEST"), createdUser._id, files)
+    createdUser.verification_status = "Submitted"
+    await createdUser.save()
     return {
       statusCode: 201,
       message: "OtherUser created Successfully",
@@ -155,6 +157,8 @@ export class UsersController {
     const validatedUser = await this.userService.validateSatitUserData(body.data)
     const [createdUser, jwt] = await this.userService.createSatitUser(validatedUser)
     await this.fsService.saveFilesSatit(this.configService.get("UPLOAD_DEST"), createdUser._id, files)
+    createdUser.verification_status = "Submitted"
+    await createdUser.save()
     return res.status(201).json({
       statusCode: 201,
       message: "SatitUser created Successfully",
