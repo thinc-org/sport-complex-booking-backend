@@ -221,8 +221,7 @@ class OtherSchemaClass extends UserSchemaClass {
         this.personal_email = updt.personal_email ?? this.personal_email
       } else {
         oldEditMethod.call(this, updt)
-        this.verification_status = "Submitted"
-        this.rejected_info = []
+        UserSchemaClass.assignNotNull(this, updt, { verification_status: "Submitted", rejected_info: [] })
       }
     }
   }
