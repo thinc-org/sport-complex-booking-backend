@@ -97,7 +97,7 @@ export class FSService {
     }
 
     // if uploaded by admin when the user haven't submit the document for membership extension
-    if (admin && user.verification_status == "Verified" && user.document_status == "NotSubmitted") {
+    if (files.payment_slip != null && admin && user.verification_status == "Verified" && user.document_status == "NotSubmitted") {
       user.previous_payment_slips.push(user.payment_slip)
       while (user.previous_payment_slips.length > MAX_PREV_SLIPS) {
         // runs more than once only when MAX_PREV_SLIPS is decreased
