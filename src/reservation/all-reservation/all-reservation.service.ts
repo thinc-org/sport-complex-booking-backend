@@ -11,7 +11,7 @@ export class AllReservationService {
   async getReservation(id: string): Promise<Reservation> {
     const reservation = await this.reservationModel
       .findById(id)
-      .populate("list_member", "username personal_email phone")
+      .populate("list_member", "username personal_email phone name_en surname_en name_th surname_th")
       .exec()
     if (!reservation) throw new HttpException("Reservation not found", HttpStatus.NOT_FOUND)
     return reservation
@@ -21,7 +21,7 @@ export class AllReservationService {
     let reservation = this.reservationModel
       .find()
       .sort({ date: 1, time_slot: -1 })
-      .populate("list_member", "username personal_email phone")
+      .populate("list_member", "username personal_email phone name_en surname_en name_th surname_th")
     if (body.sportId) {
       reservation = reservation.find({ sport_id: body.sportId })
       if (body.courtNumber) reservation = reservation.find({ court_number: body.courtNumber })
