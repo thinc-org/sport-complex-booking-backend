@@ -43,7 +43,7 @@ export class CourtManagerController {
   @ApiUnauthorizedResponse({ description: "Must be user to use this endpoint" })
   @Get("setting")
   async getSetting(@Req() req): Promise<Setting> {
-    if (!(req.user.role == "Admin" || req.user.role == "Staff") === false) {
+    if (!(req.user.role == "Admin" || req.user.role == "Staff")) {
       this.listAllUserService.getUserById(req.user.userId) //err handled in the function
     } else {
       this.staffManagerService.getStaffData(req.user.userId) //err handled in the function
