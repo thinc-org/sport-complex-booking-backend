@@ -11,7 +11,7 @@ export class AllWaitingRoomService {
   async getWaitingRoom(id: string): Promise<WaitingRoom> {
     const waitingRoom = await this.waitingRoomModel
       .findById(id)
-      .populate("list_member", "username personal_email phone")
+      .populate("list_member", "username personal_email phone name_en surname_en name_th surname_th is_penalize")
       .exec()
 
     if (!waitingRoom) throw new HttpException("Waiting room not found", HttpStatus.NOT_FOUND)
@@ -22,7 +22,7 @@ export class AllWaitingRoomService {
     let reservation = this.waitingRoomModel
       .find()
       .sort({ date: 1, time_slot: -1 })
-      .populate("list_member", "username personal_email phone")
+      .populate("list_member", "uusername personal_email phone name_en surname_en name_th surname_th is_penalize")
     if (body.sportId) {
       reservation = reservation.find({ sport_id: body.sportId })
       if (body.courtNumber) reservation = reservation.find({ court_number: body.courtNumber })
