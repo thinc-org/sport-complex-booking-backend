@@ -107,9 +107,10 @@ export class MyReservationService {
     reservedTime.setHours(reservation.time_slot[0] - 1)
     const diffTime = reservedTime.getTime() - currentTime.getTime()
     const diffMinute = diffTime / 60000
+    const EARLY_CHECK_IN_MINUTES = 120
 
-    if (diffMinute > 60) {
-      throw new HttpException("Can only check-in within one hour before the reservation time", HttpStatus.FORBIDDEN)
+    if (diffMinute > EARLY_CHECK_IN_MINUTES) {
+      throw new HttpException("Can only check-in within two hours before the reservation time", HttpStatus.FORBIDDEN)
     }
 
     const previousIsCheck = reservation.is_check
