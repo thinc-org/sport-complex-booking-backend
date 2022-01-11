@@ -81,10 +81,8 @@ export class MyReservationService {
       lateCancelationHour: number = setting.late_cancelation_day * 24
 
     if (diffHour < lateCancelationHour) {
-      for (const userid of reservation.list_member) {
-        const newExpiredPenalizeDate = new Date()
-        newExpiredPenalizeDate.setDate(newExpiredPenalizeDate.getDate() + lateCancelationPunishment)
-        await this.userModel.findByIdAndUpdate(userid, { is_penalize: true, expired_penalize_date: newExpiredPenalizeDate })
+      for (const userId of reservation.list_member) {
+        await this.userService.ban(userId, lateCancelationPunishment)
       }
     }
 

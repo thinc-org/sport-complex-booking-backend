@@ -8,6 +8,7 @@ import { AuthService } from "src/auth/auth.service"
 import { CreateOtherUserDTO, CreateSatitUserDto } from "./dto/user.dto"
 import { plainToClass } from "class-transformer"
 import { validate, ValidationError } from "class-validator"
+import { PopulatedReservation, PopulatedWaitingRoom, Reservation, WaitingRoom } from "src/reservation/interfaces/reservation.interface"
 
 @Injectable()
 export class UsersService {
@@ -16,6 +17,8 @@ export class UsersService {
     @InjectModel("CuStudent") private cuStudentModel: Model<CuStudentUser>,
     @InjectModel("SatitCuPersonel") private satitStudentModel: Model<SatitCuPersonelUser>,
     @InjectModel("Other") private otherUserModel: Model<OtherUser>,
+    @InjectModel("WaitingRoom") private waitingRoomModel: Model<WaitingRoom>,
+    @InjectModel("Reservation") private reservationModel: Model<Reservation>,
     private authService: AuthService
   ) {}
 
@@ -124,6 +127,29 @@ export class UsersService {
         break
     }
     return await model.find(filter).select(select)
+  }
+
+  async ban(id: Types.ObjectId, bannedDay: number) {
+    const bannedDate = new Date()
+    bannedDate.setDate(bannedDate.getDate() + bannedDay)
+
+    const user = await this.findById(id)
+    await this.userModel.findByIdAndUpdate(id, { is_penalize: true, expired_penalize_date: bannedDate })
+
+    const reservations = ((await this.reservationModel.find({ list_member: id }).populate("list_member")) as unknown) as PopulatedReservation[]
+    for (const reservation of reservations) {
+      if (reservation.list_member.every((member) => member.is_penalize)) {
+        await reservation.remove()
+      }
+    }
+    const waitingrooms = ((await this.waitingRoomModel.find({ list_member: id }).populate("list_member")) as unknown) as PopulatedWaitingRoom[]
+    for (const waitingroom of waitingrooms) {
+      if (waitingroom.list_member.every((member) => member.is_penalize)) {
+        await waitingroom.remove()
+      }
+    }
+
+    return user
   }
 
   async login(username: string, password: string): Promise<string> {

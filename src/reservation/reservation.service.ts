@@ -8,6 +8,7 @@ import { Account, CuStudentUser, OtherUser, SatitCuPersonelUser, User, Verificat
 import { WaitingRoomDto } from "./dto/waiting-room.dto"
 import { Reservation, WaitingRoom } from "./interfaces/reservation.interface"
 import { CourtManagerService } from "src/court-manager/court-manager.service"
+import { UsersService } from "src/users/users.service"
 
 @Injectable()
 export class ReservationService {
@@ -16,7 +17,8 @@ export class ReservationService {
     @InjectModel("Reservation") private reservationModel: Model<Reservation>,
     @InjectModel("User") private userModel: Model<User>,
     private disableCourtService: DisableCourtsService,
-    private courtManagerService: CourtManagerService
+    private courtManagerService: CourtManagerService,
+    private usersService: UsersService
   ) {}
 
   @Cron("0 0 * * * *")
@@ -44,16 +46,9 @@ export class ReservationService {
     for (const reservation of reservations) {
       const min = Math.min(...reservation.time_slot) - 1
       if (time >= min + 15 / 60) {
-        const bannedDate = new Date()
         const bannedDay = (await this.courtManagerService.getSetting()).absence_punishment
-        bannedDate.setDate(bannedDate.getDate() + bannedDay)
-        for (const member of reservation.list_member) {
-          const user = await this.userModel.findById(member)
-          if (user) {
-            user.is_penalize = true
-            user.expired_penalize_date = bannedDate
-            await user.save()
-          }
+        for (const userId of reservation.list_member) {
+          await this.usersService.ban(userId, bannedDay)
         }
         await reservation.remove()
       }
