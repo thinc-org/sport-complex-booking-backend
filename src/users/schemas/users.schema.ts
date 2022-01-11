@@ -68,9 +68,11 @@ class UserSchemaClass extends mongoose.Schema {
         return
       } else if (this.expired_penalize_date == null) {
         this.is_penalize = false
+        this.save()
       } else if (new Date() > this.expired_penalize_date) {
         this.is_penalize = false
         this.expired_penalize_date = null
+        this.save()
       }
     }
   }

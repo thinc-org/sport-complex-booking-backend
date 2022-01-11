@@ -9,6 +9,7 @@ import { CreateOtherUserDTO, CreateSatitUserDto } from "./dto/user.dto"
 import { plainToClass } from "class-transformer"
 import { validate, ValidationError } from "class-validator"
 import { PopulatedReservation, PopulatedWaitingRoom, Reservation, WaitingRoom } from "src/reservation/interfaces/reservation.interface"
+import { Cron } from "@nestjs/schedule"
 
 @Injectable()
 export class UsersService {
@@ -110,6 +111,14 @@ export class UsersService {
     return user
   }
 
+  @Cron("0 * * * * *")
+  async updateBanAll() {
+    await this.userModel.updateMany(
+      { is_penalize: true, expired_penalize_date: { $lt: new Date() } }, // if is_penalize is true and expired_penalize_date is less than current date
+      { is_penalize: false, expired_penalize_date: null } // then remove ban
+    )
+  }
+
   async find(filter, select?: string, account_type?: Account): Promise<User[]> {
     let model: Model<User> | Model<CuStudentUser> | Model<SatitCuPersonelUser> | Model<OtherUser>
     switch (account_type) {
@@ -130,6 +139,7 @@ export class UsersService {
   }
 
   async ban(id: Types.ObjectId, bannedDay: number) {
+    await this.updateBanAll()
     const bannedDate = new Date()
     bannedDate.setDate(bannedDate.getDate() + bannedDay)
 
