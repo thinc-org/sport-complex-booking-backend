@@ -92,7 +92,7 @@ export class CourtManagerController {
   @UseGuards(AdminGuard)
   @ApiOkResponse({ description: "Sport created", type: SportDTO })
   @ApiBadRequestResponse({
-    description: "Required user must be at least 2, quota must be between 1 and 23 (inclusive) or this Sport already exist.",
+    description: "Quota must be between 1 and 23 (inclusive) or this sport already exist.",
   })
   @ApiUnauthorizedResponse({ description: "Must be admin to use this endpoints" })
   @Post("/")

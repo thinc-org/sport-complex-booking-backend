@@ -243,7 +243,6 @@ export class ReservationService {
       }
     }
     const waitingroom = new this.waitingRoomModel(waitingRoomDto)
-    waitingroom.list_member.push(Types.ObjectId(id))
     const date = new Date()
     const waitingRoomDuration: number = (await this.courtManagerService.getSetting()).waiting_room_duration
     date.setMinutes(date.getMinutes() + waitingRoomDuration)
@@ -258,7 +257,7 @@ export class ReservationService {
     }
     waitingroom.access_code = access_code
     waitingroom.day_of_week = waitingroom.date.getDay()
-    return await waitingroom.save()
+    return waitingroom.save()
   }
 
   async joinWaitingRoom(accessCode: string, id: string): Promise<boolean> {

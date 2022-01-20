@@ -1,5 +1,5 @@
 import { SettingDTO, SportDTO } from "./dto/courts.dto"
-import { Injectable, HttpException, HttpStatus, BadRequestException, ConflictException } from "@nestjs/common"
+import { Injectable, HttpException, HttpStatus, BadRequestException, ConflictException, NotFoundException } from "@nestjs/common"
 import { Court, Sport } from "./interfaces/sportCourt.interface"
 import { Setting } from "./interfaces/setting.interface"
 import { Model, isValidObjectId } from "mongoose"
@@ -77,12 +77,26 @@ export class CourtManagerService {
 
   //create sport by Sport (schema)
   async createSport(court_data: SportDTO): Promise<Sport> {
-    if (court_data.required_user < 2) throw new BadRequestException("Required user must be at least 2.")
-    if (court_data.quota < 0 || court_data.quota > 23) throw new BadRequestException("Quota must be between 1 and 23 (inclusive).")
+    if (court_data.required_user < 1) {
+      throw new BadRequestException({
+        reason: "INVALID_REQUIRED_USER",
+        message: "Required user must be at least 1.",
+      })
+    }
+    if (court_data.quota < 0 || court_data.quota > 23) {
+      throw new BadRequestException({
+        reason: "INVALID_QUOTA_AMOUNT",
+        message: "Quota must be between 1 and 23 (inclusive).",
+      })
+    }
 
     const doc = await this.Sport.findOne({ $or: [{ sport_name_th: court_data.sport_name_th }, { sport_name_en: court_data.sport_name_en }] })
 
-    if (doc) throw new BadRequestException("This Sport already exist.")
+    if (doc)
+      throw new BadRequestException({
+        reason: "DUPLICATE_SPORT",
+        message: "This Sport already exist.",
+      })
 
     const setTime = new this.Sport(court_data)
     return setTime.save()
@@ -93,14 +107,30 @@ export class CourtManagerService {
     sportID: string,
     newSportSetting: { sport_name_th: string; sport_name_en: string; required_user: number; quota: number }
   ): Promise<Sport> {
-    if (newSportSetting.required_user < 2) throw new BadRequestException("Required user must be at least 2.")
-    if (newSportSetting.quota < 0 || newSportSetting.quota > 23) throw new BadRequestException("Quota must be between 1 and 23 (inclusive).")
+    if (newSportSetting.required_user < 1) {
+      throw new BadRequestException({
+        reason: "INVALID_REQUIRED_USER",
+        message: "Required user must be at least 1.",
+      })
+    }
+    if (newSportSetting.quota < 0 || newSportSetting.quota > 23) {
+      throw new BadRequestException({
+        reason: "INVALID_QUOTA_AMOUNT",
+        message: "Quota must be between 1 and 23 (inclusive).",
+      })
+    }
 
-    const Sport = await this.findSportByID(sportID)
-    Sport.required_user = newSportSetting.required_user
-    Sport.quota = newSportSetting.quota
+    const sport = await this.findSportByID(sportID)
+    if (!sport) {
+      throw new NotFoundException({
+        reason: "SPORT_NOT_FOUND",
+        message: "Quota must be between 1 and 23 (inclusive).",
+      })
+    }
+    sport.required_user = newSportSetting.required_user
+    sport.quota = newSportSetting.quota
 
-    return await Sport.save()
+    return await sport.save()
   }
 
   //delete sport by its _id
