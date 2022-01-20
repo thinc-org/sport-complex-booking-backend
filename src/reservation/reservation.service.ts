@@ -257,9 +257,7 @@ export class ReservationService {
     }
     waitingroom.access_code = access_code
     waitingroom.day_of_week = waitingroom.date.getDay()
-    const newWaitingRoom = await waitingroom.save()
-    await this.joinWaitingRoom(access_code, id)
-    return newWaitingRoom
+    return waitingroom.save()
   }
 
   async joinWaitingRoom(accessCode: string, id: string): Promise<boolean> {

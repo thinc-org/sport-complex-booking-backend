@@ -53,10 +53,12 @@ export class ReservationController {
   @Post("/createwaitingroom")
   async createWaitingRoom(@Body() waitingRoomDto: WaitingRoomDto, @Req() req, @Res() res) {
     await this.reservationService.checkValidity(req.user.userId)
-    await this.reservationService.createWaitingRoom(waitingRoomDto, req.user.userId)
+    const waitingRoom = await this.reservationService.createWaitingRoom(waitingRoomDto, req.user.userId)
+    const isReservationCreated = await this.reservationService.joinWaitingRoom(waitingRoom.access_code, req.user.userId)
     return res.status(201).json({
       statusCode: 201,
-      message: "Waiting room created",
+      message: "Created waiting room",
+      isReservationCreated: isReservationCreated,
     })
   }
 
