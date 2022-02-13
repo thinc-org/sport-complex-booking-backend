@@ -302,6 +302,7 @@ export class ReservationService {
 
   async checkQuota(waitingRoomDto: WaitingRoomDto, id: string): Promise<number> {
     const date = new Date()
+    date.setHours(date.getHours() + 7)
     date.setUTCHours(0, 0, 0, 0)
     const waitingRoomDate = new Date(waitingRoomDto.date)
     if (waitingRoomDate < date) {
