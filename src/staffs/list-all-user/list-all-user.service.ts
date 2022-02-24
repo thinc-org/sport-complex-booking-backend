@@ -1,11 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common"
-import { Model, Types } from "mongoose"
+import { Model, Types, FilterQuery } from "mongoose"
 import { InjectModel } from "@nestjs/mongoose"
 import * as bcrypt from "bcrypt"
 import { SatitCuPersonelUser, OtherUser, User, Account, CuStudentUser } from "src/users/interfaces/user.interface"
 import { UsersService } from "./../../users/users.service"
 import { UserEditingDto, ChangingPasswordDto } from "./dto/editingDto"
 import { FSService } from "src/fs/fs.service"
+
+type FilterUserAllTypes = FilterQuery<User> & FilterQuery<SatitCuPersonelUser> & FilterQuery<OtherUser> & FilterQuery<CuStudentUser>
 
 @Injectable()
 export class ListAllUserService {
@@ -33,53 +35,54 @@ export class ListAllUserService {
   //This method has a role to filter from the properties that front-end require but some property of the requirement isn't the property of User.
   //So the property extraction is neccessary.
   async filterUser(qparam): Promise<[number, User[]]> {
-    let begin = 0,
-      end: number,
-      is_thai_language = false,
-      has_end = false
+    let begin = 0
+    let end: number = null
+
+    const orClauses = []
+    const filter: FilterUserAllTypes = {}
 
     //Begin and end are the slicing numbers of the array.
     if (qparam.hasOwnProperty("begin")) {
       begin = qparam.begin
-      delete qparam["begin"]
     }
 
     if (qparam.hasOwnProperty("end")) {
       end = qparam.end
-      has_end = true
-      delete qparam["end"]
     }
 
-    const seletedProperty = "username is_penalize name_th surname_th name_en surname_en"
     //.name isn't the property of uesr. So .name is changed to .name_th or .name_en
     if (qparam.hasOwnProperty("name")) {
-      is_thai_language = this.isThaiLang(qparam.name)
-
-      if (is_thai_language) {
-        qparam.name_th = { $regex: "^" + qparam.name + ".*", $options: "i" }
-      } else {
-        qparam.name_en = { $regex: "^" + qparam.name + ".*", $options: "i" }
-      }
+      const field = this.isThaiLang(qparam.name) ? "name_th" : "name_en"
+      filter[field] = { $regex: "^" + qparam.name + ".*", $options: "i" }
     }
 
     if (qparam.hasOwnProperty("surname")) {
-      is_thai_language = this.isThaiLang(qparam.surname)
+      const field = this.isThaiLang(qparam.surname) ? "surname_th" : "surname_en"
+      filter[field] = { $regex: "^" + qparam.surname + ".*", $options: "i" }
+    }
 
-      if (is_thai_language) {
-        qparam.surname_th = { $regex: "^" + qparam.surname + ".*", $options: "i" }
+    if (qparam.hasOwnProperty("is_penalize")) {
+      filter.is_penalize = qparam.is_penalize === "true"
+    }
+
+    if (qparam.hasOwnProperty("is_expired")) {
+      if (qparam.is_expired === "true") {
+        filter.account_expiration_date = { $lt: new Date() }
       } else {
-        qparam.surname_en = { $regex: "^" + qparam.surname + ".*", $options: "i" }
+        orClauses.push({ account_expiration_date: null })
+        orClauses.push({ account_expiration_date: { $gt: new Date() } })
       }
     }
 
-    delete qparam["name"]
-    delete qparam["surname"]
-
+    if (orClauses.length > 0) {
+      filter.$or = orClauses
+    }
     //All property
-    const users: User[] = await this.usersService.find(qparam, seletedProperty)
+    const seletedProperty = "username is_penalize name_th surname_th name_en surname_en account_expiration_date"
+    const users: User[] = await this.usersService.find(filter, seletedProperty)
     const current: Date = new Date()
 
-    if (!has_end) {
+    if (end === null) {
       end = users.length
     } else {
       if (end > users.length) {
