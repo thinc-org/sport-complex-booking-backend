@@ -33,6 +33,7 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
+.env
 .env.development
 .env/.blackbox/pubring.gpg~
 /.blackbox/pubring.kbx~
