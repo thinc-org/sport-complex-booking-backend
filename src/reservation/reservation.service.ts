@@ -48,7 +48,7 @@ export class ReservationService {
       if (time >= min + 15 / 60) {
         const bannedDay = (await this.courtManagerService.getSetting()).absence_punishment
         for (const userId of reservation.list_member) {
-          await this.usersService.ban(userId, bannedDay)
+          await this.usersService.ban(userId, bannedDay, true)
         }
         await reservation.remove()
       }
