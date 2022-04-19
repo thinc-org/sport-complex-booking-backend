@@ -82,7 +82,7 @@ export class MyReservationService {
 
     if (diffHour < lateCancelationHour) {
       for (const userId of reservation.list_member) {
-        await this.userService.ban(userId, lateCancelationPunishment)
+        await this.userService.ban(userId, lateCancelationPunishment, false)
       }
     }
 

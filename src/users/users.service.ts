@@ -138,7 +138,7 @@ export class UsersService {
     return await model.find(filter).select(select)
   }
 
-  async ban(id: Types.ObjectId, bannedDay: number) {
+  async ban(id: Types.ObjectId, bannedDay: number, removeReservations = false) {
     await this.updateBanAll()
     const bannedDate = new Date()
     bannedDate.setDate(bannedDate.getDate() + bannedDay)
@@ -146,16 +146,18 @@ export class UsersService {
     const user = await this.findById(id)
     await this.userModel.findByIdAndUpdate(id, { is_penalize: true, expired_penalize_date: bannedDate })
 
-    const reservations = ((await this.reservationModel.find({ list_member: id }).populate("list_member")) as unknown) as PopulatedReservation[]
-    for (const reservation of reservations) {
-      if (reservation.list_member.every((member) => member.is_penalize)) {
-        await reservation.remove()
+    if (removeReservations) {
+      const reservations = ((await this.reservationModel.find({ list_member: id }).populate("list_member")) as unknown) as PopulatedReservation[]
+      for (const reservation of reservations) {
+        if (reservation.list_member.every((member) => member.is_penalize)) {
+          await reservation.remove()
+        }
       }
-    }
-    const waitingrooms = ((await this.waitingRoomModel.find({ list_member: id }).populate("list_member")) as unknown) as PopulatedWaitingRoom[]
-    for (const waitingroom of waitingrooms) {
-      if (waitingroom.list_member.every((member) => member.is_penalize)) {
-        await waitingroom.remove()
+      const waitingrooms = ((await this.waitingRoomModel.find({ list_member: id }).populate("list_member")) as unknown) as PopulatedWaitingRoom[]
+      for (const waitingroom of waitingrooms) {
+        if (waitingroom.list_member.every((member) => member.is_penalize)) {
+          await waitingroom.remove()
+        }
       }
     }
 
